@@ -25,6 +25,7 @@ fn derive_statement_instructions(statement: &RawStatement, enums: &[RawEnum]) ->
     let enum_fields: Vec<_> = statement
         .fields
         .iter()
+        .filter(|field| !is_ignored_field(statement, &field.name))
         .filter(|field| is_selector_field(&field.name))
         .filter_map(|field| enum_variants(enums, &field.ty).map(|raw_enum| (field, raw_enum)))
         .collect();
@@ -75,6 +76,7 @@ fn derive_instruction(statement: &RawStatement, enum_selections: &[EnumSelection
         .fields
         .iter()
         .filter(|field| !is_enum_selection(&field.name, enum_selections))
+        .filter(|field| !is_ignored_field(statement, &field.name))
         .filter(|field| !output_names.iter().any(|output| output == &field.name))
         .filter(|field| !labels.iter().any(|label| label == &field.name))
         .filter(|field| receiver != field.name)
@@ -108,7 +110,9 @@ fn emit_tokens(
                 (selection.field == field.name).then(|| selection.variant.clone())
             })
             .unwrap_or_else(|| {
-                if unused_operands.iter().any(|unused| unused == &field.name) {
+                if is_ignored_field(statement, &field.name) {
+                    default_emit_token(field)
+                } else if unused_operands.iter().any(|unused| unused == &field.name) {
                     "0".to_string()
                 } else {
                     format!("${}", field.name)
@@ -122,6 +126,7 @@ fn label_fields(statement: &RawStatement) -> Vec<String> {
     statement
         .fields
         .iter()
+        .filter(|field| !is_ignored_field(statement, &field.name))
         .filter(|field| is_label_field(&field.name))
         .map(|field| field.name.clone())
         .collect()
@@ -131,6 +136,7 @@ fn output_fields(statement: &RawStatement) -> Vec<String> {
     let outputs: Vec<_> = statement
         .fields
         .iter()
+        .filter(|field| !is_ignored_field(statement, &field.name))
         .filter(|field| is_output_field(statement, &field.name))
         .map(|field| field.name.clone())
         .collect();
@@ -154,6 +160,12 @@ fn receiver_field(
             .find(|operand| operand.as_str() == *preferred)
             .cloned()
     });
+    let ignored_preferred = receiver_priority()
+        .iter()
+        .any(|preferred| is_ignored_field(statement, preferred));
+    if preferred.is_none() && ignored_preferred {
+        return None;
+    }
     if preferred.is_some() || outputs.len() <= 1 {
         preferred.or_else(|| operands.into_iter().next())
     } else {
@@ -185,10 +197,28 @@ fn operand_fields(
         .fields
         .iter()
         .filter(|field| field.ty == "String")
+        .filter(|field| !is_ignored_field(statement, &field.name))
         .filter(|field| !outputs.iter().any(|output| output == &field.name))
         .filter(|field| !is_enum_selection(&field.name, enum_selections))
         .map(|field| field.name.clone())
         .collect()
+}
+
+fn is_ignored_field(statement: &RawStatement, name: &str) -> bool {
+    statement
+        .ignored_fields
+        .iter()
+        .any(|ignored| ignored == name)
+}
+
+fn default_emit_token(field: &RawField) -> String {
+    let Some(default) = field.default.as_deref() else {
+        return "0".to_string();
+    };
+    default
+        .rsplit_once('.')
+        .map_or(default, |(_, variant)| variant)
+        .to_string()
 }
 
 fn operand_arity(enum_selections: &[EnumSelection]) -> Option<usize> {

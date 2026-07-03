@@ -138,7 +138,9 @@ fn scans_direct_superclass_fields_for_registered_statements() {
 
         @RegisterStatement("uradar")
         public static class UnitRadarStatement extends RadarStatement{
-            public String local = "own";
+            public UnitRadarStatement(){
+                radar = "0";
+            }
             @Override public LInstruction build(LAssembler builder){
                 return new RadarI(target1, target2, builder.var("@unit"), builder.var(output));
             }
@@ -157,5 +159,12 @@ fn scans_direct_superclass_fields_for_registered_statements() {
         .map(|field| field.name.as_str())
         .collect();
 
-    assert_eq!(fields, ["local", "target1", "target2", "radar", "output"]);
+    assert_eq!(fields, ["target1", "target2", "radar", "output"]);
+    let radar = uradar
+        .fields
+        .iter()
+        .find(|field| field.name == "radar")
+        .expect("radar field exists");
+    assert_eq!(radar.default.as_deref(), Some("0"));
+    assert_eq!(uradar.ignored_fields, ["radar"]);
 }

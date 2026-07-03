@@ -3966,11 +3966,11 @@ emit = [
     "$target2",
     "$target3",
     "$sort",
-    "$radar",
+    "0",
     "$sortOrder",
     "$output",
 ]
-receiver = "radar"
+receiver = ""
 inputs = [
     "target1",
     "target2",

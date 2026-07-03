@@ -521,6 +521,7 @@ name = "uradar"
 class = "UnitRadarStatement"
 instruction = "RadarI"
 category = "unit"
+ignored_fields = ["radar"]
 
 [[statements.fields]]
 ty = "RadarTarget"
@@ -545,7 +546,7 @@ default = "RadarSort.distance"
 [[statements.fields]]
 ty = "String"
 name = "radar"
-default = "turret1"
+default = "0"
 
 [[statements.fields]]
 ty = "String"

@@ -28,6 +28,8 @@ pub struct RawStatement {
     pub instruction: Option<String>,
     pub category: Option<String>,
     pub fields: Vec<RawField>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub ignored_fields: Vec<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -86,12 +88,14 @@ pub fn scan_raw_statements(
         })?;
         let body = &source[brace_start + 1..brace_end];
 
+        let fields = parse_fields_with_direct_superclass(&classes, class, body);
         statements.push(RawStatement {
             name: name.to_string(),
             class: class.to_string(),
             instruction: parse_instruction(body),
             category: parse_category(body),
-            fields: parse_fields_with_direct_superclass(&classes, class, body),
+            ignored_fields: parse_ignored_fields(body, &fields),
+            fields,
         });
 
         offset = brace_end + 1;
@@ -247,7 +251,90 @@ fn parse_fields_with_direct_superclass(
     {
         fields.extend(parse_fields(&superclass.body));
     }
+    apply_constructor_defaults(class, body, &mut fields);
     fields
+}
+
+fn apply_constructor_defaults(class: &str, body: &str, fields: &mut [RawField]) {
+    let assignments = parse_constructor_assignments(class, body);
+    for field in fields {
+        if let Some(default) = assignments.get(&field.name) {
+            field.default = Some(default.clone());
+        }
+    }
+}
+
+fn parse_constructor_assignments(class: &str, body: &str) -> BTreeMap<String, String> {
+    let mut assignments = BTreeMap::new();
+    let marker = format!("public {class}(");
+    let Some(start) = body.find(&marker) else {
+        return assignments;
+    };
+    let Some(brace_start) = body[start..].find('{').map(|index| start + index) else {
+        return assignments;
+    };
+    let Some(brace_end) = matching_brace(body, brace_start) else {
+        return assignments;
+    };
+    let constructor_body = &body[brace_start + 1..brace_end];
+
+    for statement in constructor_body.split(';') {
+        let Some((left, right)) = statement.split_once('=') else {
+            continue;
+        };
+        let name = left.trim();
+        if is_simple_identifier(name) {
+            assignments.insert(name.to_string(), clean_default(right.trim()));
+        }
+    }
+
+    assignments
+}
+
+fn parse_ignored_fields(body: &str, fields: &[RawField]) -> Vec<String> {
+    let Some(build_body) = parse_linstruction_build_body(body) else {
+        return Vec::new();
+    };
+    fields
+        .iter()
+        .filter(|field| !contains_identifier(build_body, &field.name))
+        .map(|field| field.name.clone())
+        .collect()
+}
+
+fn parse_linstruction_build_body(body: &str) -> Option<&str> {
+    let marker = "LInstruction build";
+    let start = body.find(marker)?;
+    let brace_start = body[start..].find('{').map(|index| start + index)?;
+    let brace_end = matching_brace(body, brace_start)?;
+    Some(&body[brace_start + 1..brace_end])
+}
+
+fn contains_identifier(source: &str, ident: &str) -> bool {
+    let mut offset = 0;
+    while let Some(relative) = source[offset..].find(ident) {
+        let start = offset + relative;
+        let end = start + ident.len();
+        let before = source[..start].chars().next_back();
+        let after = source[end..].chars().next();
+        if !before.is_some_and(is_ident_char) && !after.is_some_and(is_ident_char) {
+            return true;
+        }
+        offset = end;
+    }
+    false
+}
+
+fn is_simple_identifier(value: &str) -> bool {
+    let mut chars = value.chars();
+    chars
+        .next()
+        .is_some_and(|ch| ch.is_ascii_alphabetic() || ch == '_')
+        && chars.all(is_ident_char)
+}
+
+fn is_ident_char(ch: char) -> bool {
+    ch.is_ascii_alphanumeric() || ch == '_'
 }
 
 fn parse_declarator(ty: &str, declarator: &str) -> Option<RawField> {

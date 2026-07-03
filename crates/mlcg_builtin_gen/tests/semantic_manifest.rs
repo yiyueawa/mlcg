@@ -201,3 +201,41 @@ fn keeps_multiple_outputs_and_avoids_fallback_receiver_for_multi_output_queries(
     assert_eq!(locate.inputs, ["flag", "enemy", "ore"]);
     assert_eq!(locate.outputs, ["outX", "outY", "outFound", "outBuild"]);
 }
+
+#[test]
+fn emits_ignored_serialized_fields_as_defaults_without_api_parameters() {
+    let source = r#"
+        @RegisterStatement("radar_like")
+        public static class RadarLikeStatement extends LStatement{
+            public RadarTarget target1 = RadarTarget.enemy;
+            public String radar = "turret1", sortOrder = "1", output = "result";
+            public RadarLikeStatement(){
+                radar = "0";
+            }
+            @Override public LInstruction build(LAssembler builder){
+                return new RadarLikeI(target1, builder.var("@unit"), builder.var(sortOrder), builder.var(output));
+            }
+        }
+    "#;
+
+    let mut raw = scan_raw_statements("fixture", source).expect("scan succeeds");
+    raw.enums = vec![RawEnum {
+        name: "RadarTarget".to_string(),
+        variants: vec!["enemy".to_string()],
+        arities: std::collections::BTreeMap::new(),
+    }];
+    let manifest = derive_semantic_manifest(&raw);
+    let radar = manifest
+        .instructions
+        .iter()
+        .find(|instruction| instruction.rust_name == "radar_like")
+        .expect("radar_like exists");
+
+    assert_eq!(
+        radar.emit,
+        ["radar_like", "$target1", "0", "$sortOrder", "$output"]
+    );
+    assert!(radar.receiver.is_empty());
+    assert_eq!(radar.inputs, ["target1", "sortOrder"]);
+    assert_eq!(radar.outputs, ["output"]);
+}
