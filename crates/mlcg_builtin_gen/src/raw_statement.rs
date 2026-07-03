@@ -231,7 +231,7 @@ fn parse_fields(body: &str) -> Vec<RawField> {
         let mut parts = declaration.splitn(2, char::is_whitespace);
         let Some(ty) = parts.next() else { continue };
         let Some(rest) = parts.next() else { continue };
-        for declarator in rest.split(',') {
+        for declarator in comma_separated_top_level(rest) {
             if let Some(field) = parse_declarator(ty, declarator) {
                 fields.push(field);
             }
@@ -240,7 +240,15 @@ fn parse_fields(body: &str) -> Vec<RawField> {
     fields
 }
 
+fn comma_separated_top_level(source: &str) -> Vec<&str> {
+    separated_top_level(source, b',', true)
+}
+
 fn top_level_semicolon_statements(source: &str) -> Vec<&str> {
+    separated_top_level(source, b';', false)
+}
+
+fn separated_top_level(source: &str, separator: u8, include_tail: bool) -> Vec<&str> {
     let bytes = source.as_bytes();
     let mut statements = Vec::new();
     let mut depth = 0usize;
@@ -256,7 +264,7 @@ fn top_level_semicolon_statements(source: &str) -> Vec<&str> {
                     start = index + 1;
                 }
             }
-            b';' if depth == 0 => {
+            byte if byte == separator && depth == 0 => {
                 statements.push(&source[start..index]);
                 start = index + 1;
             }
@@ -264,6 +272,10 @@ fn top_level_semicolon_statements(source: &str) -> Vec<&str> {
             _ => {}
         }
         index += 1;
+    }
+
+    if include_tail && start < source.len() {
+        statements.push(&source[start..]);
     }
 
     statements

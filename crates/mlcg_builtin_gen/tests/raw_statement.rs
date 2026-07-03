@@ -202,6 +202,37 @@ fn scans_field_declarations_after_methods_or_constructors() {
 }
 
 #[test]
+fn scans_comma_separated_fields_with_commas_inside_string_defaults() {
+    let source = r#"
+        @RegisterStatement("comma")
+        public static class CommaStatement extends LStatement{
+            public String message = "hello, world", target = "cell1";
+
+            @Override public LInstruction build(LAssembler builder){
+                return new CommaI(builder.var(message), builder.var(target));
+            }
+        }
+    "#;
+
+    let manifest = scan_raw_statements("fixture", source).expect("scan succeeds");
+    let comma = manifest
+        .statements
+        .iter()
+        .find(|statement| statement.name == "comma")
+        .expect("comma exists");
+    let fields: Vec<_> = comma
+        .fields
+        .iter()
+        .map(|field| (field.name.as_str(), field.default.as_deref()))
+        .collect();
+
+    assert_eq!(
+        fields,
+        [("message", Some("hello, world")), ("target", Some("cell1"))]
+    );
+}
+
+#[test]
 fn scans_instruction_type_from_linstruction_build_method_only() {
     let source = r#"
         @RegisterStatement("real")
