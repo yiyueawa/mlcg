@@ -414,6 +414,30 @@ fn ignores_fields_that_only_appear_inside_build_string_literals() {
 }
 
 #[test]
+fn ignores_fields_that_only_appear_inside_build_comments() {
+    let source = r#"
+        @RegisterStatement("commented_field")
+        public static class CommentedFieldStatement extends LStatement{
+            public String target = "block1", output = "result";
+
+            @Override public LInstruction build(LAssembler builder){
+                // target is intentionally not emitted here.
+                return new CommentedFieldI(builder.var(output));
+            }
+        }
+    "#;
+
+    let manifest = scan_raw_statements("fixture", source).expect("scan succeeds");
+    let commented_field = manifest
+        .statements
+        .iter()
+        .find(|statement| statement.name == "commented_field")
+        .expect("commented_field exists");
+
+    assert_eq!(commented_field.ignored_fields, ["target"]);
+}
+
+#[test]
 fn scans_field_declarations_after_methods_or_constructors() {
     let source = r#"
         @RegisterStatement("late")

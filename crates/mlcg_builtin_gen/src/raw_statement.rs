@@ -474,6 +474,14 @@ fn contains_identifier(source: &str, ident: &str) -> bool {
             offset = skip_string(bytes, offset) + 1;
             continue;
         }
+        if bytes[offset] == b'/' && bytes.get(offset + 1) == Some(&b'/') {
+            offset = skip_line_comment(bytes, offset + 2);
+            continue;
+        }
+        if bytes[offset] == b'/' && bytes.get(offset + 1) == Some(&b'*') {
+            offset = skip_block_comment(bytes, offset + 2);
+            continue;
+        }
         let end = offset + ident.len();
         if end <= bytes.len()
             && &source[offset..end] == ident
