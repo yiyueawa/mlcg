@@ -18,10 +18,10 @@ use crate::{
 };
 
 static NEXT_VALUE_ID: AtomicU64 = AtomicU64::new(0);
+static NEXT_LABEL_ID: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Debug)]
 pub(crate) struct ProgramState<P> {
-    pub(crate) next_label: u64,
     pub(crate) values: BTreeMap<ValueId, Option<String>>,
     pub(crate) items: Vec<ProgramItem<P>>,
     pub(crate) _processor: PhantomData<P>,
@@ -64,7 +64,6 @@ impl<P: 'static> Processor<P> {
         Self {
             handle: ProcessorHandle {
                 state: Arc::new(Mutex::new(ProgramState {
-                    next_label: 0,
                     values: BTreeMap::new(),
                     items: Vec::new(),
                     _processor: PhantomData,
@@ -86,13 +85,7 @@ impl<P: 'static> Processor<P> {
     }
 
     pub fn label(&self) -> Label<P> {
-        let mut state = self
-            .handle
-            .state
-            .lock()
-            .expect("program state mutex poisoned");
-        let id = LabelId(state.next_label);
-        state.next_label += 1;
+        let id = next_label_id();
         Label {
             id,
             _processor: PhantomData,
@@ -187,4 +180,8 @@ impl<P: 'static> ProcessorHandle<P> {
 
 fn next_value_id() -> ValueId {
     ValueId(NEXT_VALUE_ID.fetch_add(1, Ordering::Relaxed))
+}
+
+fn next_label_id() -> LabelId {
+    LabelId(NEXT_LABEL_ID.fetch_add(1, Ordering::Relaxed))
 }

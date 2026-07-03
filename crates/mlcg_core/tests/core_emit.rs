@@ -156,3 +156,21 @@ fn foreign_processor_value_does_not_alias_local_value_with_same_type() {
 
     assert!(error.to_string().contains("unknown value"));
 }
+
+#[test]
+fn foreign_processor_label_does_not_alias_local_label_with_same_type() {
+    let local_processor = Processor::<TestProcessor>::new();
+    let foreign_processor = Processor::<TestProcessor>::new();
+
+    let local = local_processor.label();
+    let foreign = foreign_processor.label();
+    local_processor.push(JumpTo(foreign));
+    local_processor.push(RawLine(&["noop"]));
+    local_processor.place(local);
+
+    let error = local_processor
+        .emit()
+        .expect_err("foreign label is not part of local processor state");
+
+    assert!(error.to_string().contains("unplaced label"));
+}
