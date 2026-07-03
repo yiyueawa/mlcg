@@ -10,6 +10,7 @@ const RESERVED_ITEM_SYMBOLS: &[&str] = &["Arg", "OutputArg", "LabelArg"];
 
 pub fn validate_generated_rust_api_symbols(manifest: &Manifest) -> Result<(), GenerateError> {
     validate_instruction_names(manifest)?;
+    validate_parameter_names(manifest)?;
     validate_item_symbols(manifest)?;
     validate_processor_methods(manifest)?;
     validate_value_methods(manifest)?;
@@ -28,6 +29,33 @@ fn validate_instruction_names(manifest: &Manifest) -> Result<(), GenerateError> 
                 message: "instruction has empty rust_name".to_string(),
             });
         }
+    }
+
+    Ok(())
+}
+
+fn validate_parameter_names(manifest: &Manifest) -> Result<(), GenerateError> {
+    for instruction in &manifest.instructions {
+        validate_named_parameters(instruction, "input", &instruction.inputs)?;
+        validate_named_parameters(instruction, "output", &instruction.outputs)?;
+        validate_named_parameters(instruction, "label", &instruction.labels)?;
+    }
+
+    Ok(())
+}
+
+fn validate_named_parameters(
+    instruction: &Instruction,
+    kind: &str,
+    names: &[String],
+) -> Result<(), GenerateError> {
+    if names.iter().any(String::is_empty) {
+        return Err(GenerateError::GeneratedApi {
+            message: format!(
+                "instruction `{}` has empty {kind} parameter name",
+                instruction.rust_name
+            ),
+        });
     }
 
     Ok(())

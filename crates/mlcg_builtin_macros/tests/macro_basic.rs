@@ -464,6 +464,31 @@ outputs = []
     )
     .expect("write trybuild empty rust name manifest");
 
+    let empty_input_name_manifest = r#"
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "bad"
+rust_name = "bad"
+emit = ["bad", "$"]
+receiver = ""
+inputs = [""]
+outputs = []
+"#;
+    let empty_input_name_manifest_path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/empty_input_name_manifest.toml");
+    fs::write(&empty_input_name_manifest_path, empty_input_name_manifest)
+        .expect("write empty input name manifest");
+    let trybuild_empty_input_name_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(
+        "../../target/tests/trybuild/mlcg_builtin_macros/tests/empty_input_name_manifest.toml",
+    );
+    fs::write(
+        &trybuild_empty_input_name_manifest_path,
+        empty_input_name_manifest,
+    )
+    .expect("write trybuild empty input name manifest");
+
     let t = trybuild::TestCases::new();
     t.pass("tests/ui/pass_macro_basic.rs");
     t.pass("tests/ui/pass_std_trait_name.rs");
@@ -482,4 +507,5 @@ outputs = []
     t.compile_fail("tests/ui/fail_duplicate_role.rs");
     t.compile_fail("tests/ui/fail_non_emitted_parameter.rs");
     t.compile_fail("tests/ui/fail_empty_rust_name.rs");
+    t.compile_fail("tests/ui/fail_empty_input_name.rs");
 }
