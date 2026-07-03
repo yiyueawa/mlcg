@@ -172,12 +172,23 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
 }
 
 fn validate_manifest(manifest: &Manifest) -> Result<(), String> {
+    validate_instruction_names(manifest)?;
     validate_item_symbols(manifest)?;
     validate_processor_methods(manifest)?;
     validate_value_methods(manifest)?;
 
     for spec in &manifest.instructions {
         validate_instruction_symbols(spec)?;
+    }
+
+    Ok(())
+}
+
+fn validate_instruction_names(manifest: &Manifest) -> Result<(), String> {
+    for spec in &manifest.instructions {
+        if spec.rust_name.is_empty() {
+            return Err("instruction has empty rust_name".to_string());
+        }
     }
 
     Ok(())

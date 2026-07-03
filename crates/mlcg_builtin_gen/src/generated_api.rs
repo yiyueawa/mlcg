@@ -9,12 +9,25 @@ const RESERVED_OWNER_PREFIX: &str = "\0reserved:";
 const RESERVED_ITEM_SYMBOLS: &[&str] = &["Arg", "OutputArg", "LabelArg"];
 
 pub fn validate_generated_rust_api_symbols(manifest: &Manifest) -> Result<(), GenerateError> {
+    validate_instruction_names(manifest)?;
     validate_item_symbols(manifest)?;
     validate_processor_methods(manifest)?;
     validate_value_methods(manifest)?;
 
     for instruction in &manifest.instructions {
         validate_instruction_symbols(instruction)?;
+    }
+
+    Ok(())
+}
+
+fn validate_instruction_names(manifest: &Manifest) -> Result<(), GenerateError> {
+    for instruction in &manifest.instructions {
+        if instruction.rust_name.is_empty() {
+            return Err(GenerateError::GeneratedApi {
+                message: "instruction has empty rust_name".to_string(),
+            });
+        }
     }
 
     Ok(())
