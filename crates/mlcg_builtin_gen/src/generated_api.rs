@@ -122,6 +122,15 @@ fn validate_instruction_symbols(instruction: &Instruction) -> Result<(), Generat
             .into_iter()
             .map(|param| safe_ident(&param)),
     )?;
+
+    if instruction.outputs.len() > 1 {
+        validate_unique_instruction_names(
+            "output field",
+            instruction,
+            instruction.outputs.iter().map(|output| safe_ident(output)),
+        )?;
+    }
+
     validate_unique_instruction_names(
         "processor explicit parameter",
         instruction,
@@ -144,14 +153,6 @@ fn validate_instruction_symbols(instruction: &Instruction) -> Result<(), Generat
             explicit_value_params(instruction)
                 .into_iter()
                 .map(|param| safe_ident(&param)),
-        )?;
-    }
-
-    if instruction.outputs.len() > 1 {
-        validate_unique_instruction_names(
-            "output field",
-            instruction,
-            instruction.outputs.iter().map(|output| safe_ident(output)),
         )?;
     }
 
@@ -207,7 +208,9 @@ fn validate_unique_instruction_names(
 
 fn explicit_value_params(instruction: &Instruction) -> Vec<String> {
     let mut params = Vec::new();
-    params.extend(instruction.outputs.iter().cloned());
+    if instruction.outputs.len() <= 1 {
+        params.extend(instruction.outputs.iter().cloned());
+    }
     for label in &instruction.labels {
         if !params.contains(label) {
             params.push(label.clone());
@@ -256,7 +259,9 @@ fn auto_processor_params(instruction: &Instruction) -> Vec<String> {
 
 fn explicit_processor_params(instruction: &Instruction) -> Vec<String> {
     let mut params = Vec::new();
-    params.extend(instruction.outputs.iter().cloned());
+    if instruction.outputs.len() <= 1 {
+        params.extend(instruction.outputs.iter().cloned());
+    }
     if !instruction.receiver.is_empty() && !params.contains(&instruction.receiver) {
         params.push(instruction.receiver.clone());
     }

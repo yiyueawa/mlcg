@@ -301,6 +301,17 @@ fn validate_instruction_symbols(spec: &InstructionSpec) -> Result<(), String> {
             .into_iter()
             .map(|param| safe_ident(&param).to_string()),
     )?;
+
+    if spec.outputs.len() > 1 {
+        validate_unique_instruction_names(
+            "output field",
+            spec,
+            spec.outputs
+                .iter()
+                .map(|output| safe_ident(output).to_string()),
+        )?;
+    }
+
     validate_unique_instruction_names(
         "processor explicit parameter",
         spec,
@@ -323,16 +334,6 @@ fn validate_instruction_symbols(spec: &InstructionSpec) -> Result<(), String> {
             explicit_value_params(spec)
                 .into_iter()
                 .map(|param| safe_ident(&param).to_string()),
-        )?;
-    }
-
-    if spec.outputs.len() > 1 {
-        validate_unique_instruction_names(
-            "output field",
-            spec,
-            spec.outputs
-                .iter()
-                .map(|output| safe_ident(output).to_string()),
         )?;
     }
 
@@ -967,7 +968,9 @@ fn param_where(spec: &InstructionSpec, name: &str, generic: &Ident) -> TokenStre
 
 fn explicit_value_params(spec: &InstructionSpec) -> Vec<String> {
     let mut params = Vec::new();
-    params.extend(spec.outputs.iter().cloned());
+    if spec.outputs.len() <= 1 {
+        params.extend(spec.outputs.iter().cloned());
+    }
     for label in &spec.labels {
         if !params.contains(label) {
             params.push(label.clone());
@@ -1026,7 +1029,9 @@ fn auto_processor_params(spec: &InstructionSpec) -> Vec<String> {
 
 fn explicit_processor_params(spec: &InstructionSpec) -> Vec<String> {
     let mut params = Vec::new();
-    params.extend(spec.outputs.iter().cloned());
+    if spec.outputs.len() <= 1 {
+        params.extend(spec.outputs.iter().cloned());
+    }
     if !spec.receiver.is_empty() && !params.contains(&spec.receiver) {
         params.push(spec.receiver.clone());
     }

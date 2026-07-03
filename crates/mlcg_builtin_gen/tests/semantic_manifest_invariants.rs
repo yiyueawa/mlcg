@@ -120,6 +120,31 @@ fn generated_rust_api_symbol_validation_rejects_helper_item_collision() {
     );
 }
 
+#[test]
+fn generated_rust_api_symbol_validation_reports_multi_output_field_collision_as_output_field() {
+    let manifest = Manifest {
+        version: "fixture".to_string(),
+        instructions: vec![Instruction {
+            family: "fixture".to_string(),
+            variant: "multi".to_string(),
+            rust_name: "multi".to_string(),
+            emit: strings(["multi"]),
+            receiver: String::new(),
+            inputs: Vec::new(),
+            outputs: strings(["type", "arg_type"]),
+            labels: Vec::new(),
+        }],
+    };
+
+    let error = validate_generated_rust_api_symbols(&manifest)
+        .expect_err("generated output struct field collision is rejected");
+
+    assert_eq!(
+        error.to_string(),
+        "generated output field `arg_type` appears more than once in instruction `multi`"
+    );
+}
+
 fn read_v158_1_manifest() -> Manifest {
     let manifest_path = concat!(
         env!("CARGO_MANIFEST_DIR"),

@@ -136,6 +136,35 @@ outputs = []
     )
     .expect("write trybuild helper collision manifest");
 
+    let output_field_collision_manifest = r#"
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "multi"
+rust_name = "multi"
+emit = ["multi"]
+receiver = ""
+inputs = []
+outputs = ["type", "arg_type"]
+"#;
+    let output_field_collision_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/output_field_collision_manifest.toml");
+    fs::write(
+        &output_field_collision_manifest_path,
+        output_field_collision_manifest,
+    )
+    .expect("write output field collision manifest");
+    let trybuild_output_field_collision_manifest_path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(
+            "../../target/tests/trybuild/mlcg_builtin_macros/tests/output_field_collision_manifest.toml",
+        );
+    fs::write(
+        &trybuild_output_field_collision_manifest_path,
+        output_field_collision_manifest,
+    )
+    .expect("write trybuild output field collision manifest");
+
     let t = trybuild::TestCases::new();
     t.pass("tests/ui/pass_macro_basic.rs");
     t.compile_fail("tests/ui/fail_method_collision.rs");
@@ -143,4 +172,5 @@ outputs = []
     t.compile_fail("tests/ui/fail_invalid_manifest.rs");
     t.compile_fail("tests/ui/fail_raw_output_argument.rs");
     t.compile_fail("tests/ui/fail_helper_collision.rs");
+    t.compile_fail("tests/ui/fail_output_field_collision.rs");
 }
