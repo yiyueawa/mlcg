@@ -88,6 +88,7 @@ impl<P: 'static> Processor<P> {
         let id = next_label_id();
         Label {
             id,
+            handle: self.handle.clone(),
             _processor: PhantomData,
         }
     }
@@ -151,6 +152,10 @@ impl<P: 'static> ProcessorHandle<P> {
         state.items.push(item);
     }
 
+    pub(crate) fn same_state(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.state, &other.state)
+    }
+
     pub(crate) fn emit(&self) -> Result<String, EmitError> {
         let state = self.state.lock().expect("program state mutex poisoned");
         let mut partial = PartialProgram::default();
@@ -163,6 +168,9 @@ impl<P: 'static> ProcessorHandle<P> {
                     .lower(&mut lower_ctx, &mut partial)
                     .context(emit_error::LowerSnafu)?,
                 ProgramItem::LabelPlacement(label) => {
+                    if !label.belongs_to(self) {
+                        return emit_error::ForeignLabelSnafu { label: label.id() }.fail();
+                    }
                     labels.insert(label.id(), partial.line_count())?
                 }
             }

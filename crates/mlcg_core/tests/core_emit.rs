@@ -174,3 +174,19 @@ fn foreign_processor_label_does_not_alias_local_label_with_same_type() {
 
     assert!(error.to_string().contains("unplaced label"));
 }
+
+#[test]
+fn foreign_processor_label_placement_is_an_emit_error() {
+    let local_processor = Processor::<TestProcessor>::new();
+    let foreign_processor = Processor::<TestProcessor>::new();
+
+    let foreign = foreign_processor.label();
+    local_processor.push(JumpTo(foreign.clone()));
+    local_processor.place(foreign);
+
+    let error = local_processor
+        .emit()
+        .expect_err("foreign label placement is not part of local processor state");
+
+    assert!(error.to_string().contains("foreign label"));
+}
