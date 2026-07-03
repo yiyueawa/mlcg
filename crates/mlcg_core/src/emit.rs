@@ -22,14 +22,17 @@ impl NameAllocator {
             return name.clone();
         }
 
+        if let Some(explicit) = hint.filter(|value| !value.is_empty()) {
+            if self.allocated.insert(explicit.to_string()) {
+                self.names.insert(id, explicit.to_string());
+                return explicit.to_string();
+            }
+        }
+
         let base = hint.filter(|value| !value.is_empty()).unwrap_or("__mlcg");
         let count = self.used.entry(base.to_string()).or_insert(0);
         let name = loop {
-            let candidate = if *count == 0 && base != "__mlcg" {
-                base.to_string()
-            } else {
-                format!("{base}_{count}")
-            };
+            let candidate = format!("{base}_{count}");
             *count += 1;
             if self.allocated.insert(candidate.clone()) {
                 break candidate;
