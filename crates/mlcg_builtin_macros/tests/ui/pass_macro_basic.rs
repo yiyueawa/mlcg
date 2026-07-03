@@ -42,8 +42,12 @@ fn main() {
     processor.op_add_into(out, typed_x.clone(), y.clone());
     let multi: MultiOutput<P> = processor.multi(typed_x.clone());
     processor.multi_into(multi.outA.clone(), multi.outB.clone(), 2u64);
+    let (tuple_out_a, tuple_out_b) = processor.multi(typed_x.clone()).into_tuple();
+    processor.multi_into(tuple_out_a, tuple_out_b, 4u32);
     let multi_recv: MultiRecvOutput<P> = x.multi_recv(y.clone());
     x.multi_recv_into(multi_recv.outA.clone(), multi_recv.outB.clone(), 3isize);
+    let (recv_out_a, recv_out_b) = x.multi_recv(y.clone()).into_tuple();
+    x.multi_recv_into(recv_out_a, recv_out_b, 5usize);
     let recv_out = typed_x.recv_out(y.clone());
     typed_x.recv_out_into(recv_out.clone(), 1.5f32);
     let keyword_out = processor.keywords(4, 5, 6);
@@ -55,10 +59,14 @@ fn main() {
     assert!(text.contains("op add"));
     assert!(text.contains("multi __mlcg_1 __mlcg_2 x"));
     assert!(text.contains("multi __mlcg_1 __mlcg_2 2"));
-    assert!(text.contains("multi_recv __mlcg_3 __mlcg_4 x y"));
-    assert!(text.contains("multi_recv __mlcg_3 __mlcg_4 x 3"));
-    assert!(text.contains("recv_out __mlcg_5 x y"));
-    assert!(text.contains("recv_out __mlcg_5 x 1.5"));
-    assert!(text.contains("keywords 4 5 6 __mlcg_6"));
+    assert!(text.contains("multi __mlcg_3 __mlcg_4 x"));
+    assert!(text.contains("multi __mlcg_3 __mlcg_4 4"));
+    assert!(text.contains("multi_recv __mlcg_5 __mlcg_6 x y"));
+    assert!(text.contains("multi_recv __mlcg_5 __mlcg_6 x 3"));
+    assert!(text.contains("multi_recv __mlcg_7 __mlcg_8 x y"));
+    assert!(text.contains("multi_recv __mlcg_7 __mlcg_8 x 5"));
+    assert!(text.contains("recv_out __mlcg_9 x y"));
+    assert!(text.contains("recv_out __mlcg_9 x 1.5"));
+    assert!(text.contains("keywords 4 5 6 __mlcg_10"));
     let _ = keyword_out;
 }

@@ -150,20 +150,29 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
 
 fn generate_output_struct(spec: &InstructionSpec) -> TokenStream {
     let output_struct = output_struct_name(spec);
-    let fields: Vec<_> = spec
+    let field_idents: Vec<_> = spec
         .outputs
         .iter()
-        .map(|output| {
-            let field = safe_ident(output);
-            quote! { pub #field: Value<P> }
-        })
+        .map(|output| safe_ident(output))
         .collect();
+    let fields: Vec<_> = field_idents
+        .iter()
+        .map(|field| quote! { pub #field: Value<P> })
+        .collect();
+    let tuple_types = field_idents.iter().map(|_| quote! { Value<P> });
+    let tuple_fields = field_idents.iter();
 
     quote! {
         #[allow(non_snake_case)]
         #[derive(Clone, Debug)]
         pub struct #output_struct<P> {
             #(#fields,)*
+        }
+
+        impl<P> #output_struct<P> {
+            pub fn into_tuple(self) -> (#(#tuple_types,)*) {
+                (#(self.#tuple_fields,)*)
+            }
         }
     }
 }
