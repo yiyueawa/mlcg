@@ -528,11 +528,11 @@ fn generate_instruction_struct(spec: &InstructionSpec) -> TokenStream {
                 &self,
                 _ctx: &mut LowerContext<P>,
                 out: &mut PartialProgram<P>,
-            ) -> Result<(), mlcg_core::LowerError> {
+            ) -> ::std::result::Result<(), mlcg_core::LowerError> {
                 let mut tokens = ::std::vec::Vec::new();
                 #(#lower_steps)*
                 out.push_line(PartialLine::new(tokens));
-                Ok(())
+                ::std::result::Result::Ok(())
             }
         }
     }

@@ -265,11 +265,46 @@ outputs = []
     )
     .expect("write trybuild std collection type name manifest");
 
+    let std_result_name_manifest = r#"
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "result"
+rust_name = "result"
+emit = ["result"]
+receiver = ""
+inputs = []
+outputs = []
+
+[[instructions]]
+family = "fixture"
+variant = "ok"
+rust_name = "ok"
+emit = ["ok"]
+receiver = ""
+inputs = []
+outputs = []
+"#;
+    let std_result_name_manifest_path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/std_result_name_manifest.toml");
+    fs::write(&std_result_name_manifest_path, std_result_name_manifest)
+        .expect("write std result name manifest");
+    let trybuild_std_result_name_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(
+        "../../target/tests/trybuild/mlcg_builtin_macros/tests/std_result_name_manifest.toml",
+    );
+    fs::write(
+        &trybuild_std_result_name_manifest_path,
+        std_result_name_manifest,
+    )
+    .expect("write trybuild std result name manifest");
+
     let t = trybuild::TestCases::new();
     t.pass("tests/ui/pass_macro_basic.rs");
     t.pass("tests/ui/pass_std_trait_name.rs");
     t.pass("tests/ui/pass_std_convert_trait_names.rs");
     t.pass("tests/ui/pass_std_collection_type_names.rs");
+    t.pass("tests/ui/pass_std_result_names.rs");
     t.compile_fail("tests/ui/fail_method_collision.rs");
     t.compile_fail("tests/ui/fail_missing_manifest.rs");
     t.compile_fail("tests/ui/fail_invalid_manifest.rs");
