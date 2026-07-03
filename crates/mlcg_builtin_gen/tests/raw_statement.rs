@@ -240,6 +240,57 @@ fn scans_transitive_superclass_fields_for_registered_statements() {
 }
 
 #[test]
+fn applies_transitive_superclass_constructor_defaults() {
+    let source = r#"
+        public static class BaseRadarStatement extends LStatement{
+            public RadarTarget target = RadarTarget.enemy;
+            public String radar = "turret1";
+            public BaseRadarStatement(){
+                radar = "base";
+            }
+        }
+
+        public static class MidRadarStatement extends BaseRadarStatement{
+            public String sort = "distance";
+            public MidRadarStatement(){
+                radar = "mid";
+                sort = "health";
+            }
+        }
+
+        @RegisterStatement("deep_radar")
+        public static class DeepRadarStatement extends MidRadarStatement{
+            public String output = "result";
+            @Override public LInstruction build(LAssembler builder){
+                return new RadarI(target, builder.var(radar), builder.var(sort), builder.var(output));
+            }
+        }
+    "#;
+
+    let manifest = scan_raw_statements("fixture", source).expect("scan succeeds");
+    let deep_radar = manifest
+        .statements
+        .iter()
+        .find(|statement| statement.name == "deep_radar")
+        .expect("deep_radar exists");
+    let fields: Vec<_> = deep_radar
+        .fields
+        .iter()
+        .map(|field| (field.name.as_str(), field.default.as_deref()))
+        .collect();
+
+    assert_eq!(
+        fields,
+        [
+            ("output", Some("result")),
+            ("sort", Some("health")),
+            ("target", Some("RadarTarget.enemy")),
+            ("radar", Some("mid")),
+        ]
+    );
+}
+
+#[test]
 fn ignores_fields_that_only_appear_inside_build_string_literals() {
     let source = r#"
         @RegisterStatement("literal")

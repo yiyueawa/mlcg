@@ -287,28 +287,26 @@ fn parse_fields_with_superclasses(
     body: &str,
 ) -> Vec<RawField> {
     let mut fields = parse_fields(body);
-    extend_superclass_fields(classes, class, &mut fields);
+    fields.extend(superclass_fields(classes, class));
     apply_constructor_defaults(class, body, &mut fields);
     fields
 }
 
-fn extend_superclass_fields(
-    classes: &BTreeMap<String, ClassInfo>,
-    class: &str,
-    fields: &mut Vec<RawField>,
-) {
+fn superclass_fields(classes: &BTreeMap<String, ClassInfo>, class: &str) -> Vec<RawField> {
     let Some(superclass_name) = classes
         .get(class)
         .and_then(|class_info| class_info.superclass.as_deref())
     else {
-        return;
+        return Vec::new();
     };
     let Some(superclass) = classes.get(superclass_name) else {
-        return;
+        return Vec::new();
     };
 
-    fields.extend(parse_fields(&superclass.body));
-    extend_superclass_fields(classes, superclass_name, fields);
+    let mut fields = parse_fields(&superclass.body);
+    fields.extend(superclass_fields(classes, superclass_name));
+    apply_constructor_defaults(superclass_name, &superclass.body, &mut fields);
+    fields
 }
 
 fn apply_constructor_defaults(class: &str, body: &str, fields: &mut [RawField]) {
