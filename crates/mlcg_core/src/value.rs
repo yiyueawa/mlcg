@@ -1,11 +1,10 @@
-use std::marker::PhantomData;
+use std::{fmt, marker::PhantomData};
 
 use crate::{processor::ProcessorHandle, ValueId};
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Any;
 
-#[derive(Debug)]
 pub struct Value<P, T = Any> {
     pub(crate) id: ValueId,
     pub(crate) handle: ProcessorHandle<P>,
@@ -21,6 +20,15 @@ impl<P, T> Clone for Value<P, T> {
             name_hint: self.name_hint.clone(),
             _type: PhantomData,
         }
+    }
+}
+
+impl<P, T> fmt::Debug for Value<P, T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Value")
+            .field("id", &self.id)
+            .field("name_hint", &self.name_hint)
+            .finish()
     }
 }
 

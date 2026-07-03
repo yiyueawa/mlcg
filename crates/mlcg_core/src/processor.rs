@@ -134,6 +134,12 @@ impl<P: 'static> Processor<P> {
 }
 
 impl<P: 'static> ProcessorHandle<P> {
+    pub fn push<I>(&self, instruction: I)
+    where
+        I: Instruction<P>,
+    {
+        self.push_item(ProgramItem::Instruction(Box::new(instruction)));
+    }
     pub(crate) fn push_item(&self, item: ProgramItem<P>) {
         let mut state = self.state.lock().expect("program state mutex poisoned");
         state.items.push(item);

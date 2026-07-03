@@ -1,0 +1,20 @@
+
+version = "fixture"
+
+[[instructions]]
+family = "set"
+variant = "set"
+rust_name = "set"
+emit = ["set", "$target", "$source"]
+receiver = "target"
+inputs = ["source"]
+outputs = []
+
+[[instructions]]
+family = "op"
+variant = "add"
+rust_name = "op_add"
+emit = ["op", "add", "$out", "$lhs", "$rhs"]
+receiver = ""
+inputs = ["lhs", "rhs"]
+outputs = ["out"]
