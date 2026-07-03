@@ -168,3 +168,35 @@ fn scans_direct_superclass_fields_for_registered_statements() {
     assert_eq!(radar.default.as_deref(), Some("0"));
     assert_eq!(uradar.ignored_fields, ["radar"]);
 }
+
+#[test]
+fn scans_field_declarations_after_methods_or_constructors() {
+    let source = r#"
+        @RegisterStatement("late")
+        public static class LateFieldStatement extends LStatement{
+            public LateFieldStatement(){
+                first = "changed";
+            }
+
+            @Override public LInstruction build(LAssembler builder){
+                return new LateI(builder.var(first), builder.var(second));
+            }
+
+            public String first = "a", second = "b";
+        }
+    "#;
+
+    let manifest = scan_raw_statements("fixture", source).expect("scan succeeds");
+    let late = manifest
+        .statements
+        .iter()
+        .find(|statement| statement.name == "late")
+        .expect("late exists");
+    let fields: Vec<_> = late
+        .fields
+        .iter()
+        .map(|field| (field.name.as_str(), field.default.as_deref()))
+        .collect();
+
+    assert_eq!(fields, [("first", Some("changed")), ("second", Some("b"))]);
+}

@@ -210,7 +210,7 @@ fn parse_category(body: &str) -> Option<String> {
 
 fn parse_fields(body: &str) -> Vec<RawField> {
     let mut fields = Vec::new();
-    for statement in body.split(';') {
+    for statement in top_level_semicolon_statements(body) {
         let trimmed = statement.trim();
         if !trimmed.starts_with("public ") {
             continue;
@@ -236,6 +236,35 @@ fn parse_fields(body: &str) -> Vec<RawField> {
         }
     }
     fields
+}
+
+fn top_level_semicolon_statements(source: &str) -> Vec<&str> {
+    let bytes = source.as_bytes();
+    let mut statements = Vec::new();
+    let mut depth = 0usize;
+    let mut start = 0usize;
+    let mut index = 0usize;
+
+    while index < bytes.len() {
+        match bytes[index] {
+            b'{' => depth += 1,
+            b'}' => {
+                depth = depth.saturating_sub(1);
+                if depth == 0 {
+                    start = index + 1;
+                }
+            }
+            b';' if depth == 0 => {
+                statements.push(&source[start..index]);
+                start = index + 1;
+            }
+            b'"' => index = skip_string(bytes, index),
+            _ => {}
+        }
+        index += 1;
+    }
+
+    statements
 }
 
 fn parse_fields_with_direct_superclass(
