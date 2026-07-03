@@ -320,7 +320,7 @@ fn receiver_priority() -> &'static [&'static str] {
 fn is_selector_field(name: &str) -> bool {
     matches!(
         name,
-        "op" | "type" | "rule" | "action" | "layer" | "shape" | "locate"
+        "op" | "type" | "rule" | "action" | "layer" | "shape" | "locate" | "mode"
     )
 }
 

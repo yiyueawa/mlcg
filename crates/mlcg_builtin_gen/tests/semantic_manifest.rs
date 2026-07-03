@@ -263,6 +263,60 @@ fn normalizes_generated_rust_names_from_source_symbols() {
 }
 
 #[test]
+fn expands_mode_selector_fields_when_enum_metadata_exists() {
+    let source = r#"
+        @RegisterStatement("basic_selector")
+        public static class BasicSelectorStatement extends LStatement{
+            public Mode mode = Mode.sum;
+            public String result = "result", lhs = "a", rhs = "b";
+            @Override public LInstruction build(LAssembler builder){ return new BasicSelectorI(mode, builder.var(result), builder.var(lhs), builder.var(rhs)); }
+        }
+    "#;
+
+    let mut raw = scan_raw_statements("fixture", source).expect("scan succeeds");
+    raw.enums = vec![RawEnum {
+        name: "Mode".to_string(),
+        variants: vec!["sum".to_string(), "identity".to_string()],
+        arities: [("sum".to_string(), 2), ("identity".to_string(), 1)]
+            .into_iter()
+            .collect(),
+    }];
+
+    let manifest = derive_semantic_manifest(&raw);
+
+    let sum = manifest
+        .instructions
+        .iter()
+        .find(|instruction| instruction.rust_name == "basic_selector_sum")
+        .expect("sum variant exists");
+    assert_eq!(
+        sum.emit,
+        ["basic_selector", "sum", "$result", "$lhs", "$rhs"]
+    );
+    assert_eq!(sum.receiver, "lhs");
+    assert_eq!(sum.inputs, ["rhs"]);
+    assert_eq!(sum.outputs, ["result"]);
+
+    let identity = manifest
+        .instructions
+        .iter()
+        .find(|instruction| instruction.rust_name == "basic_selector_identity")
+        .expect("identity variant exists");
+    assert_eq!(
+        identity.emit,
+        ["basic_selector", "identity", "$result", "$lhs", "0"]
+    );
+    assert_eq!(identity.receiver, "lhs");
+    assert!(identity.inputs.is_empty());
+    assert_eq!(identity.outputs, ["result"]);
+
+    assert!(!manifest
+        .instructions
+        .iter()
+        .any(|instruction| instruction.rust_name == "basic_selector"));
+}
+
+#[test]
 fn avoids_fallback_receiver_for_plain_output_queries_without_preferred_subject() {
     let source = r#"
         @RegisterStatement("link_like")
