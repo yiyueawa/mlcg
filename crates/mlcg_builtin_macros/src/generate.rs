@@ -398,7 +398,9 @@ fn generate_output_struct(spec: &InstructionSpec) -> TokenStream {
         .map(|field| quote! { pub #field: Value<P> })
         .collect();
     let tuple_types = field_idents.iter().map(|_| quote! { Value<P> });
+    let tuple_ref_types = field_idents.iter().map(|_| quote! { &Value<P> });
     let tuple_fields = field_idents.iter();
+    let tuple_ref_fields = field_idents.iter();
     let constructor_params = field_idents
         .iter()
         .zip(field_generics.iter())
@@ -447,6 +449,10 @@ fn generate_output_struct(spec: &InstructionSpec) -> TokenStream {
 
             pub fn into_tuple(self) -> (#(#tuple_types,)*) {
                 (#(self.#tuple_fields,)*)
+            }
+
+            pub fn as_tuple(&self) -> (#(#tuple_ref_types,)*) {
+                (#(&self.#tuple_ref_fields,)*)
             }
         }
 
