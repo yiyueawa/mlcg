@@ -38,9 +38,17 @@ impl<P> Clone for ProcessorHandle<P> {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Processor<P> {
     handle: ProcessorHandle<P>,
+}
+
+impl<P> Clone for Processor<P> {
+    fn clone(&self) -> Self {
+        Self {
+            handle: self.handle.clone(),
+        }
+    }
 }
 
 impl<P: 'static> Default for Processor<P> {
