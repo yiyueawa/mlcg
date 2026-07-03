@@ -55,3 +55,25 @@ fn generated_v158_1_api_emits_representative_mlog() {
         "set x 1\nop add __mlcg_0 x y\nop not __mlcg_1 __mlcg_0 0\nop add __mlcg_1 __mlcg_0 2\nprint message\nread __mlcg_2 cell1 0\nread x cell1 1\nprint __mlcg_2\nread __mlcg_3 cell 2\nop add __mlcg_4 x y\nwrite x cell 3\nsensor __mlcg_5 cell @enabled\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nuradar enemy any any distance 0 true __mlcg_10\nuradar enemy any any health 0 false __mlcg_10\nprint __mlcg_3\nprint __mlcg_4\nprint __mlcg_5\nprint __mlcg_10\nprint __mlcg_6\nprint __mlcg_7\nprint __mlcg_8\nprint __mlcg_9\njump 26 equal x 1\nprint before_done\nprint after_done"
     );
 }
+
+#[test]
+fn generated_v158_1_condition_arity_keeps_only_meaningful_operands() {
+    let processor = Processor::<P>::new();
+    let x = processor.named("x");
+    let y = processor.named("y");
+
+    let selected = x.select_equal(y, "then", "else");
+    let always_selected = processor.select_always("then", "else");
+    let done = processor.label();
+    processor.jump_always(done.clone());
+    processor.print(selected);
+    processor.place(done);
+    processor.print(always_selected);
+
+    let output = processor.emit().expect("emit succeeds");
+
+    assert_eq!(
+        output,
+        "select __mlcg_0 equal x y then else\nselect __mlcg_1 always 0 0 then else\njump 4 always 0 0\nprint __mlcg_0\nprint __mlcg_1"
+    );
+}

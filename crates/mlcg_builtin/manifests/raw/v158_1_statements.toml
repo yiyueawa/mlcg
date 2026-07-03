@@ -1349,7 +1349,7 @@ variants = [
 ]
 
 [enums.arities]
-always = 2
+always = 0
 equal = 2
 greaterThan = 2
 greaterThanEq = 2
@@ -1746,7 +1746,7 @@ variants = [
 
 [enums.arities]
 ally = 2
-any = 2
+any = 0
 attacker = 2
 boss = 2
 enemy = 2

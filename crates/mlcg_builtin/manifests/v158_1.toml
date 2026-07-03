@@ -2905,11 +2905,15 @@ emit = [
     "equal",
     "$comp0",
     "$comp1",
-    "0",
-    "0",
+    "$a",
+    "$b",
 ]
 receiver = "comp0"
-inputs = ["comp1"]
+inputs = [
+    "comp1",
+    "a",
+    "b",
+]
 outputs = ["result"]
 
 [[instructions]]
@@ -2922,11 +2926,15 @@ emit = [
     "notEqual",
     "$comp0",
     "$comp1",
-    "0",
-    "0",
+    "$a",
+    "$b",
 ]
 receiver = "comp0"
-inputs = ["comp1"]
+inputs = [
+    "comp1",
+    "a",
+    "b",
+]
 outputs = ["result"]
 
 [[instructions]]
@@ -2939,11 +2947,15 @@ emit = [
     "lessThan",
     "$comp0",
     "$comp1",
-    "0",
-    "0",
+    "$a",
+    "$b",
 ]
 receiver = "comp0"
-inputs = ["comp1"]
+inputs = [
+    "comp1",
+    "a",
+    "b",
+]
 outputs = ["result"]
 
 [[instructions]]
@@ -2956,11 +2968,15 @@ emit = [
     "lessThanEq",
     "$comp0",
     "$comp1",
-    "0",
-    "0",
+    "$a",
+    "$b",
 ]
 receiver = "comp0"
-inputs = ["comp1"]
+inputs = [
+    "comp1",
+    "a",
+    "b",
+]
 outputs = ["result"]
 
 [[instructions]]
@@ -2973,11 +2989,15 @@ emit = [
     "greaterThan",
     "$comp0",
     "$comp1",
-    "0",
-    "0",
+    "$a",
+    "$b",
 ]
 receiver = "comp0"
-inputs = ["comp1"]
+inputs = [
+    "comp1",
+    "a",
+    "b",
+]
 outputs = ["result"]
 
 [[instructions]]
@@ -2990,11 +3010,15 @@ emit = [
     "greaterThanEq",
     "$comp0",
     "$comp1",
-    "0",
-    "0",
+    "$a",
+    "$b",
 ]
 receiver = "comp0"
-inputs = ["comp1"]
+inputs = [
+    "comp1",
+    "a",
+    "b",
+]
 outputs = ["result"]
 
 [[instructions]]
@@ -3007,11 +3031,15 @@ emit = [
     "strictEqual",
     "$comp0",
     "$comp1",
-    "0",
-    "0",
+    "$a",
+    "$b",
 ]
 receiver = "comp0"
-inputs = ["comp1"]
+inputs = [
+    "comp1",
+    "a",
+    "b",
+]
 outputs = ["result"]
 
 [[instructions]]
@@ -3022,13 +3050,16 @@ emit = [
     "select",
     "$result",
     "always",
-    "$comp0",
-    "$comp1",
     "0",
     "0",
+    "$a",
+    "$b",
 ]
-receiver = "comp0"
-inputs = ["comp1"]
+receiver = ""
+inputs = [
+    "a",
+    "b",
+]
 outputs = ["result"]
 
 [[instructions]]
@@ -3474,11 +3505,11 @@ emit = [
     "jump",
     "$destIndex",
     "always",
-    "$value",
-    "$compare",
+    "0",
+    "0",
 ]
-receiver = "value"
-inputs = ["compare"]
+receiver = ""
+inputs = []
 outputs = []
 labels = ["destIndex"]
 

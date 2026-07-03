@@ -153,7 +153,11 @@ fn receiver_field(
         return None;
     }
 
-    let operands = operand_fields(statement, outputs, enum_selections);
+    let operands = if operand_limit.is_some() {
+        arity_limited_operand_fields(statement, outputs, enum_selections)
+    } else {
+        operand_fields(statement, outputs, enum_selections)
+    };
     let preferred = receiver_priority().iter().find_map(|preferred| {
         operands
             .iter()
@@ -182,10 +186,29 @@ fn unused_operand_fields(
     let Some(limit) = operand_limit else {
         return Vec::new();
     };
-    operand_fields(statement, outputs, enum_selections)
+    arity_limited_operand_fields(statement, outputs, enum_selections)
         .into_iter()
         .skip(limit)
         .collect()
+}
+
+fn arity_limited_operand_fields(
+    statement: &RawStatement,
+    outputs: &[String],
+    enum_selections: &[EnumSelection],
+) -> Vec<String> {
+    let operands = operand_fields(statement, outputs, enum_selections);
+    let comparison_operands: Vec<_> = operands
+        .iter()
+        .filter(|operand| is_comparison_operand(operand))
+        .cloned()
+        .collect();
+
+    if comparison_operands.is_empty() {
+        operands
+    } else {
+        comparison_operands
+    }
 }
 
 fn operand_fields(
@@ -202,6 +225,10 @@ fn operand_fields(
         .filter(|field| !is_enum_selection(&field.name, enum_selections))
         .map(|field| field.name.clone())
         .collect()
+}
+
+fn is_comparison_operand(name: &str) -> bool {
+    matches!(name, "value" | "compare" | "comp0" | "comp1")
 }
 
 fn is_ignored_field(statement: &RawStatement, name: &str) -> bool {

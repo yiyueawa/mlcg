@@ -28,6 +28,14 @@ fn derives_semantics_from_field_roles_and_enum_variants_without_statement_name_s
             @Override public LInstruction build(LAssembler builder){ return new BranchI(op, builder.var(value), builder.var(compare), destIndex); }
         }
 
+        @RegisterStatement("select")
+        public static class SelectStatement extends LStatement{
+            public String result = "result";
+            public ConditionOp op = ConditionOp.equal;
+            public String comp0 = "x", comp1 = "y", a = "then", b = "else";
+            @Override public LInstruction build(LAssembler builder){ return new SelectI(op, builder.var(result), builder.var(comp0), builder.var(comp1), builder.var(a), builder.var(b)); }
+        }
+
         @RegisterStatement("read")
         public static class ReadStatement extends LStatement{
             public String output = "result", target = "cell1", address = "0";
@@ -45,7 +53,9 @@ fn derives_semantics_from_field_roles_and_enum_variants_without_statement_name_s
         RawEnum {
             name: "ConditionOp".to_string(),
             variants: vec!["equal".to_string(), "always".to_string()],
-            arities: std::collections::BTreeMap::new(),
+            arities: [("equal".to_string(), 2), ("always".to_string(), 0)]
+                .into_iter()
+                .collect(),
         },
     ];
 
@@ -94,6 +104,46 @@ fn derives_semantics_from_field_roles_and_enum_variants_without_statement_name_s
     assert_eq!(branch_equal.inputs, ["compare"]);
     assert_eq!(branch_equal.labels, ["destIndex"]);
     assert!(branch_equal.outputs.is_empty());
+
+    let branch_always = manifest
+        .instructions
+        .iter()
+        .find(|instruction| instruction.rust_name == "branch_always")
+        .expect("branch_always exists");
+    assert_eq!(
+        branch_always.emit,
+        ["branch", "$destIndex", "always", "0", "0"]
+    );
+    assert!(branch_always.receiver.is_empty());
+    assert!(branch_always.inputs.is_empty());
+    assert_eq!(branch_always.labels, ["destIndex"]);
+    assert!(branch_always.outputs.is_empty());
+
+    let select_equal = manifest
+        .instructions
+        .iter()
+        .find(|instruction| instruction.rust_name == "select_equal")
+        .expect("select_equal exists");
+    assert_eq!(
+        select_equal.emit,
+        ["select", "$result", "equal", "$comp0", "$comp1", "$a", "$b"]
+    );
+    assert_eq!(select_equal.receiver, "comp0");
+    assert_eq!(select_equal.inputs, ["comp1", "a", "b"]);
+    assert_eq!(select_equal.outputs, ["result"]);
+
+    let select_always = manifest
+        .instructions
+        .iter()
+        .find(|instruction| instruction.rust_name == "select_always")
+        .expect("select_always exists");
+    assert_eq!(
+        select_always.emit,
+        ["select", "$result", "always", "0", "0", "$a", "$b"]
+    );
+    assert!(select_always.receiver.is_empty());
+    assert_eq!(select_always.inputs, ["a", "b"]);
+    assert_eq!(select_always.outputs, ["result"]);
 
     let read = manifest
         .instructions

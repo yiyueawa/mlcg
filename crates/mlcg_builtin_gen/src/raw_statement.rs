@@ -593,6 +593,10 @@ fn push_enum_variant(variants: &mut Vec<RawEnumConstant>, token: &str) {
 
 fn infer_lambda_arity(token: &str) -> Option<usize> {
     let arrow = token.find("->")?;
+    if lambda_body_is_constant_true(&token[arrow + "->".len()..]) {
+        return Some(0);
+    }
+
     let before = token[..arrow].trim_end();
     if before.ends_with(')') {
         let open = matching_paren_before(before, before.len() - 1)?;
@@ -605,6 +609,16 @@ fn infer_lambda_arity(token: &str) -> Option<usize> {
     } else {
         Some(1)
     }
+}
+
+fn lambda_body_is_constant_true(body: &str) -> bool {
+    let Some(rest) = body.trim_start().strip_prefix("true") else {
+        return false;
+    };
+    rest.trim_start()
+        .chars()
+        .next()
+        .is_none_or(|ch| matches!(ch, ')' | ',' | ';'))
 }
 
 fn matching_paren_before(source: &str, close: usize) -> Option<usize> {

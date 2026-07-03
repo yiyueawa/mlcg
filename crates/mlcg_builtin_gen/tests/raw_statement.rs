@@ -123,6 +123,22 @@ fn scans_enum_variants_from_source() {
 }
 
 #[test]
+fn infers_constant_true_enum_lambda_as_zero_arity() {
+    let source = r#"
+        public enum ConditionOp{
+            equal("==", (a, b) -> Math.abs(a - b) < 0.000001),
+            always("always", (a, b) -> true);
+        }
+    "#;
+
+    let variants = mlcg_builtin_gen::raw_statement::scan_raw_enum_variants("ConditionOp", source)
+        .expect("scan succeeds");
+
+    assert_eq!(variants.arities.get("equal"), Some(&2));
+    assert_eq!(variants.arities.get("always"), Some(&0));
+}
+
+#[test]
 fn scans_direct_superclass_fields_for_registered_statements() {
     let source = r#"
         @RegisterStatement("radar")
