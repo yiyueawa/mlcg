@@ -140,6 +140,38 @@ fn ignores_class_declarations_inside_block_comments() {
 }
 
 #[test]
+fn ignores_braces_inside_class_body_comments() {
+    let source = r#"
+        @RegisterStatement("commented_brace")
+        public static class CommentedBraceStatement extends LStatement{
+            /*
+             * A Java comment can mention braces such as } without ending the class.
+             */
+            public String output = "result";
+
+            @Override public LInstruction build(LAssembler builder){
+                // This line comment can mention another } without ending the method.
+                return new CommentedBraceI(builder.var(output));
+            }
+        }
+    "#;
+
+    let manifest = scan_raw_statements("fixture", source).expect("scan succeeds");
+    let commented_brace = manifest
+        .statements
+        .iter()
+        .find(|statement| statement.name == "commented_brace")
+        .expect("commented_brace exists");
+
+    assert_eq!(
+        commented_brace.instruction.as_deref(),
+        Some("CommentedBraceI")
+    );
+    assert_eq!(commented_brace.fields.len(), 1);
+    assert_eq!(commented_brace.fields[0].name, "output");
+}
+
+#[test]
 fn scans_enum_variants_from_source() {
     let source = r#"
         public enum LogicOp{

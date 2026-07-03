@@ -168,6 +168,14 @@ fn matching_brace(source: &str, open: usize) -> Option<usize> {
                 }
             }
             b'"' => index = skip_string(bytes, index),
+            b'/' if bytes.get(index + 1) == Some(&b'/') => {
+                index = skip_line_comment(bytes, index + 2);
+                continue;
+            }
+            b'/' if bytes.get(index + 1) == Some(&b'*') => {
+                index = skip_block_comment(bytes, index + 2);
+                continue;
+            }
             _ => {}
         }
         index += 1;
@@ -308,6 +316,22 @@ fn separated_top_level(source: &str, separator: u8, include_tail: bool) -> Vec<&
                 start = index + 1;
             }
             b'"' => index = skip_string(bytes, index),
+            b'/' if bytes.get(index + 1) == Some(&b'/') => {
+                let next = skip_line_comment(bytes, index + 2);
+                if source[start..index].trim().is_empty() {
+                    start = next;
+                }
+                index = next;
+                continue;
+            }
+            b'/' if bytes.get(index + 1) == Some(&b'*') => {
+                let next = skip_block_comment(bytes, index + 2);
+                if source[start..index].trim().is_empty() {
+                    start = next;
+                }
+                index = next;
+                continue;
+            }
             _ => {}
         }
         index += 1;
