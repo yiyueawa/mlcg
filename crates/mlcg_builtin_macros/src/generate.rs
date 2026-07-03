@@ -80,6 +80,10 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
             fn from(value: usize) -> Self { Self::Raw(value.to_string()) }
         }
 
+        impl<P> From<bool> for Arg<P> {
+            fn from(value: bool) -> Self { Self::Raw(value.to_string()) }
+        }
+
         impl<P> From<f64> for Arg<P> {
             fn from(value: f64) -> Self { Self::Raw(value.to_string()) }
         }

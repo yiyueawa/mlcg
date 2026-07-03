@@ -27,6 +27,7 @@ fn main() {
     let y = processor.named("y");
 
     x.set(1);
+    y.set(true);
     let out = processor.op_add(x.clone(), y.clone());
     processor.op_add_into(out, x.clone(), y.clone());
     let multi: MultiOutput<P> = processor.multi(x.clone());
@@ -36,6 +37,7 @@ fn main() {
 
     let text = processor.emit().unwrap();
     assert!(text.contains("set x 1"));
+    assert!(text.contains("set y true"));
     assert!(text.contains("op add"));
     assert!(text.contains("multi __mlcg_1 __mlcg_2 x"));
     assert!(text.contains("multi __mlcg_1 __mlcg_2 y"));

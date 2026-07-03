@@ -22,14 +22,14 @@ fn generated_v158_1_api_emits_representative_mlog() {
     let value_sum = x.op_add(y);
     cell.write(x.clone(), 3);
     let sensed = cell.sensor("@enabled");
-    let located = processor.ulocate_building("@core", "true", "@copper");
+    let located = processor.ulocate_building("@core", true, "@copper");
     processor.ulocate_building_into(
         located.outX.clone(),
         located.outY.clone(),
         located.outFound.clone(),
         located.outBuild.clone(),
         "@core",
-        "true",
+        true,
         "@copper",
     );
     processor.print(value_read);
