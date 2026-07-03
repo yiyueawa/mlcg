@@ -33,9 +33,9 @@ emit = [
     "$target",
     "$address",
 ]
-receiver = "input"
+receiver = "target"
 inputs = [
-    "target",
+    "input",
     "address",
 ]
 outputs = []
@@ -2203,12 +2203,9 @@ emit = [
     "$from",
     "$type",
 ]
-receiver = "to"
-inputs = [
-    "from",
-    "type",
-]
-outputs = []
+receiver = "from"
+inputs = ["type"]
+outputs = ["to"]
 
 [[instructions]]
 family = "set"
@@ -4427,10 +4424,10 @@ emit = [
     "$unit",
     "$duration",
 ]
-receiver = "effect"
+receiver = "unit"
 inputs = [
     "clear",
-    "unit",
+    "effect",
     "duration",
 ]
 outputs = []
@@ -5513,9 +5510,9 @@ emit = [
     "$of",
     "$value",
 ]
-receiver = "type"
+receiver = "of"
 inputs = [
-    "of",
+    "type",
     "value",
 ]
 outputs = []

@@ -113,3 +113,46 @@ fn derives_semantics_from_field_roles_and_enum_variants_without_statement_name_s
         .iter()
         .any(|instruction| instruction.rust_name == "branch"));
 }
+
+#[test]
+fn derives_receiver_and_output_roles_from_field_names() {
+    let source = r#"
+        @RegisterStatement("write_like")
+        public static class WriteLikeStatement extends LStatement{
+            public String input = "result", target = "cell1", address = "0";
+            @Override public LInstruction build(LAssembler builder){ return new WriteLikeI(builder.var(target), builder.var(address), builder.var(input)); }
+        }
+
+        @RegisterStatement("sense_like")
+        public static class SenseLikeStatement extends LStatement{
+            public String to = "result", from = "block1", type = "@enabled";
+            @Override public LInstruction build(LAssembler builder){ return new SenseLikeI(builder.var(from), builder.var(to), builder.var(type)); }
+        }
+    "#;
+
+    let raw = scan_raw_statements("fixture", source).expect("scan succeeds");
+    let manifest = derive_semantic_manifest(&raw);
+
+    let write_like = manifest
+        .instructions
+        .iter()
+        .find(|instruction| instruction.rust_name == "write_like")
+        .expect("write_like exists");
+    assert_eq!(
+        write_like.emit,
+        ["write_like", "$input", "$target", "$address"]
+    );
+    assert_eq!(write_like.receiver, "target");
+    assert_eq!(write_like.inputs, ["input", "address"]);
+    assert!(write_like.outputs.is_empty());
+
+    let sense_like = manifest
+        .instructions
+        .iter()
+        .find(|instruction| instruction.rust_name == "sense_like")
+        .expect("sense_like exists");
+    assert_eq!(sense_like.emit, ["sense_like", "$to", "$from", "$type"]);
+    assert_eq!(sense_like.receiver, "from");
+    assert_eq!(sense_like.inputs, ["type"]);
+    assert_eq!(sense_like.outputs, ["to"]);
+}

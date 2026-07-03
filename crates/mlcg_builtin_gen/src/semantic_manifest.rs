@@ -131,7 +131,7 @@ fn output_fields(statement: &RawStatement) -> Vec<String> {
     let outputs: Vec<_> = statement
         .fields
         .iter()
-        .filter(|field| is_output_field(&field.name))
+        .filter(|field| is_output_field(statement, &field.name))
         .map(|field| field.name.clone())
         .collect();
     if outputs.len() == 1 {
@@ -151,9 +151,16 @@ fn receiver_field(
         return None;
     }
 
-    operand_fields(statement, outputs, enum_selections)
-        .into_iter()
-        .next()
+    let operands = operand_fields(statement, outputs, enum_selections);
+    receiver_priority()
+        .iter()
+        .find_map(|preferred| {
+            operands
+                .iter()
+                .find(|operand| operand.as_str() == *preferred)
+                .cloned()
+        })
+        .or_else(|| operands.into_iter().next())
 }
 
 fn unused_operand_fields(
@@ -194,12 +201,23 @@ fn is_label_field(name: &str) -> bool {
     name == "destIndex"
 }
 
-fn is_output_field(name: &str) -> bool {
+fn is_output_field(statement: &RawStatement, name: &str) -> bool {
     matches!(name, "output" | "result" | "dest")
+        || is_to_output(statement, name)
         || name
             .strip_prefix("out")
             .and_then(|suffix| suffix.chars().next())
             .is_some_and(char::is_uppercase)
+}
+
+fn is_to_output(statement: &RawStatement, name: &str) -> bool {
+    name == "to"
+        && statement.fields.len() >= 3
+        && statement.fields.iter().any(|field| field.name == "from")
+}
+
+fn receiver_priority() -> &'static [&'static str] {
+    &["target", "of", "unit", "radar", "to", "from"]
 }
 
 fn is_selector_field(name: &str) -> bool {
