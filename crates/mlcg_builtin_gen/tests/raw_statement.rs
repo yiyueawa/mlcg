@@ -186,6 +186,60 @@ fn scans_direct_superclass_fields_for_registered_statements() {
 }
 
 #[test]
+fn scans_transitive_superclass_fields_for_registered_statements() {
+    let source = r#"
+        public static class BaseRadarStatement extends LStatement{
+            public RadarTarget target = RadarTarget.enemy;
+            public String radar = "turret1";
+        }
+
+        public static class MidRadarStatement extends BaseRadarStatement{
+            public String sort = "distance";
+        }
+
+        @RegisterStatement("deep_radar")
+        public static class DeepRadarStatement extends MidRadarStatement{
+            public String output = "result";
+            public DeepRadarStatement(){
+                radar = "0";
+            }
+            @Override public LInstruction build(LAssembler builder){
+                return new RadarI(target, builder.var(radar), builder.var(sort), builder.var(output));
+            }
+        }
+    "#;
+
+    let manifest = scan_raw_statements("fixture", source).expect("scan succeeds");
+    let deep_radar = manifest
+        .statements
+        .iter()
+        .find(|statement| statement.name == "deep_radar")
+        .expect("deep_radar exists");
+    let fields: Vec<_> = deep_radar
+        .fields
+        .iter()
+        .map(|field| {
+            (
+                field.ty.as_str(),
+                field.name.as_str(),
+                field.default.as_deref(),
+            )
+        })
+        .collect();
+
+    assert_eq!(
+        fields,
+        [
+            ("String", "output", Some("result")),
+            ("String", "sort", Some("distance")),
+            ("RadarTarget", "target", Some("RadarTarget.enemy")),
+            ("String", "radar", Some("0")),
+        ]
+    );
+    assert!(deep_radar.ignored_fields.is_empty());
+}
+
+#[test]
 fn ignores_fields_that_only_appear_inside_build_string_literals() {
     let source = r#"
         @RegisterStatement("literal")

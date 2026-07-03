@@ -88,7 +88,7 @@ pub fn scan_raw_statements(
         })?;
         let body = &source[brace_start + 1..brace_end];
 
-        let fields = parse_fields_with_direct_superclass(&classes, class, body);
+        let fields = parse_fields_with_superclasses(&classes, class, body);
         statements.push(RawStatement {
             name: name.to_string(),
             class: class.to_string(),
@@ -281,21 +281,34 @@ fn separated_top_level(source: &str, separator: u8, include_tail: bool) -> Vec<&
     statements
 }
 
-fn parse_fields_with_direct_superclass(
+fn parse_fields_with_superclasses(
     classes: &BTreeMap<String, ClassInfo>,
     class: &str,
     body: &str,
 ) -> Vec<RawField> {
     let mut fields = parse_fields(body);
-    if let Some(superclass) = classes
-        .get(class)
-        .and_then(|class_info| class_info.superclass.as_deref())
-        .and_then(|superclass| classes.get(superclass))
-    {
-        fields.extend(parse_fields(&superclass.body));
-    }
+    extend_superclass_fields(classes, class, &mut fields);
     apply_constructor_defaults(class, body, &mut fields);
     fields
+}
+
+fn extend_superclass_fields(
+    classes: &BTreeMap<String, ClassInfo>,
+    class: &str,
+    fields: &mut Vec<RawField>,
+) {
+    let Some(superclass_name) = classes
+        .get(class)
+        .and_then(|class_info| class_info.superclass.as_deref())
+    else {
+        return;
+    };
+    let Some(superclass) = classes.get(superclass_name) else {
+        return;
+    };
+
+    fields.extend(parse_fields(&superclass.body));
+    extend_superclass_fields(classes, superclass_name, fields);
 }
 
 fn apply_constructor_defaults(class: &str, body: &str, fields: &mut [RawField]) {
