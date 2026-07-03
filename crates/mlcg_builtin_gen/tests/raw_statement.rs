@@ -170,6 +170,29 @@ fn scans_direct_superclass_fields_for_registered_statements() {
 }
 
 #[test]
+fn ignores_fields_that_only_appear_inside_build_string_literals() {
+    let source = r#"
+        @RegisterStatement("literal")
+        public static class LiteralStatement extends LStatement{
+            public String target = "block1", output = "result";
+
+            @Override public LInstruction build(LAssembler builder){
+                return new LiteralI(builder.var("@target"), builder.var(output));
+            }
+        }
+    "#;
+
+    let manifest = scan_raw_statements("fixture", source).expect("scan succeeds");
+    let literal = manifest
+        .statements
+        .iter()
+        .find(|statement| statement.name == "literal")
+        .expect("literal exists");
+
+    assert_eq!(literal.ignored_fields, ["target"]);
+}
+
+#[test]
 fn scans_field_declarations_after_methods_or_constructors() {
     let source = r#"
         @RegisterStatement("late")

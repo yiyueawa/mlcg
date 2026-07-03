@@ -388,16 +388,21 @@ fn is_identifier_boundary(source: &str, start: usize, end: usize) -> bool {
 }
 
 fn contains_identifier(source: &str, ident: &str) -> bool {
+    let bytes = source.as_bytes();
     let mut offset = 0;
-    while let Some(relative) = source[offset..].find(ident) {
-        let start = offset + relative;
-        let end = start + ident.len();
-        let before = source[..start].chars().next_back();
-        let after = source[end..].chars().next();
-        if !before.is_some_and(is_ident_char) && !after.is_some_and(is_ident_char) {
+    while offset < bytes.len() {
+        if bytes[offset] == b'"' {
+            offset = skip_string(bytes, offset) + 1;
+            continue;
+        }
+        let end = offset + ident.len();
+        if end <= bytes.len()
+            && &source[offset..end] == ident
+            && is_identifier_boundary(source, offset, end)
+        {
             return true;
         }
-        offset = end;
+        offset += 1;
     }
     false
 }
