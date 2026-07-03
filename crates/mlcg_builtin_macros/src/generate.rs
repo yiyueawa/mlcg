@@ -335,6 +335,39 @@ fn validate_instruction_symbols(spec: &InstructionSpec) -> Result<(), String> {
         )?;
     }
 
+    validate_placeholder_roles(spec)?;
+
+    Ok(())
+}
+
+fn validate_placeholder_roles(spec: &InstructionSpec) -> Result<(), String> {
+    let placeholders = emit_placeholders(&spec.emit);
+    let mut roles = Vec::new();
+    if !spec.receiver.is_empty() {
+        roles.push(spec.receiver.as_str());
+    }
+    roles.extend(spec.inputs.iter().map(String::as_str));
+    roles.extend(spec.outputs.iter().map(String::as_str));
+    roles.extend(spec.labels.iter().map(String::as_str));
+
+    for placeholder in placeholders {
+        if !roles.iter().any(|role| role == &placeholder) {
+            return Err(format!(
+                "instruction `{}` emits placeholder `${placeholder}` that is not classified as receiver, input, output, or label",
+                spec.rust_name
+            ));
+        }
+    }
+
+    for role in roles {
+        if !spec.emit.iter().any(|token| token == &format!("${role}")) {
+            return Err(format!(
+                "instruction `{}` classifies non-emitted parameter `{role}`",
+                spec.rust_name
+            ));
+        }
+    }
+
     Ok(())
 }
 
@@ -1072,6 +1105,18 @@ fn placeholders(spec: &InstructionSpec) -> Vec<Ident> {
         }
     }
     names.iter().map(|name| safe_ident(name)).collect()
+}
+
+fn emit_placeholders(emit: &[String]) -> Vec<&str> {
+    let mut placeholders = Vec::new();
+    for token in emit {
+        if let Some(placeholder) = token.strip_prefix('$') {
+            if !placeholders.contains(&placeholder) {
+                placeholders.push(placeholder);
+            }
+        }
+    }
+    placeholders
 }
 
 fn struct_name(spec: &InstructionSpec) -> Ident {

@@ -156,6 +156,47 @@ fn validate_instruction_symbols(instruction: &Instruction) -> Result<(), Generat
         )?;
     }
 
+    validate_placeholder_roles(instruction)?;
+
+    Ok(())
+}
+
+fn validate_placeholder_roles(instruction: &Instruction) -> Result<(), GenerateError> {
+    let placeholders = emit_placeholders(&instruction.emit);
+    let mut roles = Vec::new();
+    if !instruction.receiver.is_empty() {
+        roles.push(instruction.receiver.as_str());
+    }
+    roles.extend(instruction.inputs.iter().map(String::as_str));
+    roles.extend(instruction.outputs.iter().map(String::as_str));
+    roles.extend(instruction.labels.iter().map(String::as_str));
+
+    for placeholder in placeholders {
+        if !roles.iter().any(|role| role == &placeholder) {
+            return Err(GenerateError::GeneratedApi {
+                message: format!(
+                    "instruction `{}` emits placeholder `${placeholder}` that is not classified as receiver, input, output, or label",
+                    instruction.rust_name
+                ),
+            });
+        }
+    }
+
+    for role in roles {
+        if !instruction
+            .emit
+            .iter()
+            .any(|token| token == &format!("${role}"))
+        {
+            return Err(GenerateError::GeneratedApi {
+                message: format!(
+                    "instruction `{}` classifies non-emitted parameter `{role}`",
+                    instruction.rust_name
+                ),
+            });
+        }
+    }
+
     Ok(())
 }
 
@@ -288,6 +329,18 @@ fn placeholders(instruction: &Instruction) -> Vec<String> {
         }
     }
     names
+}
+
+fn emit_placeholders(emit: &[String]) -> Vec<&str> {
+    let mut placeholders = Vec::new();
+    for token in emit {
+        if let Some(placeholder) = token.strip_prefix('$') {
+            if !placeholders.contains(&placeholder) {
+                placeholders.push(placeholder);
+            }
+        }
+    }
+    placeholders
 }
 
 fn struct_name(instruction: &Instruction) -> String {

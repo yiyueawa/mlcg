@@ -357,6 +357,35 @@ outputs = []
     )
     .expect("write trybuild keyword item name manifest");
 
+    let unclassified_placeholder_manifest = r#"
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "bad"
+rust_name = "bad"
+emit = ["bad", "$missing"]
+receiver = ""
+inputs = []
+outputs = []
+"#;
+    let unclassified_placeholder_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/unclassified_placeholder_manifest.toml");
+    fs::write(
+        &unclassified_placeholder_manifest_path,
+        unclassified_placeholder_manifest,
+    )
+    .expect("write unclassified placeholder manifest");
+    let trybuild_unclassified_placeholder_manifest_path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(
+            "../../target/tests/trybuild/mlcg_builtin_macros/tests/unclassified_placeholder_manifest.toml",
+        );
+    fs::write(
+        &trybuild_unclassified_placeholder_manifest_path,
+        unclassified_placeholder_manifest,
+    )
+    .expect("write trybuild unclassified placeholder manifest");
+
     let t = trybuild::TestCases::new();
     t.pass("tests/ui/pass_macro_basic.rs");
     t.pass("tests/ui/pass_std_trait_name.rs");
@@ -371,4 +400,5 @@ outputs = []
     t.compile_fail("tests/ui/fail_raw_output_argument.rs");
     t.compile_fail("tests/ui/fail_helper_collision.rs");
     t.compile_fail("tests/ui/fail_output_field_collision.rs");
+    t.compile_fail("tests/ui/fail_unclassified_placeholder.rs");
 }

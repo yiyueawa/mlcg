@@ -1,0 +1,7 @@
+error: instruction `bad` emits placeholder `$missing` that is not classified as receiver, input, output, or label
+ --> tests/ui/fail_unclassified_placeholder.rs:2:5
+  |
+2 |     mlcg_builtin_macros::include_manifest!("tests/unclassified_placeholder_manifest.toml");
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `mlcg_builtin_macros::include_manifest` (in Nightly builds, run with -Z macro-backtrace for more info)

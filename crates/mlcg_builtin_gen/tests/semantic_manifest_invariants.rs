@@ -182,6 +182,56 @@ fn generated_rust_api_symbol_validation_rejects_keyword_item_collision_after_esc
     );
 }
 
+#[test]
+fn generated_rust_api_symbol_validation_rejects_unclassified_emit_placeholder() {
+    let manifest = Manifest {
+        version: "fixture".to_string(),
+        instructions: vec![Instruction {
+            family: "fixture".to_string(),
+            variant: "bad".to_string(),
+            rust_name: "bad".to_string(),
+            emit: strings(["bad", "$missing"]),
+            receiver: String::new(),
+            inputs: Vec::new(),
+            outputs: Vec::new(),
+            labels: Vec::new(),
+        }],
+    };
+
+    let error = validate_generated_rust_api_symbols(&manifest)
+        .expect_err("unclassified emit placeholder is rejected");
+
+    assert_eq!(
+        error.to_string(),
+        "instruction `bad` emits placeholder `$missing` that is not classified as receiver, input, output, or label"
+    );
+}
+
+#[test]
+fn generated_rust_api_symbol_validation_rejects_non_emitted_classified_parameter() {
+    let manifest = Manifest {
+        version: "fixture".to_string(),
+        instructions: vec![Instruction {
+            family: "fixture".to_string(),
+            variant: "bad".to_string(),
+            rust_name: "bad".to_string(),
+            emit: strings(["bad"]),
+            receiver: String::new(),
+            inputs: strings(["unused"]),
+            outputs: Vec::new(),
+            labels: Vec::new(),
+        }],
+    };
+
+    let error = validate_generated_rust_api_symbols(&manifest)
+        .expect_err("non-emitted classified parameter is rejected");
+
+    assert_eq!(
+        error.to_string(),
+        "instruction `bad` classifies non-emitted parameter `unused`"
+    );
+}
+
 fn read_v158_1_manifest() -> Manifest {
     let manifest_path = concat!(
         env!("CARGO_MANIFEST_DIR"),
