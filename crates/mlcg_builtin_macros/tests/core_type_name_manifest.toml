@@ -1,0 +1,20 @@
+
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "value"
+rust_name = "value"
+emit = ["value"]
+receiver = ""
+inputs = []
+outputs = []
+
+[[instructions]]
+family = "fixture"
+variant = "processor"
+rust_name = "processor"
+emit = ["processor"]
+receiver = ""
+inputs = []
+outputs = []

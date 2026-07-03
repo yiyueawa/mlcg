@@ -51,15 +51,13 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
     });
 
     quote! {
-        use mlcg_core::{Instruction, Label, LowerContext, PartialLine, PartialProgram, PartialToken, Processor, Value};
-
         #[derive(Clone)]
         pub enum Arg<P> {
-            Value(Value<P>),
+            Value(::mlcg_core::Value<P>),
             Raw(::std::string::String),
         }
 
-        pub struct OutputArg<P>(Value<P>);
+        pub struct OutputArg<P>(::mlcg_core::Value<P>);
 
         impl<P> ::std::clone::Clone for OutputArg<P> {
             fn clone(&self) -> Self {
@@ -68,7 +66,7 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
         }
 
         #[derive(Clone)]
-        pub struct LabelArg<P>(Label<P>);
+        pub struct LabelArg<P>(::mlcg_core::Label<P>);
 
         impl<P> ::std::fmt::Debug for Arg<P> {
             fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
@@ -79,12 +77,12 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
             }
         }
 
-        impl<P, T> ::std::convert::From<Value<P, T>> for Arg<P> {
-            fn from(value: Value<P, T>) -> Self { Self::Value(value.erase_type()) }
+        impl<P, T> ::std::convert::From<::mlcg_core::Value<P, T>> for Arg<P> {
+            fn from(value: ::mlcg_core::Value<P, T>) -> Self { Self::Value(value.erase_type()) }
         }
 
-        impl<P, T> ::std::convert::From<&Value<P, T>> for Arg<P> {
-            fn from(value: &Value<P, T>) -> Self { Self::Value(value.erase_type()) }
+        impl<P, T> ::std::convert::From<&::mlcg_core::Value<P, T>> for Arg<P> {
+            fn from(value: &::mlcg_core::Value<P, T>) -> Self { Self::Value(value.erase_type()) }
         }
 
         impl<P> ::std::fmt::Debug for OutputArg<P> {
@@ -93,12 +91,12 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
             }
         }
 
-        impl<P, T> ::std::convert::From<Value<P, T>> for OutputArg<P> {
-            fn from(value: Value<P, T>) -> Self { Self(value.erase_type()) }
+        impl<P, T> ::std::convert::From<::mlcg_core::Value<P, T>> for OutputArg<P> {
+            fn from(value: ::mlcg_core::Value<P, T>) -> Self { Self(value.erase_type()) }
         }
 
-        impl<P, T> ::std::convert::From<&Value<P, T>> for OutputArg<P> {
-            fn from(value: &Value<P, T>) -> Self { Self(value.erase_type()) }
+        impl<P, T> ::std::convert::From<&::mlcg_core::Value<P, T>> for OutputArg<P> {
+            fn from(value: &::mlcg_core::Value<P, T>) -> Self { Self(value.erase_type()) }
         }
 
         impl<P> ::std::convert::From<i32> for Arg<P> {
@@ -151,27 +149,27 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
             }
         }
 
-        impl<P> ::std::convert::From<Label<P>> for LabelArg<P> {
-            fn from(value: Label<P>) -> Self { Self(value) }
+        impl<P> ::std::convert::From<::mlcg_core::Label<P>> for LabelArg<P> {
+            fn from(value: ::mlcg_core::Label<P>) -> Self { Self(value) }
         }
 
-        impl<P> ::std::convert::From<&Label<P>> for LabelArg<P> {
-            fn from(value: &Label<P>) -> Self { Self(value.clone()) }
+        impl<P> ::std::convert::From<&::mlcg_core::Label<P>> for LabelArg<P> {
+            fn from(value: &::mlcg_core::Label<P>) -> Self { Self(value.clone()) }
         }
 
-        fn push_arg<P>(tokens: &mut ::std::vec::Vec<PartialToken<P>>, arg: &Arg<P>) {
+        fn push_arg<P>(tokens: &mut ::std::vec::Vec<::mlcg_core::PartialToken<P>>, arg: &Arg<P>) {
             match arg {
-                Arg::Value(value) => tokens.push(PartialToken::value(value.clone())),
-                Arg::Raw(raw) => tokens.push(PartialToken::raw(raw.clone())),
+                Arg::Value(value) => tokens.push(::mlcg_core::PartialToken::value(value.clone())),
+                Arg::Raw(raw) => tokens.push(::mlcg_core::PartialToken::raw(raw.clone())),
             }
         }
 
-        fn push_output_arg<P>(tokens: &mut ::std::vec::Vec<PartialToken<P>>, arg: &OutputArg<P>) {
-            tokens.push(PartialToken::value(arg.0.clone()));
+        fn push_output_arg<P>(tokens: &mut ::std::vec::Vec<::mlcg_core::PartialToken<P>>, arg: &OutputArg<P>) {
+            tokens.push(::mlcg_core::PartialToken::value(arg.0.clone()));
         }
 
-        fn push_label_arg<P>(tokens: &mut ::std::vec::Vec<PartialToken<P>>, arg: &LabelArg<P>) {
-            tokens.push(PartialToken::label(arg.0.clone()));
+        fn push_label_arg<P>(tokens: &mut ::std::vec::Vec<::mlcg_core::PartialToken<P>>, arg: &LabelArg<P>) {
+            tokens.push(::mlcg_core::PartialToken::label(arg.0.clone()));
         }
 
         #(#output_structs)*
@@ -395,10 +393,14 @@ fn generate_output_struct(spec: &InstructionSpec) -> TokenStream {
         .collect();
     let fields: Vec<_> = field_idents
         .iter()
-        .map(|field| quote! { pub #field: Value<P> })
+        .map(|field| quote! { pub #field: ::mlcg_core::Value<P> })
         .collect();
-    let tuple_types = field_idents.iter().map(|_| quote! { Value<P> });
-    let tuple_ref_types = field_idents.iter().map(|_| quote! { &Value<P> });
+    let tuple_types = field_idents
+        .iter()
+        .map(|_| quote! { ::mlcg_core::Value<P> });
+    let tuple_ref_types = field_idents
+        .iter()
+        .map(|_| quote! { &::mlcg_core::Value<P> });
     let tuple_fields = field_idents.iter();
     let tuple_ref_fields = field_idents.iter();
     let constructor_params = field_idents
@@ -502,7 +504,7 @@ fn generate_instruction_struct(spec: &InstructionSpec) -> TokenStream {
                     quote! { push_arg(&mut tokens, &self.#field); }
                 }
             } else {
-                quote! { tokens.push(PartialToken::raw(#token)); }
+                quote! { tokens.push(::mlcg_core::PartialToken::raw(#token)); }
             }
         })
         .collect();
@@ -520,18 +522,18 @@ fn generate_instruction_struct(spec: &InstructionSpec) -> TokenStream {
             }
         }
 
-        impl<P> Instruction<P> for #struct_name<P>
+        impl<P> ::mlcg_core::Instruction<P> for #struct_name<P>
         where
             P: ::std::marker::Send + ::std::marker::Sync + 'static,
         {
             fn lower(
                 &self,
-                _ctx: &mut LowerContext<P>,
-                out: &mut PartialProgram<P>,
-            ) -> ::std::result::Result<(), mlcg_core::LowerError> {
+                _ctx: &mut ::mlcg_core::LowerContext<P>,
+                out: &mut ::mlcg_core::PartialProgram<P>,
+            ) -> ::std::result::Result<(), ::mlcg_core::LowerError> {
                 let mut tokens = ::std::vec::Vec::new();
                 #(#lower_steps)*
-                out.push_line(PartialLine::new(tokens));
+                out.push_line(::mlcg_core::PartialLine::new(tokens));
                 ::std::result::Result::Ok(())
             }
         }
@@ -578,7 +580,7 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
             }
 
             #[allow(clippy::too_many_arguments, non_snake_case)]
-            impl<P> #trait_name<P> for Processor<P>
+            impl<P> #trait_name<P> for ::mlcg_core::Processor<P>
             where
                 P: ::std::marker::Send + ::std::marker::Sync + 'static,
             {
@@ -614,7 +616,7 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
             quote! {
                 #[allow(clippy::too_many_arguments, non_snake_case)]
                 pub trait #trait_name<P> {
-                    fn #method<#(#auto_generics,)*>(&self, #(#auto_params_sig,)*) -> Value<P>
+                    fn #method<#(#auto_generics,)*>(&self, #(#auto_params_sig,)*) -> ::mlcg_core::Value<P>
                     where
                         #(#auto_where,)*;
 
@@ -624,11 +626,11 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
                 }
 
                 #[allow(clippy::too_many_arguments, non_snake_case)]
-                impl<P> #trait_name<P> for Processor<P>
+                impl<P> #trait_name<P> for ::mlcg_core::Processor<P>
                 where
                     P: ::std::marker::Send + ::std::marker::Sync + 'static,
                 {
-                    fn #method<#(#auto_generics,)*>(&self, #(#auto_params_sig,)*) -> Value<P>
+                    fn #method<#(#auto_generics,)*>(&self, #(#auto_params_sig,)*) -> ::mlcg_core::Value<P>
                     where
                         #(#auto_where,)*
                     {
@@ -723,7 +725,7 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
                 }
 
                 #[allow(clippy::too_many_arguments, non_snake_case)]
-                impl<P> #trait_name<P> for Processor<P>
+                impl<P> #trait_name<P> for ::mlcg_core::Processor<P>
                 where
                     P: ::std::marker::Send + ::std::marker::Sync + 'static,
                 {
@@ -820,7 +822,7 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
         quote! {
             #[allow(clippy::too_many_arguments, non_snake_case)]
             pub trait #trait_name<P> {
-                fn #method<#(#input_generics,)*>(&self, #(#input_params_sig,)*) -> Value<P>
+                fn #method<#(#input_generics,)*>(&self, #(#input_params_sig,)*) -> ::mlcg_core::Value<P>
                 where
                     #(#input_where,)*;
 
@@ -830,11 +832,11 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
             }
 
             #[allow(clippy::too_many_arguments, non_snake_case)]
-            impl<P, T> #trait_name<P> for Value<P, T>
+            impl<P, T> #trait_name<P> for ::mlcg_core::Value<P, T>
             where
                 P: ::std::marker::Send + ::std::marker::Sync + 'static,
             {
-                fn #method<#(#input_generics,)*>(&self, #(#input_params_sig,)*) -> Value<P>
+                fn #method<#(#input_generics,)*>(&self, #(#input_params_sig,)*) -> ::mlcg_core::Value<P>
                 where
                     #(#input_where,)*
                 {
@@ -865,7 +867,7 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
             }
 
             #[allow(clippy::too_many_arguments)]
-            impl<P, T> #trait_name<P> for Value<P, T>
+            impl<P, T> #trait_name<P> for ::mlcg_core::Value<P, T>
             where
                 P: ::std::marker::Send + ::std::marker::Sync + 'static,
             {
@@ -937,7 +939,7 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
             }
 
             #[allow(clippy::too_many_arguments, non_snake_case)]
-            impl<P, T> #trait_name<P> for Value<P, T>
+            impl<P, T> #trait_name<P> for ::mlcg_core::Value<P, T>
             where
                 P: ::std::marker::Send + ::std::marker::Sync + 'static,
             {

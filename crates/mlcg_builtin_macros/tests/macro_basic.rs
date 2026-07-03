@@ -299,12 +299,46 @@ outputs = []
     )
     .expect("write trybuild std result name manifest");
 
+    let core_type_name_manifest = r#"
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "value"
+rust_name = "value"
+emit = ["value"]
+receiver = ""
+inputs = []
+outputs = []
+
+[[instructions]]
+family = "fixture"
+variant = "processor"
+rust_name = "processor"
+emit = ["processor"]
+receiver = ""
+inputs = []
+outputs = []
+"#;
+    let core_type_name_manifest_path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/core_type_name_manifest.toml");
+    fs::write(&core_type_name_manifest_path, core_type_name_manifest)
+        .expect("write core type name manifest");
+    let trybuild_core_type_name_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../target/tests/trybuild/mlcg_builtin_macros/tests/core_type_name_manifest.toml");
+    fs::write(
+        &trybuild_core_type_name_manifest_path,
+        core_type_name_manifest,
+    )
+    .expect("write trybuild core type name manifest");
+
     let t = trybuild::TestCases::new();
     t.pass("tests/ui/pass_macro_basic.rs");
     t.pass("tests/ui/pass_std_trait_name.rs");
     t.pass("tests/ui/pass_std_convert_trait_names.rs");
     t.pass("tests/ui/pass_std_collection_type_names.rs");
     t.pass("tests/ui/pass_std_result_names.rs");
+    t.pass("tests/ui/pass_core_type_names.rs");
     t.compile_fail("tests/ui/fail_method_collision.rs");
     t.compile_fail("tests/ui/fail_missing_manifest.rs");
     t.compile_fail("tests/ui/fail_invalid_manifest.rs");
