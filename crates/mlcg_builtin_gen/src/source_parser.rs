@@ -102,3 +102,25 @@ fn contains_enum_variant(source: &str, variant: &str) -> bool {
 fn strings<const N: usize>(items: [&str; N]) -> Vec<String> {
     items.into_iter().map(ToString::to_string).collect()
 }
+
+use crate::error::ReadSourceSnafu;
+use snafu::ResultExt;
+use std::path::Path;
+
+pub fn parse_cached_mindustry(version: &str, cache_path: &Path) -> Result<Manifest, GenerateError> {
+    let statements_path = cache_path.join("core/src/mindustry/logic/LStatements.java");
+    let logic_op_path = cache_path.join("core/src/mindustry/logic/LogicOp.java");
+    let condition_op_path = cache_path.join("core/src/mindustry/logic/ConditionOp.java");
+
+    let statements = std::fs::read_to_string(&statements_path).context(ReadSourceSnafu {
+        path: statements_path,
+    })?;
+    let logic_op = std::fs::read_to_string(&logic_op_path).context(ReadSourceSnafu {
+        path: logic_op_path,
+    })?;
+    let condition_op = std::fs::read_to_string(&condition_op_path).context(ReadSourceSnafu {
+        path: condition_op_path,
+    })?;
+
+    parse_representative_manifest(version, &statements, &logic_op, &condition_op)
+}
