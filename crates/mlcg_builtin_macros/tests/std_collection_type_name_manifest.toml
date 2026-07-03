@@ -1,0 +1,20 @@
+
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "string"
+rust_name = "string"
+emit = ["string", "$input"]
+receiver = ""
+inputs = ["input"]
+outputs = []
+
+[[instructions]]
+family = "fixture"
+variant = "vec"
+rust_name = "vec"
+emit = ["vec", "$input"]
+receiver = ""
+inputs = ["input"]
+outputs = []

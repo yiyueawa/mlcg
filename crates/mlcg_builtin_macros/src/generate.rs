@@ -56,7 +56,7 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
         #[derive(Clone)]
         pub enum Arg<P> {
             Value(Value<P>),
-            Raw(String),
+            Raw(::std::string::String),
         }
 
         pub struct OutputArg<P>(Value<P>);
@@ -79,11 +79,11 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
             }
         }
 
-        impl<P, T> From<Value<P, T>> for Arg<P> {
+        impl<P, T> ::std::convert::From<Value<P, T>> for Arg<P> {
             fn from(value: Value<P, T>) -> Self { Self::Value(value.erase_type()) }
         }
 
-        impl<P, T> From<&Value<P, T>> for Arg<P> {
+        impl<P, T> ::std::convert::From<&Value<P, T>> for Arg<P> {
             fn from(value: &Value<P, T>) -> Self { Self::Value(value.erase_type()) }
         }
 
@@ -93,56 +93,56 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
             }
         }
 
-        impl<P, T> From<Value<P, T>> for OutputArg<P> {
+        impl<P, T> ::std::convert::From<Value<P, T>> for OutputArg<P> {
             fn from(value: Value<P, T>) -> Self { Self(value.erase_type()) }
         }
 
-        impl<P, T> From<&Value<P, T>> for OutputArg<P> {
+        impl<P, T> ::std::convert::From<&Value<P, T>> for OutputArg<P> {
             fn from(value: &Value<P, T>) -> Self { Self(value.erase_type()) }
         }
 
-        impl<P> From<i32> for Arg<P> {
+        impl<P> ::std::convert::From<i32> for Arg<P> {
             fn from(value: i32) -> Self { Self::Raw(value.to_string()) }
         }
 
-        impl<P> From<i64> for Arg<P> {
+        impl<P> ::std::convert::From<i64> for Arg<P> {
             fn from(value: i64) -> Self { Self::Raw(value.to_string()) }
         }
 
-        impl<P> From<isize> for Arg<P> {
+        impl<P> ::std::convert::From<isize> for Arg<P> {
             fn from(value: isize) -> Self { Self::Raw(value.to_string()) }
         }
 
-        impl<P> From<u32> for Arg<P> {
+        impl<P> ::std::convert::From<u32> for Arg<P> {
             fn from(value: u32) -> Self { Self::Raw(value.to_string()) }
         }
 
-        impl<P> From<u64> for Arg<P> {
+        impl<P> ::std::convert::From<u64> for Arg<P> {
             fn from(value: u64) -> Self { Self::Raw(value.to_string()) }
         }
 
-        impl<P> From<usize> for Arg<P> {
+        impl<P> ::std::convert::From<usize> for Arg<P> {
             fn from(value: usize) -> Self { Self::Raw(value.to_string()) }
         }
 
-        impl<P> From<bool> for Arg<P> {
+        impl<P> ::std::convert::From<bool> for Arg<P> {
             fn from(value: bool) -> Self { Self::Raw(value.to_string()) }
         }
 
-        impl<P> From<f64> for Arg<P> {
+        impl<P> ::std::convert::From<f64> for Arg<P> {
             fn from(value: f64) -> Self { Self::Raw(value.to_string()) }
         }
 
-        impl<P> From<f32> for Arg<P> {
+        impl<P> ::std::convert::From<f32> for Arg<P> {
             fn from(value: f32) -> Self { Self::Raw(value.to_string()) }
         }
 
-        impl<P> From<&str> for Arg<P> {
+        impl<P> ::std::convert::From<&str> for Arg<P> {
             fn from(value: &str) -> Self { Self::Raw(value.to_string()) }
         }
 
-        impl<P> From<String> for Arg<P> {
-            fn from(value: String) -> Self { Self::Raw(value) }
+        impl<P> ::std::convert::From<::std::string::String> for Arg<P> {
+            fn from(value: ::std::string::String) -> Self { Self::Raw(value) }
         }
 
         impl<P> ::std::fmt::Debug for LabelArg<P> {
@@ -151,26 +151,26 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
             }
         }
 
-        impl<P> From<Label<P>> for LabelArg<P> {
+        impl<P> ::std::convert::From<Label<P>> for LabelArg<P> {
             fn from(value: Label<P>) -> Self { Self(value) }
         }
 
-        impl<P> From<&Label<P>> for LabelArg<P> {
+        impl<P> ::std::convert::From<&Label<P>> for LabelArg<P> {
             fn from(value: &Label<P>) -> Self { Self(value.clone()) }
         }
 
-        fn push_arg<P>(tokens: &mut Vec<PartialToken<P>>, arg: &Arg<P>) {
+        fn push_arg<P>(tokens: &mut ::std::vec::Vec<PartialToken<P>>, arg: &Arg<P>) {
             match arg {
                 Arg::Value(value) => tokens.push(PartialToken::value(value.clone())),
                 Arg::Raw(raw) => tokens.push(PartialToken::raw(raw.clone())),
             }
         }
 
-        fn push_output_arg<P>(tokens: &mut Vec<PartialToken<P>>, arg: &OutputArg<P>) {
+        fn push_output_arg<P>(tokens: &mut ::std::vec::Vec<PartialToken<P>>, arg: &OutputArg<P>) {
             tokens.push(PartialToken::value(arg.0.clone()));
         }
 
-        fn push_label_arg<P>(tokens: &mut Vec<PartialToken<P>>, arg: &LabelArg<P>) {
+        fn push_label_arg<P>(tokens: &mut ::std::vec::Vec<PartialToken<P>>, arg: &LabelArg<P>) {
             tokens.push(PartialToken::label(arg.0.clone()));
         }
 
@@ -407,7 +407,7 @@ fn generate_output_struct(spec: &InstructionSpec) -> TokenStream {
         .map(|(field, generic)| quote! { #field: #generic });
     let constructor_where: Vec<_> = field_generics
         .iter()
-        .map(|generic| quote! { #generic: Into<OutputArg<P>> })
+        .map(|generic| quote! { #generic: ::std::convert::Into<OutputArg<P>> })
         .collect();
     let constructor_fields = field_idents
         .iter()
@@ -456,7 +456,7 @@ fn generate_output_struct(spec: &InstructionSpec) -> TokenStream {
             }
         }
 
-        impl<P, #(#field_generics,)*> From<(#(#from_tuple_types,)*)> for #output_struct<P>
+        impl<P, #(#field_generics,)*> ::std::convert::From<(#(#from_tuple_types,)*)> for #output_struct<P>
         where
             #(#constructor_where,)*
         {
@@ -465,7 +465,7 @@ fn generate_output_struct(spec: &InstructionSpec) -> TokenStream {
             }
         }
 
-        impl<P> From<&#output_struct<P>> for #output_struct<P> {
+        impl<P> ::std::convert::From<&#output_struct<P>> for #output_struct<P> {
             fn from(value: &#output_struct<P>) -> Self {
                 value.clone()
             }
@@ -529,7 +529,7 @@ fn generate_instruction_struct(spec: &InstructionSpec) -> TokenStream {
                 _ctx: &mut LowerContext<P>,
                 out: &mut PartialProgram<P>,
             ) -> Result<(), mlcg_core::LowerError> {
-                let mut tokens = Vec::new();
+                let mut tokens = ::std::vec::Vec::new();
                 #(#lower_steps)*
                 out.push_line(PartialLine::new(tokens));
                 Ok(())
@@ -718,7 +718,7 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
 
                     fn #into_method<#outputs_arg, #(#explicit_generics,)*>(&self, #outputs_param: #outputs_arg, #(#explicit_params_sig,)*)
                     where
-                        #outputs_arg: Into<#output_struct<P>>,
+                        #outputs_arg: ::std::convert::Into<#output_struct<P>>,
                         #(#explicit_where,)*;
                 }
 
@@ -738,7 +738,7 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
 
                     fn #into_method<#outputs_arg, #(#explicit_generics,)*>(&self, #outputs_param: #outputs_arg, #(#explicit_params_sig,)*)
                     where
-                        #outputs_arg: Into<#output_struct<P>>,
+                        #outputs_arg: ::std::convert::Into<#output_struct<P>>,
                         #(#explicit_where,)*
                     {
                         let #outputs_param = #outputs_param.into();
@@ -932,7 +932,7 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
 
                 fn #into_method<#outputs_arg, #(#explicit_value_generics,)*>(&self, #outputs_param: #outputs_arg, #(#explicit_value_params_sig,)*)
                 where
-                    #outputs_arg: Into<#output_struct<P>>,
+                    #outputs_arg: ::std::convert::Into<#output_struct<P>>,
                     #(#explicit_value_where,)*;
             }
 
@@ -957,7 +957,7 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
 
                 fn #into_method<#outputs_arg, #(#explicit_value_generics,)*>(&self, #outputs_param: #outputs_arg, #(#explicit_value_params_sig,)*)
                 where
-                    #outputs_arg: Into<#output_struct<P>>,
+                    #outputs_arg: ::std::convert::Into<#output_struct<P>>,
                     #(#explicit_value_where,)*
                 {
                     let #outputs_param = #outputs_param.into();
@@ -970,11 +970,11 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
 
 fn param_where(spec: &InstructionSpec, name: &str, generic: &Ident) -> TokenStream {
     if spec.outputs.iter().any(|output| output == name) {
-        quote! { #generic: Into<OutputArg<P>> }
+        quote! { #generic: ::std::convert::Into<OutputArg<P>> }
     } else if spec.labels.iter().any(|label| label == name) {
-        quote! { #generic: Into<LabelArg<P>> }
+        quote! { #generic: ::std::convert::Into<LabelArg<P>> }
     } else {
-        quote! { #generic: Into<Arg<P>> }
+        quote! { #generic: ::std::convert::Into<Arg<P>> }
     }
 }
 

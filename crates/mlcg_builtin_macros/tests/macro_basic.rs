@@ -189,9 +189,87 @@ outputs = ["outA", "outB"]
     )
     .expect("write trybuild std trait name manifest");
 
+    let std_convert_trait_name_manifest = r#"
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "from"
+rust_name = "from"
+emit = ["from", "$out", "$input"]
+receiver = ""
+inputs = ["input"]
+outputs = ["out"]
+
+[[instructions]]
+family = "fixture"
+variant = "into"
+rust_name = "into"
+emit = ["into", "$out", "$input"]
+receiver = ""
+inputs = ["input"]
+outputs = ["out"]
+"#;
+    let std_convert_trait_name_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/std_convert_trait_name_manifest.toml");
+    fs::write(
+        &std_convert_trait_name_manifest_path,
+        std_convert_trait_name_manifest,
+    )
+    .expect("write std convert trait name manifest");
+    let trybuild_std_convert_trait_name_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join(
+            "../../target/tests/trybuild/mlcg_builtin_macros/tests/std_convert_trait_name_manifest.toml",
+        );
+    fs::write(
+        &trybuild_std_convert_trait_name_manifest_path,
+        std_convert_trait_name_manifest,
+    )
+    .expect("write trybuild std convert trait name manifest");
+
+    let std_collection_type_name_manifest = r#"
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "string"
+rust_name = "string"
+emit = ["string", "$input"]
+receiver = ""
+inputs = ["input"]
+outputs = []
+
+[[instructions]]
+family = "fixture"
+variant = "vec"
+rust_name = "vec"
+emit = ["vec", "$input"]
+receiver = ""
+inputs = ["input"]
+outputs = []
+"#;
+    let std_collection_type_name_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/std_collection_type_name_manifest.toml");
+    fs::write(
+        &std_collection_type_name_manifest_path,
+        std_collection_type_name_manifest,
+    )
+    .expect("write std collection type name manifest");
+    let trybuild_std_collection_type_name_manifest_path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(
+            "../../target/tests/trybuild/mlcg_builtin_macros/tests/std_collection_type_name_manifest.toml",
+        );
+    fs::write(
+        &trybuild_std_collection_type_name_manifest_path,
+        std_collection_type_name_manifest,
+    )
+    .expect("write trybuild std collection type name manifest");
+
     let t = trybuild::TestCases::new();
     t.pass("tests/ui/pass_macro_basic.rs");
     t.pass("tests/ui/pass_std_trait_name.rs");
+    t.pass("tests/ui/pass_std_convert_trait_names.rs");
+    t.pass("tests/ui/pass_std_collection_type_names.rs");
     t.compile_fail("tests/ui/fail_method_collision.rs");
     t.compile_fail("tests/ui/fail_missing_manifest.rs");
     t.compile_fail("tests/ui/fail_invalid_manifest.rs");
