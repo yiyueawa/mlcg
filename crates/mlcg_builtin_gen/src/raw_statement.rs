@@ -1,15 +1,15 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use snafu::OptionExt;
 
 use crate::error::{GenerateError, RequiredItemMissingSnafu};
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct RawStatementManifest {
     pub version: String,
     pub statements: Vec<RawStatement>,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct RawStatement {
     pub name: String,
     pub class: String,
@@ -18,7 +18,7 @@ pub struct RawStatement {
     pub fields: Vec<RawField>,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct RawField {
     pub ty: String,
     pub name: String,

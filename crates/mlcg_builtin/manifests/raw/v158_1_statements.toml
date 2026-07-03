@@ -1,0 +1,1278 @@
+version = "158.1"
+
+[[statements]]
+name = "noop"
+class = "InvalidStatement"
+instruction = "NoopI"
+fields = []
+
+[[statements]]
+name = "read"
+class = "ReadStatement"
+instruction = "ReadI"
+category = "io"
+
+[[statements.fields]]
+ty = "String"
+name = "output"
+default = "result"
+
+[[statements.fields]]
+ty = "String"
+name = "target"
+default = "cell1"
+
+[[statements.fields]]
+ty = "String"
+name = "address"
+default = "0"
+
+[[statements]]
+name = "write"
+class = "WriteStatement"
+instruction = "WriteI"
+category = "io"
+
+[[statements.fields]]
+ty = "String"
+name = "input"
+default = "result"
+
+[[statements.fields]]
+ty = "String"
+name = "target"
+default = "cell1"
+
+[[statements.fields]]
+ty = "String"
+name = "address"
+default = "0"
+
+[[statements]]
+name = "draw"
+class = "DrawStatement"
+instruction = "DrawI"
+category = "io"
+
+[[statements.fields]]
+ty = "GraphicsType"
+name = "type"
+default = "GraphicsType.clear"
+
+[[statements.fields]]
+ty = "String"
+name = "x"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "y"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "p1"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "p2"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "p3"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "p4"
+default = "0"
+
+[[statements]]
+name = "print"
+class = "PrintStatement"
+instruction = "PrintI"
+category = "io"
+
+[[statements.fields]]
+ty = "String"
+name = "value"
+default = '\"frog\"'
+
+[[statements]]
+name = "printchar"
+class = "PrintCharStatement"
+instruction = "PrintCharI"
+category = "io"
+
+[[statements.fields]]
+ty = "String"
+name = "value"
+default = "65"
+
+[[statements]]
+name = "format"
+class = "FormatStatement"
+instruction = "FormatI"
+category = "io"
+
+[[statements.fields]]
+ty = "String"
+name = "value"
+default = '\"frog\"'
+
+[[statements]]
+name = "drawflush"
+class = "DrawFlushStatement"
+instruction = "DrawFlushI"
+category = "block"
+
+[[statements.fields]]
+ty = "String"
+name = "target"
+default = "display1"
+
+[[statements]]
+name = "printflush"
+class = "PrintFlushStatement"
+instruction = "PrintFlushI"
+category = "block"
+
+[[statements.fields]]
+ty = "String"
+name = "target"
+default = "message1"
+
+[[statements]]
+name = "getlink"
+class = "GetLinkStatement"
+instruction = "GetLinkI"
+category = "block"
+
+[[statements.fields]]
+ty = "String"
+name = "output"
+default = "result"
+
+[[statements.fields]]
+ty = "String"
+name = "address"
+default = "0"
+
+[[statements]]
+name = "control"
+class = "ControlStatement"
+instruction = "ControlI"
+category = "block"
+
+[[statements.fields]]
+ty = "LAccess"
+name = "type"
+default = "LAccess.enabled"
+
+[[statements.fields]]
+ty = "String"
+name = "target"
+default = "block1"
+
+[[statements.fields]]
+ty = "String"
+name = "p1"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "p2"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "p3"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "p4"
+default = "0"
+
+[[statements]]
+name = "radar"
+class = "RadarStatement"
+instruction = "RadarI"
+category = "block"
+
+[[statements.fields]]
+ty = "RadarTarget"
+name = "target1"
+default = "RadarTarget.enemy"
+
+[[statements.fields]]
+ty = "RadarTarget"
+name = "target2"
+default = "RadarTarget.any"
+
+[[statements.fields]]
+ty = "RadarTarget"
+name = "target3"
+default = "RadarTarget.any"
+
+[[statements.fields]]
+ty = "RadarSort"
+name = "sort"
+default = "RadarSort.distance"
+
+[[statements.fields]]
+ty = "String"
+name = "radar"
+default = "turret1"
+
+[[statements.fields]]
+ty = "String"
+name = "sortOrder"
+default = "1"
+
+[[statements.fields]]
+ty = "String"
+name = "output"
+default = "result"
+
+[[statements]]
+name = "sensor"
+class = "SensorStatement"
+instruction = "SenseI"
+category = "block"
+
+[[statements.fields]]
+ty = "String"
+name = "to"
+default = "result"
+
+[[statements.fields]]
+ty = "String"
+name = "from"
+default = "block1"
+
+[[statements.fields]]
+ty = "String"
+name = "type"
+default = "@copper"
+
+[[statements]]
+name = "set"
+class = "SetStatement"
+instruction = "SetI"
+category = "operation"
+
+[[statements.fields]]
+ty = "String"
+name = "to"
+default = "result"
+
+[[statements.fields]]
+ty = "String"
+name = "from"
+default = "0"
+
+[[statements]]
+name = "op"
+class = "OperationStatement"
+instruction = "OpI"
+category = "operation"
+
+[[statements.fields]]
+ty = "LogicOp"
+name = "op"
+default = "LogicOp.add"
+
+[[statements.fields]]
+ty = "String"
+name = "dest"
+default = "result"
+
+[[statements.fields]]
+ty = "String"
+name = "a"
+default = "a"
+
+[[statements.fields]]
+ty = "String"
+name = "b"
+default = "b"
+
+[[statements]]
+name = "select"
+class = "SelectStatement"
+instruction = "SelectI"
+category = "operation"
+
+[[statements.fields]]
+ty = "String"
+name = "result"
+default = "result"
+
+[[statements.fields]]
+ty = "ConditionOp"
+name = "op"
+default = "ConditionOp.notEqual"
+
+[[statements.fields]]
+ty = "String"
+name = "comp0"
+default = "x"
+
+[[statements.fields]]
+ty = "String"
+name = "comp1"
+default = "false"
+
+[[statements.fields]]
+ty = "String"
+name = "a"
+default = "a"
+
+[[statements.fields]]
+ty = "String"
+name = "b"
+default = "b"
+
+[[statements]]
+name = "wait"
+class = "WaitStatement"
+instruction = "WaitI"
+category = "control"
+
+[[statements.fields]]
+ty = "String"
+name = "value"
+default = "0.5"
+
+[[statements]]
+name = "stop"
+class = "StopStatement"
+instruction = "StopI"
+category = "control"
+fields = []
+
+[[statements]]
+name = "lookup"
+class = "LookupStatement"
+instruction = "LookupI"
+category = "operation"
+
+[[statements.fields]]
+ty = "ContentType"
+name = "type"
+default = "ContentType.item"
+
+[[statements.fields]]
+ty = "String"
+name = "result"
+default = "result"
+
+[[statements.fields]]
+ty = "String"
+name = "id"
+default = "0"
+
+[[statements]]
+name = "packcolor"
+class = "PackColorStatement"
+instruction = "PackColorI"
+category = "operation"
+
+[[statements.fields]]
+ty = "String"
+name = "result"
+default = "result"
+
+[[statements.fields]]
+ty = "String"
+name = "r"
+default = "1"
+
+[[statements.fields]]
+ty = "String"
+name = "g"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "b"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "a"
+default = "1"
+
+[[statements]]
+name = "unpackcolor"
+class = "UnpackColorStatement"
+instruction = "UnpackColorI"
+category = "operation"
+
+[[statements.fields]]
+ty = "String"
+name = "r"
+default = "r"
+
+[[statements.fields]]
+ty = "String"
+name = "g"
+default = "g"
+
+[[statements.fields]]
+ty = "String"
+name = "b"
+default = "b"
+
+[[statements.fields]]
+ty = "String"
+name = "a"
+default = "a"
+
+[[statements.fields]]
+ty = "String"
+name = "value"
+default = "color"
+
+[[statements]]
+name = "end"
+class = "EndStatement"
+instruction = "EndI"
+category = "control"
+fields = []
+
+[[statements]]
+name = "jump"
+class = "JumpStatement"
+instruction = "JumpI"
+category = "control"
+
+[[statements.fields]]
+ty = "int"
+name = "destIndex"
+
+[[statements.fields]]
+ty = "ConditionOp"
+name = "op"
+default = "ConditionOp.notEqual"
+
+[[statements.fields]]
+ty = "String"
+name = "value"
+default = "x"
+
+[[statements.fields]]
+ty = "String"
+name = "compare"
+default = "false"
+
+[[statements]]
+name = "ubind"
+class = "UnitBindStatement"
+instruction = "UnitBindI"
+category = "unit"
+
+[[statements.fields]]
+ty = "String"
+name = "type"
+default = "@poly"
+
+[[statements]]
+name = "ucontrol"
+class = "UnitControlStatement"
+instruction = "UnitControlI"
+category = "unit"
+
+[[statements.fields]]
+ty = "LUnitControl"
+name = "type"
+default = "LUnitControl.move"
+
+[[statements.fields]]
+ty = "String"
+name = "p1"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "p2"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "p3"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "p4"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "p5"
+default = "0"
+
+[[statements]]
+name = "uradar"
+class = "UnitRadarStatement"
+instruction = "RadarI"
+category = "unit"
+fields = []
+
+[[statements]]
+name = "ulocate"
+class = "UnitLocateStatement"
+instruction = "UnitLocateI"
+category = "unit"
+
+[[statements.fields]]
+ty = "LLocate"
+name = "locate"
+default = "LLocate.building"
+
+[[statements.fields]]
+ty = "BlockFlag"
+name = "flag"
+default = "BlockFlag.core"
+
+[[statements.fields]]
+ty = "String"
+name = "enemy"
+default = "true"
+
+[[statements.fields]]
+ty = "String"
+name = "ore"
+default = "@copper"
+
+[[statements.fields]]
+ty = "String"
+name = "outX"
+default = "outx"
+
+[[statements.fields]]
+ty = "String"
+name = "outY"
+default = "outy"
+
+[[statements.fields]]
+ty = "String"
+name = "outFound"
+default = "found"
+
+[[statements.fields]]
+ty = "String"
+name = "outBuild"
+default = "building"
+
+[[statements]]
+name = "query"
+class = "QueryStatement"
+instruction = "QueryI"
+category = "world"
+
+[[statements.fields]]
+ty = "QueryShape"
+name = "shape"
+default = "QueryShape.circle"
+
+[[statements.fields]]
+ty = "QueryType"
+name = "type"
+default = "QueryType.unit"
+
+[[statements.fields]]
+ty = "String"
+name = "team"
+default = "null"
+
+[[statements.fields]]
+ty = "String"
+name = "x"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "y"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "w"
+default = "10"
+
+[[statements.fields]]
+ty = "String"
+name = "h"
+default = "10"
+
+[[statements]]
+name = "getblock"
+class = "GetBlockStatement"
+instruction = "GetBlockI"
+category = "world"
+
+[[statements.fields]]
+ty = "TileLayer"
+name = "layer"
+default = "TileLayer.block"
+
+[[statements.fields]]
+ty = "String"
+name = "result"
+default = "result"
+
+[[statements.fields]]
+ty = "String"
+name = "x"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "y"
+default = "0"
+
+[[statements]]
+name = "setblock"
+class = "SetBlockStatement"
+instruction = "SetBlockI"
+category = "world"
+
+[[statements.fields]]
+ty = "TileLayer"
+name = "layer"
+default = "TileLayer.block"
+
+[[statements.fields]]
+ty = "String"
+name = "block"
+default = "@air"
+
+[[statements.fields]]
+ty = "String"
+name = "x"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "y"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "team"
+default = "@derelict"
+
+[[statements.fields]]
+ty = "String"
+name = "rotation"
+default = "0"
+
+[[statements]]
+name = "spawn"
+class = "SpawnUnitStatement"
+instruction = "SpawnUnitI"
+category = "world"
+
+[[statements.fields]]
+ty = "String"
+name = "type"
+default = "@dagger"
+
+[[statements.fields]]
+ty = "String"
+name = "x"
+default = "10"
+
+[[statements.fields]]
+ty = "String"
+name = "y"
+default = "10"
+
+[[statements.fields]]
+ty = "String"
+name = "rotation"
+default = "90"
+
+[[statements.fields]]
+ty = "String"
+name = "team"
+default = "@sharded"
+
+[[statements.fields]]
+ty = "String"
+name = "result"
+default = "result"
+
+[[statements]]
+name = "bullet"
+class = "SpawnBulletStatement"
+instruction = "SpawnBulletI"
+category = "world"
+
+[[statements.fields]]
+ty = "String"
+name = "result"
+default = "result"
+
+[[statements.fields]]
+ty = "String"
+name = "from"
+default = "@dagger"
+
+[[statements.fields]]
+ty = "String"
+name = "index"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "x"
+default = "x"
+
+[[statements.fields]]
+ty = "String"
+name = "y"
+default = "y"
+
+[[statements.fields]]
+ty = "String"
+name = "rotation"
+default = "angle"
+
+[[statements.fields]]
+ty = "String"
+name = "team"
+default = "null"
+
+[[statements.fields]]
+ty = "String"
+name = "owner"
+default = "null"
+
+[[statements.fields]]
+ty = "String"
+name = "damage"
+default = "-1"
+
+[[statements.fields]]
+ty = "String"
+name = "velocityScl"
+default = "1"
+
+[[statements.fields]]
+ty = "String"
+name = "lifeScl"
+default = "1"
+
+[[statements.fields]]
+ty = "String"
+name = "aimX"
+default = "-1"
+
+[[statements.fields]]
+ty = "String"
+name = "aimY"
+default = "-1"
+
+[[statements]]
+name = "status"
+class = "ApplyStatusStatement"
+instruction = "ApplyEffectI"
+category = "world"
+
+[[statements.fields]]
+ty = "boolean"
+name = "clear"
+
+[[statements.fields]]
+ty = "String"
+name = "effect"
+default = "wet"
+
+[[statements.fields]]
+ty = "String"
+name = "unit"
+default = "unit"
+
+[[statements.fields]]
+ty = "String"
+name = "duration"
+default = "10"
+
+[[statements]]
+name = "weathersense"
+class = "WeatherSenseStatement"
+instruction = "SenseWeatherI"
+category = "world"
+
+[[statements.fields]]
+ty = "String"
+name = "to"
+default = "result"
+
+[[statements.fields]]
+ty = "String"
+name = "weather"
+default = "@rain"
+
+[[statements]]
+name = "weatherset"
+class = "WeatherSetStatement"
+instruction = "SetWeatherI"
+category = "world"
+
+[[statements.fields]]
+ty = "String"
+name = "weather"
+default = "@rain"
+
+[[statements.fields]]
+ty = "String"
+name = "state"
+default = "true"
+
+[[statements]]
+name = "spawnwave"
+class = "SpawnWaveStatement"
+instruction = "SpawnWaveI"
+category = "world"
+
+[[statements.fields]]
+ty = "String"
+name = "x"
+default = "10"
+
+[[statements.fields]]
+ty = "String"
+name = "y"
+default = "10"
+
+[[statements.fields]]
+ty = "String"
+name = "natural"
+default = "false"
+
+[[statements]]
+name = "setrule"
+class = "SetRuleStatement"
+instruction = "SetRuleI"
+category = "world"
+
+[[statements.fields]]
+ty = "LogicRule"
+name = "rule"
+default = "LogicRule.waveSpacing"
+
+[[statements.fields]]
+ty = "String"
+name = "value"
+default = "10"
+
+[[statements.fields]]
+ty = "String"
+name = "p1"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "p2"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "p3"
+default = "100"
+
+[[statements.fields]]
+ty = "String"
+name = "p4"
+default = "100"
+
+[[statements]]
+name = "message"
+class = "FlushMessageStatement"
+instruction = "FlushMessageI"
+category = "world"
+
+[[statements.fields]]
+ty = "MessageType"
+name = "type"
+default = "MessageType.announce"
+
+[[statements.fields]]
+ty = "String"
+name = "duration"
+default = "3"
+
+[[statements.fields]]
+ty = "String"
+name = "outSuccess"
+default = "@wait"
+
+[[statements]]
+name = "cutscene"
+class = "CutsceneStatement"
+instruction = "CutsceneI"
+category = "world"
+
+[[statements.fields]]
+ty = "CutsceneAction"
+name = "action"
+default = "CutsceneAction.pan"
+
+[[statements.fields]]
+ty = "String"
+name = "p1"
+default = "100"
+
+[[statements.fields]]
+ty = "String"
+name = "p2"
+default = "100"
+
+[[statements.fields]]
+ty = "String"
+name = "p3"
+default = "0.06"
+
+[[statements.fields]]
+ty = "String"
+name = "p4"
+default = "0"
+
+[[statements]]
+name = "effect"
+class = "EffectStatement"
+instruction = "EffectI"
+category = "world"
+
+[[statements.fields]]
+ty = "String"
+name = "type"
+default = "warn"
+
+[[statements.fields]]
+ty = "String"
+name = "x"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "y"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "sizerot"
+default = "2"
+
+[[statements.fields]]
+ty = "String"
+name = "color"
+default = "%ffaaff"
+
+[[statements.fields]]
+ty = "String"
+name = "data"
+default = ""
+
+[[statements]]
+name = "explosion"
+class = "ExplosionStatement"
+instruction = "ExplosionI"
+category = "world"
+
+[[statements.fields]]
+ty = "String"
+name = "team"
+default = "@crux"
+
+[[statements.fields]]
+ty = "String"
+name = "x"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "y"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "radius"
+default = "5"
+
+[[statements.fields]]
+ty = "String"
+name = "damage"
+default = "50"
+
+[[statements.fields]]
+ty = "String"
+name = "air"
+default = "true"
+
+[[statements.fields]]
+ty = "String"
+name = "ground"
+default = "true"
+
+[[statements.fields]]
+ty = "String"
+name = "pierce"
+default = "false"
+
+[[statements.fields]]
+ty = "String"
+name = "effect"
+default = "true"
+
+[[statements]]
+name = "setrate"
+class = "SetRateStatement"
+instruction = "SetRateI"
+category = "world"
+
+[[statements.fields]]
+ty = "String"
+name = "amount"
+default = "10"
+
+[[statements]]
+name = "fetch"
+class = "FetchStatement"
+instruction = "FetchI"
+category = "world"
+
+[[statements.fields]]
+ty = "FetchType"
+name = "type"
+default = "FetchType.unit"
+
+[[statements.fields]]
+ty = "String"
+name = "result"
+default = "result"
+
+[[statements.fields]]
+ty = "String"
+name = "team"
+default = "@sharded"
+
+[[statements.fields]]
+ty = "String"
+name = "index"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "extra"
+default = "@conveyor"
+
+[[statements]]
+name = "sync"
+class = "SyncStatement"
+instruction = "SyncI"
+category = "world"
+
+[[statements.fields]]
+ty = "String"
+name = "variable"
+default = "var"
+
+[[statements]]
+name = "clientdata"
+class = "ClientDataStatement"
+instruction = "ClientDataI"
+category = "world"
+
+[[statements.fields]]
+ty = "String"
+name = "channel"
+default = '\"frog\"'
+
+[[statements.fields]]
+ty = "String"
+name = "value"
+default = '\"bar\"'
+
+[[statements.fields]]
+ty = "String"
+name = "reliable"
+default = "0"
+
+[[statements]]
+name = "getflag"
+class = "GetFlagStatement"
+instruction = "GetFlagI"
+category = "world"
+
+[[statements.fields]]
+ty = "String"
+name = "result"
+default = "result"
+
+[[statements.fields]]
+ty = "String"
+name = "flag"
+default = '\"flag\"'
+
+[[statements]]
+name = "setflag"
+class = "SetFlagStatement"
+instruction = "SetFlagI"
+category = "world"
+
+[[statements.fields]]
+ty = "String"
+name = "flag"
+default = '\"flag\"'
+
+[[statements.fields]]
+ty = "String"
+name = "value"
+default = "true"
+
+[[statements]]
+name = "setprop"
+class = "SetPropStatement"
+instruction = "SetPropI"
+category = "world"
+
+[[statements.fields]]
+ty = "String"
+name = "type"
+default = "@copper"
+
+[[statements.fields]]
+ty = "String"
+name = "of"
+default = "block1"
+
+[[statements.fields]]
+ty = "String"
+name = "value"
+default = "0"
+
+[[statements]]
+name = "playsound"
+class = "PlaySoundStatement"
+instruction = "PlaySoundI"
+category = "world"
+
+[[statements.fields]]
+ty = "boolean"
+name = "positional"
+
+[[statements.fields]]
+ty = "String"
+name = "id"
+default = "@sfx-shoot"
+
+[[statements.fields]]
+ty = "String"
+name = "volume"
+default = "1"
+
+[[statements.fields]]
+ty = "String"
+name = "pitch"
+default = "1"
+
+[[statements.fields]]
+ty = "String"
+name = "pan"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "x"
+default = "@thisx"
+
+[[statements.fields]]
+ty = "String"
+name = "y"
+default = "@thisy"
+
+[[statements.fields]]
+ty = "String"
+name = "limit"
+default = "true"
+
+[[statements]]
+name = "setmarker"
+class = "SetMarkerStatement"
+instruction = "SetMarkerI"
+category = "world"
+
+[[statements.fields]]
+ty = "LMarkerControl"
+name = "type"
+default = "LMarkerControl.pos"
+
+[[statements.fields]]
+ty = "String"
+name = "id"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "p1"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "p2"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "p3"
+default = "0"
+
+[[statements]]
+name = "makemarker"
+class = "MakeMarkerStatement"
+instruction = "MakeMarkerI"
+category = "world"
+
+[[statements.fields]]
+ty = "String"
+name = "type"
+default = "shape"
+
+[[statements.fields]]
+ty = "String"
+name = "id"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "x"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "y"
+default = "0"
+
+[[statements.fields]]
+ty = "String"
+name = "replace"
+default = "true"
+
+[[statements]]
+name = "localeprint"
+class = "LocalePrintStatement"
+instruction = "LocalePrintI"
+category = "world"
+
+[[statements.fields]]
+ty = "String"
+name = "value"
+default = '\"name\"'

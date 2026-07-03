@@ -1,8 +1,11 @@
 use std::{env, fs, path::PathBuf};
 
 use mlcg_builtin_gen::{
-    cache::ensure_mindustry_cache, fixture_parser::parse_fixture_manifest,
-    raw_statement::scan_raw_statements, source_parser::parse_cached_mindustry,
+    cache::ensure_mindustry_cache,
+    fixture_parser::parse_fixture_manifest,
+    raw_statement::{scan_raw_statements, RawStatementManifest},
+    semantic_manifest::derive_semantic_manifest,
+    source_parser::parse_cached_mindustry,
 };
 
 fn main() {
@@ -41,6 +44,19 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             let manifest = scan_raw_statements(&version, &statements)?;
             fs::write(output, manifest.to_toml()?)?;
         }
+
+        Some("derive-semantic") => {
+            let input = args.next().map(PathBuf::from).ok_or(
+                "usage: mlcg_builtin_gen derive-semantic <raw-input-toml> <semantic-output-toml>",
+            )?;
+            let output = args.next().map(PathBuf::from).ok_or(
+                "usage: mlcg_builtin_gen derive-semantic <raw-input-toml> <semantic-output-toml>",
+            )?;
+            let raw_toml = fs::read_to_string(&input)?;
+            let raw_manifest: RawStatementManifest = toml::from_str(&raw_toml)?;
+            let manifest = derive_semantic_manifest(&raw_manifest);
+            fs::write(output, manifest.to_toml()?)?;
+        }
         Some("fixture") => {
             let version = args
                 .next()
@@ -58,7 +74,10 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             fs::write(&output, manifest)?;
         }
         _ => {
-            return Err("usage: mlcg_builtin_gen <fetch|fixture|scan-statements> ...".into());
+            return Err(
+                "usage: mlcg_builtin_gen <fetch|fixture|scan-statements|derive-semantic> ..."
+                    .into(),
+            );
         }
     }
     Ok(())

@@ -120,6 +120,7 @@ fn generate_instruction_struct(spec: &InstructionSpec) -> TokenStream {
     quote! {
         #[derive(Clone)]
         pub struct #struct_name<P> {
+            _processor: ::std::marker::PhantomData<fn() -> P>,
             #(#field_defs,)*
         }
 
@@ -131,7 +132,7 @@ fn generate_instruction_struct(spec: &InstructionSpec) -> TokenStream {
 
         impl<P> Instruction<P> for #struct_name<P>
         where
-            P: Send + Sync + 'static,
+            P: ::std::marker::Send + ::std::marker::Sync + 'static,
         {
             fn lower(
                 &self,
@@ -196,7 +197,9 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
         let call_args = auto_param_idents.iter();
 
         quote! {
-            pub trait #trait_name<P> {
+            #[allow(clippy::too_many_arguments)]
+            #[allow(clippy::too_many_arguments)]
+        pub trait #trait_name<P> {
                 fn #method<#(#auto_generics,)*>(&self, #(#auto_params_sig,)*) -> Value<P>
                 where
                     #(#auto_where,)*;
@@ -206,9 +209,10 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
                     #(#explicit_where,)*;
             }
 
+            #[allow(clippy::too_many_arguments)]
             impl<P> #trait_name<P> for Processor<P>
             where
-                P: Send + Sync + 'static,
+                P: ::std::marker::Send + ::std::marker::Sync + 'static,
             {
                 fn #method<#(#auto_generics,)*>(&self, #(#auto_params_sig,)*) -> Value<P>
                 where
@@ -223,27 +227,30 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
                 where
                     #(#explicit_where,)*
                 {
-                    self.push(#struct_name { #(#explicit_fields,)* });
+                    self.push(#struct_name { _processor: ::std::marker::PhantomData, #(#explicit_fields,)* });
                 }
             }
         }
     } else if spec.outputs.is_empty() {
         quote! {
-            pub trait #trait_name<P> {
+            #[allow(clippy::too_many_arguments)]
+            #[allow(clippy::too_many_arguments)]
+        pub trait #trait_name<P> {
                 fn #method<#(#explicit_generics,)*>(&self, #(#explicit_params_sig,)*)
                 where
                     #(#explicit_where,)*;
             }
 
+            #[allow(clippy::too_many_arguments)]
             impl<P> #trait_name<P> for Processor<P>
             where
-                P: Send + Sync + 'static,
+                P: ::std::marker::Send + ::std::marker::Sync + 'static,
             {
                 fn #method<#(#explicit_generics,)*>(&self, #(#explicit_params_sig,)*)
                 where
                     #(#explicit_where,)*
                 {
-                    self.push(#struct_name { #(#explicit_fields,)* });
+                    self.push(#struct_name { _processor: ::std::marker::PhantomData, #(#explicit_fields,)* });
                 }
             }
         }
@@ -288,21 +295,23 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
         .collect();
 
     quote! {
+        #[allow(clippy::too_many_arguments)]
         pub trait #trait_name<P> {
             fn #method<#(#input_generics,)*>(&self, #(#input_params_sig,)*)
             where
                 #(#input_where,)*;
         }
 
+        #[allow(clippy::too_many_arguments)]
         impl<P> #trait_name<P> for Value<P>
         where
-            P: Send + Sync + 'static,
+            P: ::std::marker::Send + ::std::marker::Sync + 'static,
         {
             fn #method<#(#input_generics,)*>(&self, #(#input_params_sig,)*)
             where
                 #(#input_where,)*
             {
-                self.handle().push(#struct_name { #(#fields,)* });
+                self.handle().push(#struct_name { _processor: ::std::marker::PhantomData, #(#fields,)* });
             }
         }
     }
