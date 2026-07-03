@@ -61,7 +61,7 @@ impl<P> PartialLine<P> {
 pub enum PartialToken<P> {
     Raw(String),
     Value(ValueId),
-    Label(LabelId),
+    Label(Label<P>),
     #[doc(hidden)]
     Processor(PhantomData<P>),
 }
@@ -76,7 +76,7 @@ impl<P> PartialToken<P> {
     }
 
     pub fn label(label: Label<P>) -> Self {
-        Self::Label(label.id())
+        Self::Label(label)
     }
 }
 

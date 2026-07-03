@@ -186,7 +186,7 @@ fn foreign_processor_label_does_not_alias_local_label_with_same_type() {
         .emit()
         .expect_err("foreign label is not part of local processor state");
 
-    assert!(error.to_string().contains("unplaced label"));
+    assert!(error.to_string().contains("foreign label"));
 }
 
 #[test]

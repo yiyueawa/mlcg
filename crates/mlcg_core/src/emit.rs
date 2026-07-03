@@ -5,6 +5,7 @@ use snafu::OptionExt;
 use crate::{
     error::emit_error,
     lower::{LabelTable, PartialProgram, PartialToken},
+    processor::ProcessorHandle,
     EmitError, ValueId,
 };
 
@@ -39,8 +40,9 @@ impl NameAllocator {
     }
 }
 
-pub(crate) fn emit_partial<P>(
+pub(crate) fn emit_partial<P: 'static>(
     partial: &PartialProgram<P>,
+    handle: &ProcessorHandle<P>,
     labels: &LabelTable,
     value_names: &BTreeMap<ValueId, String>,
 ) -> Result<String, EmitError> {
@@ -62,9 +64,12 @@ pub(crate) fn emit_partial<P>(
                     out.push_str(name);
                 }
                 PartialToken::Label(label) => {
+                    if !label.belongs_to(handle) {
+                        return emit_error::ForeignLabelSnafu { label: label.id() }.fail();
+                    }
                     let line = labels
-                        .get(*label)
-                        .context(emit_error::UnplacedLabelSnafu { label: *label })?;
+                        .get(label.id())
+                        .context(emit_error::UnplacedLabelSnafu { label: label.id() })?;
                     out.push_str(&line.to_string());
                 }
                 PartialToken::Processor(_) => {}

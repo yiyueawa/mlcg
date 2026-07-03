@@ -182,7 +182,7 @@ impl<P: 'static> ProcessorHandle<P> {
             value_names.insert(*id, allocator.name_for(*id, hint.as_deref()));
         }
 
-        emit_partial(&partial, &labels, &value_names)
+        emit_partial(&partial, self, &labels, &value_names)
     }
 }
 
