@@ -1,16 +1,27 @@
 use std::{
+    collections::BTreeMap,
     marker::PhantomData,
     sync::{Arc, Mutex},
 };
 
+use snafu::ResultExt;
+
 use crate::{
+    emit::{emit_partial, NameAllocator},
+    error::emit_error,
+    instruction::ProgramItem,
+    label::Label,
+    lower::{LabelTable, LowerContext, PartialProgram},
     value::{Any, Value},
-    ValueId,
+    EmitError, Instruction, LabelId, ValueId,
 };
 
 #[derive(Debug)]
 pub(crate) struct ProgramState<P> {
     pub(crate) next_value: u64,
+    pub(crate) next_label: u64,
+    pub(crate) values: BTreeMap<ValueId, Option<String>>,
+    pub(crate) items: Vec<ProgramItem<P>>,
     pub(crate) _processor: PhantomData<P>,
 }
 
@@ -32,18 +43,21 @@ pub struct Processor<P> {
     handle: ProcessorHandle<P>,
 }
 
-impl<P> Default for Processor<P> {
+impl<P: 'static> Default for Processor<P> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<P> Processor<P> {
+impl<P: 'static> Processor<P> {
     pub fn new() -> Self {
         Self {
             handle: ProcessorHandle {
                 state: Arc::new(Mutex::new(ProgramState {
                     next_value: 0,
+                    next_label: 0,
+                    values: BTreeMap::new(),
+                    items: Vec::new(),
                     _processor: PhantomData,
                 })),
             },
@@ -62,6 +76,36 @@ impl<P> Processor<P> {
         self.allocate_value(Some(name.into()))
     }
 
+    pub fn label(&self) -> Label<P> {
+        let mut state = self
+            .handle
+            .state
+            .lock()
+            .expect("program state mutex poisoned");
+        let id = LabelId(state.next_label);
+        state.next_label += 1;
+        Label {
+            id,
+            _processor: PhantomData,
+        }
+    }
+
+    pub fn place(&self, label: Label<P>) {
+        self.handle.push_item(ProgramItem::LabelPlacement(label));
+    }
+
+    pub fn push<I>(&self, instruction: I)
+    where
+        I: Instruction<P>,
+    {
+        self.handle
+            .push_item(ProgramItem::Instruction(Box::new(instruction)));
+    }
+
+    pub fn emit(&self) -> Result<String, EmitError> {
+        self.handle.emit()
+    }
+
     fn allocate_value(&self, name_hint: Option<String>) -> Value<P, Any> {
         let mut state = self
             .handle
@@ -70,6 +114,7 @@ impl<P> Processor<P> {
             .expect("program state mutex poisoned");
         let id = ValueId(state.next_value);
         state.next_value += 1;
+        state.values.insert(id, name_hint.clone());
         drop(state);
         Value {
             id,
@@ -77,5 +122,38 @@ impl<P> Processor<P> {
             name_hint,
             _type: PhantomData,
         }
+    }
+}
+
+impl<P: 'static> ProcessorHandle<P> {
+    pub(crate) fn push_item(&self, item: ProgramItem<P>) {
+        let mut state = self.state.lock().expect("program state mutex poisoned");
+        state.items.push(item);
+    }
+
+    pub(crate) fn emit(&self) -> Result<String, EmitError> {
+        let state = self.state.lock().expect("program state mutex poisoned");
+        let mut partial = PartialProgram::default();
+        let mut labels = LabelTable::default();
+        let mut lower_ctx = LowerContext::default();
+
+        for item in &state.items {
+            match item {
+                ProgramItem::Instruction(instruction) => instruction
+                    .lower(&mut lower_ctx, &mut partial)
+                    .context(emit_error::LowerSnafu)?,
+                ProgramItem::LabelPlacement(label) => {
+                    labels.insert(label.id(), partial.line_count())
+                }
+            }
+        }
+
+        let mut allocator = NameAllocator::default();
+        let mut value_names = BTreeMap::new();
+        for (id, hint) in &state.values {
+            value_names.insert(*id, allocator.name_for(*id, hint.as_deref()));
+        }
+
+        emit_partial(&partial, &labels, &value_names)
     }
 }
