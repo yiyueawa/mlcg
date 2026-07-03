@@ -1,0 +1,11 @@
+
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "clone"
+rust_name = "clone"
+emit = ["clone", "$outA", "$outB"]
+receiver = ""
+inputs = []
+outputs = ["outA", "outB"]

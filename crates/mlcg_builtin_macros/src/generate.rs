@@ -61,7 +61,7 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
 
         pub struct OutputArg<P>(Value<P>);
 
-        impl<P> Clone for OutputArg<P> {
+        impl<P> ::std::clone::Clone for OutputArg<P> {
             fn clone(&self) -> Self {
                 Self(self.0.clone())
             }
@@ -421,7 +421,7 @@ fn generate_output_struct(spec: &InstructionSpec) -> TokenStream {
             #(#fields,)*
         }
 
-        impl<P> Clone for #output_struct<P> {
+        impl<P> ::std::clone::Clone for #output_struct<P> {
             fn clone(&self) -> Self {
                 Self {
                     #(#field_idents: self.#field_idents.clone(),)*
@@ -633,7 +633,7 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
                         #(#auto_where,)*
                     {
                         let #output_ident = self.new_value();
-                        self.#into_method(#output_ident.clone(), #(#call_args,)*);
+                        <Self as #trait_name<P>>::#into_method(self, #output_ident.clone(), #(#call_args,)*);
                         #output_ident
                     }
 
@@ -732,7 +732,7 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
                         #(#auto_where,)*
                     {
                         #(#output_allocations)*
-                        self.#into_method(#output_struct { #(#output_call_args,)* }, #(#call_args,)*);
+                        <Self as #trait_name<P>>::#into_method(self, #output_struct { #(#output_call_args,)* }, #(#call_args,)*);
                         #output_struct { #(#output_fields,)* }
                     }
 

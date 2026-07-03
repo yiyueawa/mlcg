@@ -165,8 +165,33 @@ outputs = ["type", "arg_type"]
     )
     .expect("write trybuild output field collision manifest");
 
+    let std_trait_name_manifest = r#"
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "clone"
+rust_name = "clone"
+emit = ["clone", "$outA", "$outB"]
+receiver = ""
+inputs = []
+outputs = ["outA", "outB"]
+"#;
+    let std_trait_name_manifest_path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/std_trait_name_manifest.toml");
+    fs::write(&std_trait_name_manifest_path, std_trait_name_manifest)
+        .expect("write std trait name manifest");
+    let trybuild_std_trait_name_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../target/tests/trybuild/mlcg_builtin_macros/tests/std_trait_name_manifest.toml");
+    fs::write(
+        &trybuild_std_trait_name_manifest_path,
+        std_trait_name_manifest,
+    )
+    .expect("write trybuild std trait name manifest");
+
     let t = trybuild::TestCases::new();
     t.pass("tests/ui/pass_macro_basic.rs");
+    t.pass("tests/ui/pass_std_trait_name.rs");
     t.compile_fail("tests/ui/fail_method_collision.rs");
     t.compile_fail("tests/ui/fail_missing_manifest.rs");
     t.compile_fail("tests/ui/fail_invalid_manifest.rs");
