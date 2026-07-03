@@ -1,0 +1,64 @@
+error[E0277]: the trait bound `OutputArg<P>: From<{integer}>` is not satisfied
+  --> tests/ui/fail_raw_output_argument.rs:14:27
+   |
+14 |     processor.op_add_into(1, 2, 3);
+   |               ----------- ^ unsatisfied trait bound
+   |               |
+   |               required by a bound introduced by this call
+   |
+help: the trait `From<{integer}>` is not implemented for `OutputArg<P>`
+  --> tests/ui/fail_raw_output_argument.rs:4:5
+   |
+ 4 |     mlcg_builtin_macros::include_manifest!("tests/basic_manifest.toml");
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: `OutputArg<P>` implements trait `From<T>`
+  --> tests/ui/fail_raw_output_argument.rs:4:5
+   |
+ 4 |     mlcg_builtin_macros::include_manifest!("tests/basic_manifest.toml");
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |     |
+   |     `From<&mlcg_core::Value<P, T>>`
+   |     `From<mlcg_core::Value<P, T>>`
+   = note: required for `{integer}` to implement `Into<OutputArg<P>>`
+note: required by a bound in `ProcessorOpAddExt::op_add_into`
+  --> tests/ui/fail_raw_output_argument.rs:4:5
+   |
+ 4 |     mlcg_builtin_macros::include_manifest!("tests/basic_manifest.toml");
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `ProcessorOpAddExt::op_add_into`
+   = note: this error originates in the macro `mlcg_builtin_macros::include_manifest` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the trait bound `OutputArg<P>: From<{integer}>` is not satisfied
+  --> tests/ui/fail_raw_output_argument.rs:15:26
+   |
+15 |     processor.multi_into((1, 2), 3);
+   |               ---------- ^^^^^^ unsatisfied trait bound
+   |               |
+   |               required by a bound introduced by this call
+   |
+help: the trait `From<{integer}>` is not implemented for `OutputArg<P>`
+  --> tests/ui/fail_raw_output_argument.rs:4:5
+   |
+ 4 |     mlcg_builtin_macros::include_manifest!("tests/basic_manifest.toml");
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: `OutputArg<P>` implements trait `From<T>`
+  --> tests/ui/fail_raw_output_argument.rs:4:5
+   |
+ 4 |     mlcg_builtin_macros::include_manifest!("tests/basic_manifest.toml");
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |     |
+   |     `From<&mlcg_core::Value<P, T>>`
+   |     `From<mlcg_core::Value<P, T>>`
+   = note: required for `{integer}` to implement `Into<OutputArg<P>>`
+note: required for `MultiOutput<P>` to implement `From<({integer}, {integer})>`
+  --> tests/ui/fail_raw_output_argument.rs:4:5
+   |
+ 4 |     mlcg_builtin_macros::include_manifest!("tests/basic_manifest.toml");
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: 1 redundant requirement hidden
+   = note: required for `({integer}, {integer})` to implement `Into<MultiOutput<P>>`
+note: required by a bound in `ProcessorMultiExt::multi_into`
+  --> tests/ui/fail_raw_output_argument.rs:4:5
+   |
+ 4 |     mlcg_builtin_macros::include_manifest!("tests/basic_manifest.toml");
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `ProcessorMultiExt::multi_into`
+   = note: this error originates in the macro `mlcg_builtin_macros::include_manifest` (in Nightly builds, run with -Z macro-backtrace for more info)

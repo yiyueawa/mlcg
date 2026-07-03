@@ -56,6 +56,14 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
             Raw(String),
         }
 
+        pub struct OutputArg<P>(Value<P>);
+
+        impl<P> Clone for OutputArg<P> {
+            fn clone(&self) -> Self {
+                Self(self.0.clone())
+            }
+        }
+
         #[derive(Clone)]
         pub struct LabelArg<P>(Label<P>);
 
@@ -74,6 +82,20 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
 
         impl<P, T> From<&Value<P, T>> for Arg<P> {
             fn from(value: &Value<P, T>) -> Self { Self::Value(value.erase_type()) }
+        }
+
+        impl<P> ::std::fmt::Debug for OutputArg<P> {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+                f.debug_tuple("Output").field(&self.0).finish()
+            }
+        }
+
+        impl<P, T> From<Value<P, T>> for OutputArg<P> {
+            fn from(value: Value<P, T>) -> Self { Self(value.erase_type()) }
+        }
+
+        impl<P, T> From<&Value<P, T>> for OutputArg<P> {
+            fn from(value: &Value<P, T>) -> Self { Self(value.erase_type()) }
         }
 
         impl<P> From<i32> for Arg<P> {
@@ -141,6 +163,10 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
             }
         }
 
+        fn push_output_arg<P>(tokens: &mut Vec<PartialToken<P>>, arg: &OutputArg<P>) {
+            tokens.push(PartialToken::value(arg.0.clone()));
+        }
+
         fn push_label_arg<P>(tokens: &mut Vec<PartialToken<P>>, arg: &LabelArg<P>) {
             tokens.push(PartialToken::label(arg.0.clone()));
         }
@@ -151,7 +177,7 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
         #(#value_exts)*
 
         pub mod prelude {
-            pub use super::{Arg, LabelArg, #(#prelude_exports,)*};
+            pub use super::{Arg, OutputArg, LabelArg, #(#prelude_exports,)*};
         }
     }
 }
@@ -345,23 +371,74 @@ fn generate_output_struct(spec: &InstructionSpec) -> TokenStream {
         .iter()
         .map(|output| safe_ident(output))
         .collect();
+    let field_generics: Vec<_> = spec
+        .outputs
+        .iter()
+        .map(|output| param_generic_ident(output))
+        .collect();
     let fields: Vec<_> = field_idents
         .iter()
         .map(|field| quote! { pub #field: Value<P> })
         .collect();
     let tuple_types = field_idents.iter().map(|_| quote! { Value<P> });
     let tuple_fields = field_idents.iter();
+    let constructor_params = field_idents
+        .iter()
+        .zip(field_generics.iter())
+        .map(|(field, generic)| quote! { #field: #generic });
+    let constructor_where: Vec<_> = field_generics
+        .iter()
+        .map(|generic| quote! { #generic: Into<OutputArg<P>> })
+        .collect();
+    let constructor_fields = field_idents
+        .iter()
+        .map(|field| quote! { #field: #field.into().0 });
+    let from_tuple_types = field_generics.iter();
+    let from_tuple_fields = (0..field_idents.len()).map(syn::Index::from);
 
     quote! {
         #[allow(non_snake_case)]
-        #[derive(Clone, Debug)]
         pub struct #output_struct<P> {
             #(#fields,)*
         }
 
+        impl<P> Clone for #output_struct<P> {
+            fn clone(&self) -> Self {
+                Self {
+                    #(#field_idents: self.#field_idents.clone(),)*
+                }
+            }
+        }
+
+        impl<P> ::std::fmt::Debug for #output_struct<P> {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+                f.debug_struct(stringify!(#output_struct))
+                    #(.field(stringify!(#field_idents), &self.#field_idents))*
+                    .finish()
+            }
+        }
+
         impl<P> #output_struct<P> {
+            pub fn new<#(#field_generics,)*>(#(#constructor_params,)*) -> Self
+            where
+                #(#constructor_where,)*
+            {
+                Self {
+                    #(#constructor_fields,)*
+                }
+            }
+
             pub fn into_tuple(self) -> (#(#tuple_types,)*) {
                 (#(self.#tuple_fields,)*)
+            }
+        }
+
+        impl<P, #(#field_generics,)*> From<(#(#from_tuple_types,)*)> for #output_struct<P>
+        where
+            #(#constructor_where,)*
+        {
+            fn from(value: (#(#field_generics,)*)) -> Self {
+                Self::new(#(value.#from_tuple_fields,)*)
             }
         }
     }
@@ -373,7 +450,9 @@ fn generate_instruction_struct(spec: &InstructionSpec) -> TokenStream {
     let field_defs: Vec<_> = fields
         .iter()
         .map(|field| {
-            if is_label_field(spec, field) {
+            if is_output_field(spec, field) {
+                quote! { #field: OutputArg<P> }
+            } else if is_label_field(spec, field) {
                 quote! { #field: LabelArg<P> }
             } else {
                 quote! { #field: Arg<P> }
@@ -388,6 +467,8 @@ fn generate_instruction_struct(spec: &InstructionSpec) -> TokenStream {
                 let field = safe_ident(name);
                 if spec.labels.iter().any(|label| label == name) {
                     quote! { push_label_arg(&mut tokens, &self.#field); }
+                } else if spec.outputs.iter().any(|output| output == name) {
+                    quote! { push_output_arg(&mut tokens, &self.#field); }
                 } else {
                     quote! { push_arg(&mut tokens, &self.#field); }
                 }
@@ -441,7 +522,7 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
         .collect();
     let explicit_generics: Vec<_> = explicit_params
         .iter()
-        .map(|name| format_ident!("{}Arg", to_pascal_string(name)))
+        .map(|name| param_generic_ident(name))
         .collect();
     let explicit_params_sig: Vec<_> = explicit_param_idents
         .iter()
@@ -486,7 +567,7 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
                 auto_params.iter().map(|name| safe_ident(name)).collect();
             let auto_generics: Vec<_> = auto_params
                 .iter()
-                .map(|name| format_ident!("{}Arg", to_pascal_string(name)))
+                .map(|name| param_generic_ident(name))
                 .collect();
             let auto_params_sig: Vec<_> = auto_param_idents
                 .iter()
@@ -538,12 +619,14 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
         }
         _ => {
             let output_struct = output_struct_name(spec);
+            let outputs_arg = format_ident!("OutputsArg");
+            let outputs_param = format_ident!("__mlcg_outputs");
             let auto_params = auto_processor_params(spec);
             let auto_param_idents: Vec<_> =
                 auto_params.iter().map(|name| safe_ident(name)).collect();
             let auto_generics: Vec<_> = auto_params
                 .iter()
-                .map(|name| format_ident!("{}Arg", to_pascal_string(name)))
+                .map(|name| param_generic_ident(name))
                 .collect();
             let auto_params_sig: Vec<_> = auto_param_idents
                 .iter()
@@ -556,14 +639,46 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
                 .map(|(name, generic)| param_where(spec, name, generic))
                 .collect();
             let output_idents: Vec<_> = spec.outputs.iter().map(|name| safe_ident(name)).collect();
+            let explicit_params: Vec<_> = explicit_processor_params(spec)
+                .into_iter()
+                .filter(|param| !spec.outputs.iter().any(|output| output == param))
+                .collect();
+            let explicit_param_idents: Vec<_> = explicit_params
+                .iter()
+                .map(|name| safe_ident(name))
+                .collect();
+            let explicit_generics: Vec<_> = explicit_params
+                .iter()
+                .map(|name| param_generic_ident(name))
+                .collect();
+            let explicit_params_sig: Vec<_> = explicit_param_idents
+                .iter()
+                .zip(explicit_generics.iter())
+                .map(|(ident, generic)| quote! { #ident: #generic })
+                .collect();
+            let explicit_where: Vec<_> = explicit_params
+                .iter()
+                .zip(explicit_generics.iter())
+                .map(|(name, generic)| param_where(spec, name, generic))
+                .collect();
             let output_allocations = output_idents
                 .iter()
                 .map(|output| quote! { let #output = self.new_value(); });
             let output_call_args = output_idents
                 .iter()
-                .map(|output| quote! { #output.clone() });
+                .map(|output| quote! { #output: #output.clone() });
             let output_fields = output_idents.iter().map(|output| quote! { #output });
             let call_args = auto_param_idents.iter();
+            let explicit_fields: Vec<_> = placeholders(spec)
+                .into_iter()
+                .map(|field| {
+                    if output_idents.iter().any(|output| output == &field) {
+                        quote! { #field: #outputs_param.#field.clone().into() }
+                    } else {
+                        quote! { #field: #field.into() }
+                    }
+                })
+                .collect();
 
             quote! {
                 #[allow(clippy::too_many_arguments, non_snake_case)]
@@ -572,8 +687,9 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
                     where
                         #(#auto_where,)*;
 
-                    fn #into_method<#(#explicit_generics,)*>(&self, #(#explicit_params_sig,)*)
+                    fn #into_method<#outputs_arg, #(#explicit_generics,)*>(&self, #outputs_param: #outputs_arg, #(#explicit_params_sig,)*)
                     where
+                        #outputs_arg: Into<#output_struct<P>>,
                         #(#explicit_where,)*;
                 }
 
@@ -587,14 +703,16 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
                         #(#auto_where,)*
                     {
                         #(#output_allocations)*
-                        self.#into_method(#(#output_call_args,)* #(#call_args,)*);
+                        self.#into_method(#output_struct { #(#output_call_args,)* }, #(#call_args,)*);
                         #output_struct { #(#output_fields,)* }
                     }
 
-                    fn #into_method<#(#explicit_generics,)*>(&self, #(#explicit_params_sig,)*)
+                    fn #into_method<#outputs_arg, #(#explicit_generics,)*>(&self, #outputs_param: #outputs_arg, #(#explicit_params_sig,)*)
                     where
+                        #outputs_arg: Into<#output_struct<P>>,
                         #(#explicit_where,)*
                     {
+                        let #outputs_param = #outputs_param.into();
                         self.push(#struct_name { _processor: ::std::marker::PhantomData, #(#explicit_fields,)* });
                     }
                 }
@@ -613,7 +731,7 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
     let input_idents: Vec<_> = value_params.iter().map(|name| safe_ident(name)).collect();
     let input_generics: Vec<_> = value_params
         .iter()
-        .map(|name| format_ident!("{}Arg", to_pascal_string(name)))
+        .map(|name| param_generic_ident(name))
         .collect();
     let input_params_sig: Vec<_> = input_idents
         .iter()
@@ -638,21 +756,21 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
         })
         .collect();
 
-    let explicit_value_params = explicit_value_params(spec);
-    let explicit_value_param_idents: Vec<_> = explicit_value_params
+    let explicit_all_value_params = explicit_value_params(spec);
+    let explicit_value_param_idents: Vec<_> = explicit_all_value_params
         .iter()
         .map(|name| safe_ident(name))
         .collect();
-    let explicit_value_generics: Vec<_> = explicit_value_params
+    let explicit_value_generics: Vec<_> = explicit_all_value_params
         .iter()
-        .map(|name| format_ident!("{}Arg", to_pascal_string(name)))
+        .map(|name| param_generic_ident(name))
         .collect();
     let explicit_value_params_sig: Vec<_> = explicit_value_param_idents
         .iter()
         .zip(explicit_value_generics.iter())
         .map(|(ident, generic)| quote! { #ident: #generic })
         .collect();
-    let explicit_value_where: Vec<_> = explicit_value_params
+    let explicit_value_where: Vec<_> = explicit_all_value_params
         .iter()
         .zip(explicit_value_generics.iter())
         .map(|(name, generic)| param_where(spec, name, generic))
@@ -732,6 +850,8 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
         }
     } else {
         let output_struct = output_struct_name(spec);
+        let outputs_arg = format_ident!("OutputsArg");
+        let outputs_param = format_ident!("__mlcg_outputs");
         let output_allocations = output_idents
             .iter()
             .map(|output| quote! { let #output = handle.new_value(); });
@@ -739,6 +859,40 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
             .iter()
             .map(|output| quote! { #output: #output.clone().into() });
         let output_fields = output_idents.iter().map(|output| quote! { #output });
+        let explicit_multi_value_params: Vec<_> = explicit_value_params(spec)
+            .into_iter()
+            .filter(|param| !spec.outputs.iter().any(|output| output == param))
+            .collect();
+        let explicit_value_param_idents: Vec<_> = explicit_multi_value_params
+            .iter()
+            .map(|name| safe_ident(name))
+            .collect();
+        let explicit_value_generics: Vec<_> = explicit_multi_value_params
+            .iter()
+            .map(|name| param_generic_ident(name))
+            .collect();
+        let explicit_value_params_sig: Vec<_> = explicit_value_param_idents
+            .iter()
+            .zip(explicit_value_generics.iter())
+            .map(|(ident, generic)| quote! { #ident: #generic })
+            .collect();
+        let explicit_value_where: Vec<_> = explicit_multi_value_params
+            .iter()
+            .zip(explicit_value_generics.iter())
+            .map(|(name, generic)| param_where(spec, name, generic))
+            .collect();
+        let explicit_value_fields: Vec<_> = placeholders(spec)
+            .into_iter()
+            .map(|field| {
+                if output_idents.iter().any(|output| output == &field) {
+                    quote! { #field: #outputs_param.#field.clone().into() }
+                } else if field == receiver {
+                    quote! { #field: self.clone().into() }
+                } else {
+                    quote! { #field: #field.into() }
+                }
+            })
+            .collect();
 
         quote! {
             #[allow(clippy::too_many_arguments, non_snake_case)]
@@ -747,8 +901,9 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
                 where
                     #(#input_where,)*;
 
-                fn #into_method<#(#explicit_value_generics,)*>(&self, #(#explicit_value_params_sig,)*)
+                fn #into_method<#outputs_arg, #(#explicit_value_generics,)*>(&self, #outputs_param: #outputs_arg, #(#explicit_value_params_sig,)*)
                 where
+                    #outputs_arg: Into<#output_struct<P>>,
                     #(#explicit_value_where,)*;
             }
 
@@ -771,10 +926,12 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
                     #output_struct { #(#output_fields,)* }
                 }
 
-                fn #into_method<#(#explicit_value_generics,)*>(&self, #(#explicit_value_params_sig,)*)
+                fn #into_method<#outputs_arg, #(#explicit_value_generics,)*>(&self, #outputs_param: #outputs_arg, #(#explicit_value_params_sig,)*)
                 where
+                    #outputs_arg: Into<#output_struct<P>>,
                     #(#explicit_value_where,)*
                 {
+                    let #outputs_param = #outputs_param.into();
                     self.handle().push(#struct_name { _processor: ::std::marker::PhantomData, #(#explicit_value_fields,)* });
                 }
             }
@@ -783,7 +940,9 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
 }
 
 fn param_where(spec: &InstructionSpec, name: &str, generic: &Ident) -> TokenStream {
-    if spec.labels.iter().any(|label| label == name) {
+    if spec.outputs.iter().any(|output| output == name) {
+        quote! { #generic: Into<OutputArg<P>> }
+    } else if spec.labels.iter().any(|label| label == name) {
         quote! { #generic: Into<LabelArg<P>> }
     } else {
         quote! { #generic: Into<Arg<P>> }
@@ -823,6 +982,12 @@ fn value_params(spec: &InstructionSpec) -> Vec<String> {
 
 fn is_label_field(spec: &InstructionSpec, field: &Ident) -> bool {
     spec.labels.iter().any(|label| safe_ident(label) == *field)
+}
+
+fn is_output_field(spec: &InstructionSpec, field: &Ident) -> bool {
+    spec.outputs
+        .iter()
+        .any(|output| safe_ident(output) == *field)
 }
 
 fn auto_processor_params(spec: &InstructionSpec) -> Vec<String> {
@@ -888,6 +1053,10 @@ fn processor_trait_name(spec: &InstructionSpec) -> Ident {
 
 fn value_trait_name(spec: &InstructionSpec) -> Ident {
     format_ident!("Value{}Ext", struct_name(spec))
+}
+
+fn param_generic_ident(name: &str) -> Ident {
+    format_ident!("Mlcg{}Arg", to_pascal_string(name))
 }
 
 fn to_pascal_ident(name: &str) -> Ident {

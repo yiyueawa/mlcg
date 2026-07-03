@@ -116,4 +116,5 @@ family = "broken"
     t.compile_fail("tests/ui/fail_method_collision.rs");
     t.compile_fail("tests/ui/fail_missing_manifest.rs");
     t.compile_fail("tests/ui/fail_invalid_manifest.rs");
+    t.compile_fail("tests/ui/fail_raw_output_argument.rs");
 }

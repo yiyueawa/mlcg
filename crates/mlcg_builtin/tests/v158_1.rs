@@ -23,15 +23,7 @@ fn generated_v158_1_api_emits_mlog_program() {
     cell.write(x.clone(), 3);
     let sensed = cell.sensor("@enabled");
     let located = processor.ulocate_building("@core", true, "@copper");
-    processor.ulocate_building_into(
-        located.outX.clone(),
-        located.outY.clone(),
-        located.outFound.clone(),
-        located.outBuild.clone(),
-        "@core",
-        true,
-        "@copper",
-    );
+    processor.ulocate_building_into(located.clone(), "@core", true, "@copper");
     let radar_target = processor.uradar("enemy", "any", "any", "distance", true);
     processor.uradar_into(radar_target.clone(), "enemy", "any", "any", "health", false);
     processor.print(value_read);
