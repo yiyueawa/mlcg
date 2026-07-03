@@ -31,13 +31,16 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
     });
 
     quote! {
-        use mlcg_core::{Instruction, LowerContext, PartialLine, PartialProgram, PartialToken, Processor, Value};
+        use mlcg_core::{Instruction, Label, LowerContext, PartialLine, PartialProgram, PartialToken, Processor, Value};
 
         #[derive(Clone)]
         pub enum Arg<P> {
             Value(Value<P>),
             Raw(String),
         }
+
+        #[derive(Clone)]
+        pub struct LabelArg<P>(Label<P>);
 
         impl<P> ::std::fmt::Debug for Arg<P> {
             fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
@@ -80,6 +83,20 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
             fn from(value: String) -> Self { Self::Raw(value) }
         }
 
+        impl<P> ::std::fmt::Debug for LabelArg<P> {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+                f.debug_tuple("Label").field(&self.0).finish()
+            }
+        }
+
+        impl<P> From<Label<P>> for LabelArg<P> {
+            fn from(value: Label<P>) -> Self { Self(value) }
+        }
+
+        impl<P> From<&Label<P>> for LabelArg<P> {
+            fn from(value: &Label<P>) -> Self { Self(value.clone()) }
+        }
+
         fn push_arg<P>(tokens: &mut Vec<PartialToken<P>>, arg: &Arg<P>) {
             match arg {
                 Arg::Value(value) => tokens.push(PartialToken::value(value.clone())),
@@ -87,12 +104,16 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
             }
         }
 
+        fn push_label_arg<P>(tokens: &mut Vec<PartialToken<P>>, arg: &LabelArg<P>) {
+            tokens.push(PartialToken::label(arg.0.clone()));
+        }
+
         #(#structs)*
         #(#processor_exts)*
         #(#value_exts)*
 
         pub mod prelude {
-            pub use super::{Arg, #(#prelude_exports,)*};
+            pub use super::{Arg, LabelArg, #(#prelude_exports,)*};
         }
     }
 }
@@ -102,7 +123,13 @@ fn generate_instruction_struct(spec: &InstructionSpec) -> TokenStream {
     let fields = placeholders(spec);
     let field_defs: Vec<_> = fields
         .iter()
-        .map(|field| quote! { #field: Arg<P> })
+        .map(|field| {
+            if is_label_field(spec, field) {
+                quote! { #field: LabelArg<P> }
+            } else {
+                quote! { #field: Arg<P> }
+            }
+        })
         .collect();
     let lower_steps: Vec<_> = spec
         .emit
@@ -110,7 +137,11 @@ fn generate_instruction_struct(spec: &InstructionSpec) -> TokenStream {
         .map(|token| {
             if let Some(name) = token.strip_prefix('$') {
                 let field = safe_ident(name);
-                quote! { push_arg(&mut tokens, &self.#field); }
+                if spec.labels.iter().any(|label| label == name) {
+                    quote! { push_label_arg(&mut tokens, &self.#field); }
+                } else {
+                    quote! { push_arg(&mut tokens, &self.#field); }
+                }
             } else {
                 quote! { tokens.push(PartialToken::raw(#token)); }
             }
@@ -168,9 +199,10 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
         .zip(explicit_generics.iter())
         .map(|(ident, generic)| quote! { #ident: #generic })
         .collect();
-    let explicit_where: Vec<_> = explicit_generics
+    let explicit_where: Vec<_> = explicit_params
         .iter()
-        .map(|generic| quote! { #generic: Into<Arg<P>> })
+        .zip(explicit_generics.iter())
+        .map(|(name, generic)| param_where(spec, name, generic))
         .collect();
     let explicit_fields: Vec<_> = placeholders(spec)
         .into_iter()
@@ -189,9 +221,10 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
             .zip(auto_generics.iter())
             .map(|(ident, generic)| quote! { #ident: #generic })
             .collect();
-        let auto_where: Vec<_> = auto_generics
+        let auto_where: Vec<_> = auto_params
             .iter()
-            .map(|generic| quote! { #generic: Into<Arg<P>> })
+            .zip(auto_generics.iter())
+            .map(|(name, generic)| param_where(spec, name, generic))
             .collect();
         let output_ident = safe_ident(&spec.outputs[0]);
         let call_args = auto_param_idents.iter();
@@ -266,9 +299,9 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
     let trait_name = value_trait_name(spec);
     let method = safe_ident(&spec.rust_name);
     let receiver = safe_ident(&spec.receiver);
-    let input_idents: Vec<_> = spec.inputs.iter().map(|name| safe_ident(name)).collect();
-    let input_generics: Vec<_> = spec
-        .inputs
+    let value_params = value_params(spec);
+    let input_idents: Vec<_> = value_params.iter().map(|name| safe_ident(name)).collect();
+    let input_generics: Vec<_> = value_params
         .iter()
         .map(|name| format_ident!("{}Arg", to_pascal_string(name)))
         .collect();
@@ -277,9 +310,10 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
         .zip(input_generics.iter())
         .map(|(ident, generic)| quote! { #ident: #generic })
         .collect();
-    let input_where: Vec<_> = input_generics
+    let input_where: Vec<_> = value_params
         .iter()
-        .map(|generic| quote! { #generic: Into<Arg<P>> })
+        .zip(input_generics.iter())
+        .map(|(name, generic)| param_where(spec, name, generic))
         .collect();
     let output_idents: Vec<_> = spec.outputs.iter().map(|name| safe_ident(name)).collect();
     let fields: Vec<_> = placeholders(spec)
@@ -354,10 +388,42 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
     }
 }
 
+fn param_where(spec: &InstructionSpec, name: &str, generic: &Ident) -> TokenStream {
+    if spec.labels.iter().any(|label| label == name) {
+        quote! { #generic: Into<LabelArg<P>> }
+    } else {
+        quote! { #generic: Into<Arg<P>> }
+    }
+}
+
+fn value_params(spec: &InstructionSpec) -> Vec<String> {
+    let mut params = Vec::new();
+    for label in &spec.labels {
+        if !params.contains(label) {
+            params.push(label.clone());
+        }
+    }
+    for input in &spec.inputs {
+        if !params.contains(input) {
+            params.push(input.clone());
+        }
+    }
+    params
+}
+
+fn is_label_field(spec: &InstructionSpec, field: &Ident) -> bool {
+    spec.labels.iter().any(|label| safe_ident(label) == *field)
+}
+
 fn auto_processor_params(spec: &InstructionSpec) -> Vec<String> {
     let mut params = Vec::new();
     if !spec.receiver.is_empty() {
         params.push(spec.receiver.clone());
+    }
+    for label in &spec.labels {
+        if !params.contains(label) {
+            params.push(label.clone());
+        }
     }
     for input in &spec.inputs {
         if !params.contains(input) {
@@ -372,6 +438,11 @@ fn explicit_processor_params(spec: &InstructionSpec) -> Vec<String> {
     params.extend(spec.outputs.iter().cloned());
     if !spec.receiver.is_empty() && !params.contains(&spec.receiver) {
         params.push(spec.receiver.clone());
+    }
+    for label in &spec.labels {
+        if !params.contains(label) {
+            params.push(label.clone());
+        }
     }
     for input in &spec.inputs {
         if !params.contains(input) {

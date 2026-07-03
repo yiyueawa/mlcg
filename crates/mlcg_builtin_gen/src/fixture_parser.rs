@@ -62,6 +62,7 @@ pub fn parse_fixture_manifest(version: &str, input: &str) -> Result<String, Gene
             receiver,
             inputs,
             outputs,
+            labels: Vec::new(),
         });
     }
 

@@ -22,11 +22,16 @@ fn generated_v158_1_api_emits_representative_mlog() {
     let value_sum = x.op_add(y);
     processor.print(value_read);
     processor.print(value_sum);
+    let done = processor.label();
+    x.jump_equal(done.clone(), 1);
+    processor.print("before_done");
+    processor.place(done);
+    processor.print("after_done");
 
     let output = processor.emit().expect("emit succeeds");
 
     assert_eq!(
         output,
-        "set x 1\nop add __mlcg_0 x y\nop not __mlcg_1 __mlcg_0 0\nop add __mlcg_1 __mlcg_0 2\nprint message\nread __mlcg_2 cell1 0\nread x cell1 1\nprint __mlcg_2\nread __mlcg_3 cell 2\nop add __mlcg_4 x y\nprint __mlcg_3\nprint __mlcg_4"
+        "set x 1\nop add __mlcg_0 x y\nop not __mlcg_1 __mlcg_0 0\nop add __mlcg_1 __mlcg_0 2\nprint message\nread __mlcg_2 cell1 0\nread x cell1 1\nprint __mlcg_2\nread __mlcg_3 cell 2\nop add __mlcg_4 x y\nprint __mlcg_3\nprint __mlcg_4\njump 14 equal x 1\nprint before_done\nprint after_done"
     );
 }

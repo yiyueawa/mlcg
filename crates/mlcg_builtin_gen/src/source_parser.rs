@@ -53,6 +53,7 @@ pub fn parse_representative_manifest(
                 receiver: "target".to_string(),
                 inputs: strings(["source"]),
                 outputs: Vec::new(),
+                labels: Vec::new(),
             },
             Instruction {
                 family: "op".to_string(),
@@ -62,6 +63,7 @@ pub fn parse_representative_manifest(
                 receiver: String::new(),
                 inputs: strings(["lhs", "rhs"]),
                 outputs: strings(["out"]),
+                labels: Vec::new(),
             },
             Instruction {
                 family: "op".to_string(),
@@ -71,6 +73,7 @@ pub fn parse_representative_manifest(
                 receiver: String::new(),
                 inputs: strings(["input"]),
                 outputs: strings(["out"]),
+                labels: Vec::new(),
             },
             Instruction {
                 family: "jump".to_string(),
@@ -80,6 +83,7 @@ pub fn parse_representative_manifest(
                 receiver: String::new(),
                 inputs: strings(["label", "lhs", "rhs"]),
                 outputs: Vec::new(),
+                labels: strings(["label"]),
             },
             Instruction {
                 family: "jump".to_string(),
@@ -89,6 +93,7 @@ pub fn parse_representative_manifest(
                 receiver: String::new(),
                 inputs: strings(["label"]),
                 outputs: Vec::new(),
+                labels: strings(["label"]),
             },
         ],
     })

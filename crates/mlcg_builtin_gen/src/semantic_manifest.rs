@@ -65,6 +65,7 @@ fn expand_enum_selections(
 
 fn derive_instruction(statement: &RawStatement, enum_selections: &[EnumSelection]) -> Instruction {
     let output_names = output_fields(statement);
+    let labels = label_fields(statement);
     let operand_limit = operand_arity(enum_selections);
     let receiver = receiver_field(statement, &output_names, enum_selections, operand_limit)
         .unwrap_or_default();
@@ -75,6 +76,7 @@ fn derive_instruction(statement: &RawStatement, enum_selections: &[EnumSelection
         .iter()
         .filter(|field| !is_enum_selection(&field.name, enum_selections))
         .filter(|field| !output_names.iter().any(|output| output == &field.name))
+        .filter(|field| !labels.iter().any(|label| label == &field.name))
         .filter(|field| receiver != field.name)
         .filter(|field| !unused_operands.iter().any(|unused| unused == &field.name))
         .map(|field| field.name.clone())
@@ -88,6 +90,7 @@ fn derive_instruction(statement: &RawStatement, enum_selections: &[EnumSelection
         receiver,
         inputs,
         outputs: output_names,
+        labels,
     }
 }
 
@@ -113,6 +116,15 @@ fn emit_tokens(
             })
     }));
     emit
+}
+
+fn label_fields(statement: &RawStatement) -> Vec<String> {
+    statement
+        .fields
+        .iter()
+        .filter(|field| is_label_field(&field.name))
+        .map(|field| field.name.clone())
+        .collect()
 }
 
 fn output_fields(statement: &RawStatement) -> Vec<String> {
@@ -176,6 +188,10 @@ fn operand_fields(
 
 fn operand_arity(enum_selections: &[EnumSelection]) -> Option<usize> {
     enum_selections.iter().find_map(|selection| selection.arity)
+}
+
+fn is_label_field(name: &str) -> bool {
+    name == "destIndex"
 }
 
 fn is_output_field(name: &str) -> bool {

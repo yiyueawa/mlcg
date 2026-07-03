@@ -18,6 +18,8 @@ pub struct Instruction {
     pub receiver: String,
     pub inputs: Vec<String>,
     pub outputs: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub labels: Vec<String>,
 }
 
 impl Manifest {

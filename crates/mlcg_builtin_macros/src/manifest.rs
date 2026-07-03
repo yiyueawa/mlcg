@@ -18,4 +18,6 @@ pub(crate) struct InstructionSpec {
     pub(crate) inputs: Vec<String>,
     #[serde(default)]
     pub(crate) outputs: Vec<String>,
+    #[serde(default)]
+    pub(crate) labels: Vec<String>,
 }

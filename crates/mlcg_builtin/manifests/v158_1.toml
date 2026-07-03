@@ -3369,11 +3369,9 @@ emit = [
     "$compare",
 ]
 receiver = "value"
-inputs = [
-    "destIndex",
-    "compare",
-]
+inputs = ["compare"]
 outputs = []
+labels = ["destIndex"]
 
 [[instructions]]
 family = "jump"
@@ -3387,11 +3385,9 @@ emit = [
     "$compare",
 ]
 receiver = "value"
-inputs = [
-    "destIndex",
-    "compare",
-]
+inputs = ["compare"]
 outputs = []
+labels = ["destIndex"]
 
 [[instructions]]
 family = "jump"
@@ -3405,11 +3401,9 @@ emit = [
     "$compare",
 ]
 receiver = "value"
-inputs = [
-    "destIndex",
-    "compare",
-]
+inputs = ["compare"]
 outputs = []
+labels = ["destIndex"]
 
 [[instructions]]
 family = "jump"
@@ -3423,11 +3417,9 @@ emit = [
     "$compare",
 ]
 receiver = "value"
-inputs = [
-    "destIndex",
-    "compare",
-]
+inputs = ["compare"]
 outputs = []
+labels = ["destIndex"]
 
 [[instructions]]
 family = "jump"
@@ -3441,11 +3433,9 @@ emit = [
     "$compare",
 ]
 receiver = "value"
-inputs = [
-    "destIndex",
-    "compare",
-]
+inputs = ["compare"]
 outputs = []
+labels = ["destIndex"]
 
 [[instructions]]
 family = "jump"
@@ -3459,11 +3449,9 @@ emit = [
     "$compare",
 ]
 receiver = "value"
-inputs = [
-    "destIndex",
-    "compare",
-]
+inputs = ["compare"]
 outputs = []
+labels = ["destIndex"]
 
 [[instructions]]
 family = "jump"
@@ -3477,11 +3465,9 @@ emit = [
     "$compare",
 ]
 receiver = "value"
-inputs = [
-    "destIndex",
-    "compare",
-]
+inputs = ["compare"]
 outputs = []
+labels = ["destIndex"]
 
 [[instructions]]
 family = "jump"
@@ -3495,11 +3481,9 @@ emit = [
     "$compare",
 ]
 receiver = "value"
-inputs = [
-    "destIndex",
-    "compare",
-]
+inputs = ["compare"]
 outputs = []
+labels = ["destIndex"]
 
 [[instructions]]
 family = "ubind"

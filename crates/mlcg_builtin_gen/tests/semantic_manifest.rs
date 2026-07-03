@@ -91,7 +91,8 @@ fn derives_semantics_from_field_roles_and_enum_variants_without_statement_name_s
         ["branch", "$destIndex", "equal", "$value", "$compare"]
     );
     assert_eq!(branch_equal.receiver, "value");
-    assert_eq!(branch_equal.inputs, ["destIndex", "compare"]);
+    assert_eq!(branch_equal.inputs, ["compare"]);
+    assert_eq!(branch_equal.labels, ["destIndex"]);
     assert!(branch_equal.outputs.is_empty());
 
     let read = manifest
