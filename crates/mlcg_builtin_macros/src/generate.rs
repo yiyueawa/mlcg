@@ -10,6 +10,11 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
         .iter()
         .map(|spec| (&spec.family, &spec.variant))
         .collect();
+    let output_structs = manifest
+        .instructions
+        .iter()
+        .filter(|spec| spec.outputs.len() > 1)
+        .map(generate_output_struct);
     let structs = manifest
         .instructions
         .iter()
@@ -23,11 +28,15 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
     let prelude_exports = manifest.instructions.iter().flat_map(|spec| {
         let processor_trait = processor_trait_name(spec);
         let value_trait = value_trait_name(spec);
+        let output_struct = output_struct_name(spec);
+        let output_exports = (spec.outputs.len() > 1).then_some(quote! { #output_struct });
         if spec.receiver.is_empty() {
             vec![quote! { #processor_trait }]
         } else {
             vec![quote! { #processor_trait }, quote! { #value_trait }]
         }
+        .into_iter()
+        .chain(output_exports)
     });
 
     quote! {
@@ -108,12 +117,33 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
             tokens.push(PartialToken::label(arg.0.clone()));
         }
 
+        #(#output_structs)*
         #(#structs)*
         #(#processor_exts)*
         #(#value_exts)*
 
         pub mod prelude {
             pub use super::{Arg, LabelArg, #(#prelude_exports,)*};
+        }
+    }
+}
+
+fn generate_output_struct(spec: &InstructionSpec) -> TokenStream {
+    let output_struct = output_struct_name(spec);
+    let fields: Vec<_> = spec
+        .outputs
+        .iter()
+        .map(|output| {
+            let field = safe_ident(output);
+            quote! { pub #field: Value<P> }
+        })
+        .collect();
+
+    quote! {
+        #[allow(non_snake_case)]
+        #[derive(Clone, Debug)]
+        pub struct #output_struct<P> {
+            #(#fields,)*
         }
     }
 }
@@ -209,70 +239,16 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
         .map(|field| quote! { #field: #field.into() })
         .collect();
 
-    if spec.outputs.len() == 1 {
-        let auto_params = auto_processor_params(spec);
-        let auto_param_idents: Vec<_> = auto_params.iter().map(|name| safe_ident(name)).collect();
-        let auto_generics: Vec<_> = auto_params
-            .iter()
-            .map(|name| format_ident!("{}Arg", to_pascal_string(name)))
-            .collect();
-        let auto_params_sig: Vec<_> = auto_param_idents
-            .iter()
-            .zip(auto_generics.iter())
-            .map(|(ident, generic)| quote! { #ident: #generic })
-            .collect();
-        let auto_where: Vec<_> = auto_params
-            .iter()
-            .zip(auto_generics.iter())
-            .map(|(name, generic)| param_where(spec, name, generic))
-            .collect();
-        let output_ident = safe_ident(&spec.outputs[0]);
-        let call_args = auto_param_idents.iter();
-
-        quote! {
-            #[allow(clippy::too_many_arguments)]
-            pub trait #trait_name<P> {
-                fn #method<#(#auto_generics,)*>(&self, #(#auto_params_sig,)*) -> Value<P>
-                where
-                    #(#auto_where,)*;
-
-                fn #into_method<#(#explicit_generics,)*>(&self, #(#explicit_params_sig,)*)
-                where
-                    #(#explicit_where,)*;
-            }
-
-            #[allow(clippy::too_many_arguments)]
-            impl<P> #trait_name<P> for Processor<P>
-            where
-                P: ::std::marker::Send + ::std::marker::Sync + 'static,
-            {
-                fn #method<#(#auto_generics,)*>(&self, #(#auto_params_sig,)*) -> Value<P>
-                where
-                    #(#auto_where,)*
-                {
-                    let #output_ident = self.new_value();
-                    self.#into_method(#output_ident.clone(), #(#call_args,)*);
-                    #output_ident
-                }
-
-                fn #into_method<#(#explicit_generics,)*>(&self, #(#explicit_params_sig,)*)
-                where
-                    #(#explicit_where,)*
-                {
-                    self.push(#struct_name { _processor: ::std::marker::PhantomData, #(#explicit_fields,)* });
-                }
-            }
-        }
-    } else if spec.outputs.is_empty() {
-        quote! {
-            #[allow(clippy::too_many_arguments)]
+    match spec.outputs.len() {
+        0 => quote! {
+            #[allow(clippy::too_many_arguments, non_snake_case)]
             pub trait #trait_name<P> {
                 fn #method<#(#explicit_generics,)*>(&self, #(#explicit_params_sig,)*)
                 where
                     #(#explicit_where,)*;
             }
 
-            #[allow(clippy::too_many_arguments)]
+            #[allow(clippy::too_many_arguments, non_snake_case)]
             impl<P> #trait_name<P> for Processor<P>
             where
                 P: ::std::marker::Send + ::std::marker::Sync + 'static,
@@ -284,13 +260,127 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
                     self.push(#struct_name { _processor: ::std::marker::PhantomData, #(#explicit_fields,)* });
                 }
             }
+        },
+        1 => {
+            let auto_params = auto_processor_params(spec);
+            let auto_param_idents: Vec<_> =
+                auto_params.iter().map(|name| safe_ident(name)).collect();
+            let auto_generics: Vec<_> = auto_params
+                .iter()
+                .map(|name| format_ident!("{}Arg", to_pascal_string(name)))
+                .collect();
+            let auto_params_sig: Vec<_> = auto_param_idents
+                .iter()
+                .zip(auto_generics.iter())
+                .map(|(ident, generic)| quote! { #ident: #generic })
+                .collect();
+            let auto_where: Vec<_> = auto_params
+                .iter()
+                .zip(auto_generics.iter())
+                .map(|(name, generic)| param_where(spec, name, generic))
+                .collect();
+            let output_ident = safe_ident(&spec.outputs[0]);
+            let call_args = auto_param_idents.iter();
+
+            quote! {
+                #[allow(clippy::too_many_arguments, non_snake_case)]
+                pub trait #trait_name<P> {
+                    fn #method<#(#auto_generics,)*>(&self, #(#auto_params_sig,)*) -> Value<P>
+                    where
+                        #(#auto_where,)*;
+
+                    fn #into_method<#(#explicit_generics,)*>(&self, #(#explicit_params_sig,)*)
+                    where
+                        #(#explicit_where,)*;
+                }
+
+                #[allow(clippy::too_many_arguments, non_snake_case)]
+                impl<P> #trait_name<P> for Processor<P>
+                where
+                    P: ::std::marker::Send + ::std::marker::Sync + 'static,
+                {
+                    fn #method<#(#auto_generics,)*>(&self, #(#auto_params_sig,)*) -> Value<P>
+                    where
+                        #(#auto_where,)*
+                    {
+                        let #output_ident = self.new_value();
+                        self.#into_method(#output_ident.clone(), #(#call_args,)*);
+                        #output_ident
+                    }
+
+                    fn #into_method<#(#explicit_generics,)*>(&self, #(#explicit_params_sig,)*)
+                    where
+                        #(#explicit_where,)*
+                    {
+                        self.push(#struct_name { _processor: ::std::marker::PhantomData, #(#explicit_fields,)* });
+                    }
+                }
+            }
         }
-    } else {
-        panic!(
-            "instruction {} has {} auto outputs; only zero or one is supported",
-            spec.rust_name,
-            spec.outputs.len()
-        );
+        _ => {
+            let output_struct = output_struct_name(spec);
+            let auto_params = auto_processor_params(spec);
+            let auto_param_idents: Vec<_> =
+                auto_params.iter().map(|name| safe_ident(name)).collect();
+            let auto_generics: Vec<_> = auto_params
+                .iter()
+                .map(|name| format_ident!("{}Arg", to_pascal_string(name)))
+                .collect();
+            let auto_params_sig: Vec<_> = auto_param_idents
+                .iter()
+                .zip(auto_generics.iter())
+                .map(|(ident, generic)| quote! { #ident: #generic })
+                .collect();
+            let auto_where: Vec<_> = auto_params
+                .iter()
+                .zip(auto_generics.iter())
+                .map(|(name, generic)| param_where(spec, name, generic))
+                .collect();
+            let output_idents: Vec<_> = spec.outputs.iter().map(|name| safe_ident(name)).collect();
+            let output_allocations = output_idents
+                .iter()
+                .map(|output| quote! { let #output = self.new_value(); });
+            let output_call_args = output_idents
+                .iter()
+                .map(|output| quote! { #output.clone() });
+            let output_fields = output_idents.iter().map(|output| quote! { #output });
+            let call_args = auto_param_idents.iter();
+
+            quote! {
+                #[allow(clippy::too_many_arguments, non_snake_case)]
+                pub trait #trait_name<P> {
+                    fn #method<#(#auto_generics,)*>(&self, #(#auto_params_sig,)*) -> #output_struct<P>
+                    where
+                        #(#auto_where,)*;
+
+                    fn #into_method<#(#explicit_generics,)*>(&self, #(#explicit_params_sig,)*)
+                    where
+                        #(#explicit_where,)*;
+                }
+
+                #[allow(clippy::too_many_arguments, non_snake_case)]
+                impl<P> #trait_name<P> for Processor<P>
+                where
+                    P: ::std::marker::Send + ::std::marker::Sync + 'static,
+                {
+                    fn #method<#(#auto_generics,)*>(&self, #(#auto_params_sig,)*) -> #output_struct<P>
+                    where
+                        #(#auto_where,)*
+                    {
+                        #(#output_allocations)*
+                        self.#into_method(#(#output_call_args,)* #(#call_args,)*);
+                        #output_struct { #(#output_fields,)* }
+                    }
+
+                    fn #into_method<#(#explicit_generics,)*>(&self, #(#explicit_params_sig,)*)
+                    where
+                        #(#explicit_where,)*
+                    {
+                        self.push(#struct_name { _processor: ::std::marker::PhantomData, #(#explicit_fields,)* });
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -298,6 +388,7 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
     let struct_name = struct_name(spec);
     let trait_name = value_trait_name(spec);
     let method = safe_ident(&spec.rust_name);
+    let into_method = safe_ident(&format!("{}_into", spec.rust_name));
     let receiver = safe_ident(&spec.receiver);
     let value_params = value_params(spec);
     let input_idents: Vec<_> = value_params.iter().map(|name| safe_ident(name)).collect();
@@ -319,6 +410,36 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
     let fields: Vec<_> = placeholders(spec)
         .into_iter()
         .filter(|field| !output_idents.iter().any(|output| output == field))
+        .map(|field| {
+            if field == receiver {
+                quote! { #field: self.clone().into() }
+            } else {
+                quote! { #field: #field.into() }
+            }
+        })
+        .collect();
+
+    let explicit_value_params = explicit_value_params(spec);
+    let explicit_value_param_idents: Vec<_> = explicit_value_params
+        .iter()
+        .map(|name| safe_ident(name))
+        .collect();
+    let explicit_value_generics: Vec<_> = explicit_value_params
+        .iter()
+        .map(|name| format_ident!("{}Arg", to_pascal_string(name)))
+        .collect();
+    let explicit_value_params_sig: Vec<_> = explicit_value_param_idents
+        .iter()
+        .zip(explicit_value_generics.iter())
+        .map(|(ident, generic)| quote! { #ident: #generic })
+        .collect();
+    let explicit_value_where: Vec<_> = explicit_value_params
+        .iter()
+        .zip(explicit_value_generics.iter())
+        .map(|(name, generic)| param_where(spec, name, generic))
+        .collect();
+    let explicit_value_fields: Vec<_> = placeholders(spec)
+        .into_iter()
         .map(|field| {
             if field == receiver {
                 quote! { #field: self.clone().into() }
@@ -380,11 +501,54 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
             }
         }
     } else {
-        panic!(
-            "instruction {} has {} value outputs; only zero or one is supported",
-            spec.rust_name,
-            spec.outputs.len()
-        );
+        let output_struct = output_struct_name(spec);
+        let output_allocations = output_idents
+            .iter()
+            .map(|output| quote! { let #output = handle.new_value(); });
+        let output_instruction_fields = output_idents
+            .iter()
+            .map(|output| quote! { #output: #output.clone().into() });
+        let output_fields = output_idents.iter().map(|output| quote! { #output });
+
+        quote! {
+            #[allow(clippy::too_many_arguments, non_snake_case)]
+            pub trait #trait_name<P> {
+                fn #method<#(#input_generics,)*>(&self, #(#input_params_sig,)*) -> #output_struct<P>
+                where
+                    #(#input_where,)*;
+
+                fn #into_method<#(#explicit_value_generics,)*>(&self, #(#explicit_value_params_sig,)*)
+                where
+                    #(#explicit_value_where,)*;
+            }
+
+            #[allow(clippy::too_many_arguments, non_snake_case)]
+            impl<P> #trait_name<P> for Value<P>
+            where
+                P: ::std::marker::Send + ::std::marker::Sync + 'static,
+            {
+                fn #method<#(#input_generics,)*>(&self, #(#input_params_sig,)*) -> #output_struct<P>
+                where
+                    #(#input_where,)*
+                {
+                    let handle = self.handle();
+                    #(#output_allocations)*
+                    handle.push(#struct_name {
+                        _processor: ::std::marker::PhantomData,
+                        #(#output_instruction_fields,)*
+                        #(#fields,)*
+                    });
+                    #output_struct { #(#output_fields,)* }
+                }
+
+                fn #into_method<#(#explicit_value_generics,)*>(&self, #(#explicit_value_params_sig,)*)
+                where
+                    #(#explicit_value_where,)*
+                {
+                    self.handle().push(#struct_name { _processor: ::std::marker::PhantomData, #(#explicit_value_fields,)* });
+                }
+            }
+        }
     }
 }
 
@@ -394,6 +558,22 @@ fn param_where(spec: &InstructionSpec, name: &str, generic: &Ident) -> TokenStre
     } else {
         quote! { #generic: Into<Arg<P>> }
     }
+}
+
+fn explicit_value_params(spec: &InstructionSpec) -> Vec<String> {
+    let mut params = Vec::new();
+    params.extend(spec.outputs.iter().cloned());
+    for label in &spec.labels {
+        if !params.contains(label) {
+            params.push(label.clone());
+        }
+    }
+    for input in &spec.inputs {
+        if !params.contains(input) {
+            params.push(input.clone());
+        }
+    }
+    params
 }
 
 fn value_params(spec: &InstructionSpec) -> Vec<String> {
@@ -466,6 +646,10 @@ fn placeholders(spec: &InstructionSpec) -> Vec<Ident> {
 
 fn struct_name(spec: &InstructionSpec) -> Ident {
     to_pascal_ident(&spec.rust_name)
+}
+
+fn output_struct_name(spec: &InstructionSpec) -> Ident {
+    format_ident!("{}Output", struct_name(spec))
 }
 
 fn processor_trait_name(spec: &InstructionSpec) -> Ident {

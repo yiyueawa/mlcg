@@ -134,11 +134,7 @@ fn output_fields(statement: &RawStatement) -> Vec<String> {
         .filter(|field| is_output_field(statement, &field.name))
         .map(|field| field.name.clone())
         .collect();
-    if outputs.len() == 1 {
-        outputs
-    } else {
-        Vec::new()
-    }
+    outputs
 }
 
 fn receiver_field(
@@ -152,15 +148,17 @@ fn receiver_field(
     }
 
     let operands = operand_fields(statement, outputs, enum_selections);
-    receiver_priority()
-        .iter()
-        .find_map(|preferred| {
-            operands
-                .iter()
-                .find(|operand| operand.as_str() == *preferred)
-                .cloned()
-        })
-        .or_else(|| operands.into_iter().next())
+    let preferred = receiver_priority().iter().find_map(|preferred| {
+        operands
+            .iter()
+            .find(|operand| operand.as_str() == *preferred)
+            .cloned()
+    });
+    if preferred.is_some() || outputs.len() <= 1 {
+        preferred.or_else(|| operands.into_iter().next())
+    } else {
+        None
+    }
 }
 
 fn unused_operand_fields(

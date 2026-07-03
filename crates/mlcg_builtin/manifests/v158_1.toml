@@ -3980,16 +3980,18 @@ emit = [
     "$outFound",
     "$outBuild",
 ]
-receiver = "enemy"
+receiver = ""
 inputs = [
     "flag",
+    "enemy",
     "ore",
+]
+outputs = [
     "outX",
     "outY",
     "outFound",
     "outBuild",
 ]
-outputs = []
 
 [[instructions]]
 family = "ulocate"
@@ -4006,16 +4008,18 @@ emit = [
     "$outFound",
     "$outBuild",
 ]
-receiver = "enemy"
+receiver = ""
 inputs = [
     "flag",
+    "enemy",
     "ore",
+]
+outputs = [
     "outX",
     "outY",
     "outFound",
     "outBuild",
 ]
-outputs = []
 
 [[instructions]]
 family = "ulocate"
@@ -4032,16 +4036,18 @@ emit = [
     "$outFound",
     "$outBuild",
 ]
-receiver = "enemy"
+receiver = ""
 inputs = [
     "flag",
+    "enemy",
     "ore",
+]
+outputs = [
     "outX",
     "outY",
     "outFound",
     "outBuild",
 ]
-outputs = []
 
 [[instructions]]
 family = "ulocate"
@@ -4058,16 +4064,18 @@ emit = [
     "$outFound",
     "$outBuild",
 ]
-receiver = "enemy"
+receiver = ""
 inputs = [
     "flag",
+    "enemy",
     "ore",
+]
+outputs = [
     "outX",
     "outY",
     "outFound",
     "outBuild",
 ]
-outputs = []
 
 [[instructions]]
 family = "query"

@@ -156,3 +156,48 @@ fn derives_receiver_and_output_roles_from_field_names() {
     assert_eq!(sense_like.inputs, ["type"]);
     assert_eq!(sense_like.outputs, ["to"]);
 }
+
+#[test]
+fn keeps_multiple_outputs_and_avoids_fallback_receiver_for_multi_output_queries() {
+    let source = r#"
+        @RegisterStatement("locate_like")
+        public static class LocateLikeStatement extends LStatement{
+            public LLocate locate = LLocate.building;
+            public BlockFlag flag = BlockFlag.core;
+            public String enemy = "true", ore = "@copper", outX = "outx", outY = "outy", outFound = "found", outBuild = "building";
+            @Override public LInstruction build(LAssembler builder){ return new LocateLikeI(locate, flag, builder.var(enemy), builder.var(ore), builder.var(outX), builder.var(outY), builder.var(outFound), builder.var(outBuild)); }
+        }
+    "#;
+
+    let mut raw = scan_raw_statements("fixture", source).expect("scan succeeds");
+    raw.enums = vec![RawEnum {
+        name: "LLocate".to_string(),
+        variants: vec!["building".to_string()],
+        arities: std::collections::BTreeMap::new(),
+    }];
+
+    let manifest = derive_semantic_manifest(&raw);
+    let locate = manifest
+        .instructions
+        .iter()
+        .find(|instruction| instruction.rust_name == "locate_like_building")
+        .expect("locate_like_building exists");
+
+    assert_eq!(
+        locate.emit,
+        [
+            "locate_like",
+            "building",
+            "$flag",
+            "$enemy",
+            "$ore",
+            "$outX",
+            "$outY",
+            "$outFound",
+            "$outBuild",
+        ]
+    );
+    assert!(locate.receiver.is_empty());
+    assert_eq!(locate.inputs, ["flag", "enemy", "ore"]);
+    assert_eq!(locate.outputs, ["outX", "outY", "outFound", "outBuild"]);
+}

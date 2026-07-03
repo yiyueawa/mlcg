@@ -23,6 +23,24 @@ emit = ["op", "add", "$out", "$lhs", "$rhs"]
 receiver = ""
 inputs = ["lhs", "rhs"]
 outputs = ["out"]
+
+[[instructions]]
+family = "multi"
+variant = "multi"
+rust_name = "multi"
+emit = ["multi", "$outA", "$outB", "$input"]
+receiver = ""
+inputs = ["input"]
+outputs = ["outA", "outB"]
+
+[[instructions]]
+family = "multi_recv"
+variant = "multi_recv"
+rust_name = "multi_recv"
+emit = ["multi_recv", "$outA", "$outB", "$target", "$input"]
+receiver = "target"
+inputs = ["input"]
+outputs = ["outA", "outB"]
 "#;
     fs::write(&manifest_path, manifest).expect("write manifest");
     let trybuild_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
