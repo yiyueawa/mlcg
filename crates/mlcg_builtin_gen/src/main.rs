@@ -2,7 +2,7 @@ use std::{env, fs, path::PathBuf};
 
 use mlcg_builtin_gen::{
     cache::ensure_mindustry_cache, fixture_parser::parse_fixture_manifest,
-    source_parser::parse_cached_mindustry,
+    raw_statement::scan_raw_statements, source_parser::parse_cached_mindustry,
 };
 
 fn main() {
@@ -27,6 +27,20 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             let manifest = parse_cached_mindustry(&version, &cache)?;
             fs::write(output, manifest.to_toml()?)?;
         }
+        Some("scan-statements") => {
+            let version = args
+                .next()
+                .ok_or("usage: mlcg_builtin_gen scan-statements <version> <output-toml>")?;
+            let output = args
+                .next()
+                .map(PathBuf::from)
+                .ok_or("usage: mlcg_builtin_gen scan-statements <version> <output-toml>")?;
+            let cache = ensure_mindustry_cache(&version)?;
+            let statements_path = cache.join("core/src/mindustry/logic/LStatements.java");
+            let statements = fs::read_to_string(&statements_path)?;
+            let manifest = scan_raw_statements(&version, &statements)?;
+            fs::write(output, manifest.to_toml()?)?;
+        }
         Some("fixture") => {
             let version = args
                 .next()
@@ -44,7 +58,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             fs::write(&output, manifest)?;
         }
         _ => {
-            return Err("usage: mlcg_builtin_gen <fetch|fixture> ...".into());
+            return Err("usage: mlcg_builtin_gen <fetch|fixture|scan-statements> ...".into());
         }
     }
     Ok(())

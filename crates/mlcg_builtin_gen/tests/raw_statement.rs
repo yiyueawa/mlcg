@@ -84,3 +84,23 @@ fn scans_registered_statement_classes() {
         .iter()
         .any(|field| field.ty == "ConditionOp" && field.name == "op"));
 }
+
+#[test]
+fn ignores_commented_register_statement_annotations() {
+    let source = r##"
+        //@RegisterStatement("#")
+        public static class CommentStatement extends LStatement{
+            public String comment = "";
+        }
+
+        @RegisterStatement("noop")
+        public static class InvalidStatement extends LStatement{
+            @Override public LInstruction build(LAssembler builder){ return new NoopI(); }
+        }
+    "##;
+
+    let manifest = scan_raw_statements("158.1", source).expect("scan succeeds");
+
+    assert_eq!(manifest.statements.len(), 1);
+    assert_eq!(manifest.statements[0].name, "noop");
+}

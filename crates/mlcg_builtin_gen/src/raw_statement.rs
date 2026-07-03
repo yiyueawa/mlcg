@@ -35,6 +35,10 @@ pub fn scan_raw_statements(
 
     while let Some(relative) = source[offset..].find(marker) {
         let marker_start = offset + relative;
+        if is_line_comment_at(source, marker_start) {
+            offset = marker_start + marker.len();
+            continue;
+        }
         let name_start = marker_start + marker.len();
         let name_end = source[name_start..]
             .find("\"")
@@ -199,4 +203,11 @@ fn clean_default(value: &str) -> String {
     } else {
         value.to_string()
     }
+}
+
+fn is_line_comment_at(source: &str, index: usize) -> bool {
+    let line_start = source[..index]
+        .rfind('\n')
+        .map_or(0, |position| position + 1);
+    source[line_start..index].contains("//")
 }
