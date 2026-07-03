@@ -195,6 +195,7 @@ fn skip_string(bytes: &[u8], quote: usize) -> usize {
 }
 
 fn parse_instruction(body: &str) -> Option<String> {
+    let body = parse_linstruction_build_body(body)?;
     let marker = "return new ";
     let start = body.find(marker)? + marker.len();
     let end = body[start..].find('(')? + start;

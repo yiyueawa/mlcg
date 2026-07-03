@@ -200,3 +200,30 @@ fn scans_field_declarations_after_methods_or_constructors() {
 
     assert_eq!(fields, [("first", Some("changed")), ("second", Some("b"))]);
 }
+
+#[test]
+fn scans_instruction_type_from_linstruction_build_method_only() {
+    let source = r#"
+        @RegisterStatement("real")
+        public static class RealStatement extends LStatement{
+            public String value = "x";
+
+            public LInstruction helper(){
+                return new WrongI();
+            }
+
+            @Override public LInstruction build(LAssembler builder){
+                return new RealI(builder.var(value));
+            }
+        }
+    "#;
+
+    let manifest = scan_raw_statements("fixture", source).expect("scan succeeds");
+    let real = manifest
+        .statements
+        .iter()
+        .find(|statement| statement.name == "real")
+        .expect("real exists");
+
+    assert_eq!(real.instruction.as_deref(), Some("RealI"));
+}
