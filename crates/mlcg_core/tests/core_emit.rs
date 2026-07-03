@@ -158,6 +158,20 @@ fn foreign_processor_value_does_not_alias_local_value_with_same_type() {
 }
 
 #[test]
+fn temporary_value_names_do_not_collide_with_explicit_names() {
+    let processor = Processor::<TestProcessor>::new();
+
+    let explicit = processor.named("__mlcg_0");
+    let temporary = processor.new_value();
+    processor.push(PrintValue(explicit));
+    processor.push(PrintValue(temporary));
+
+    let output = processor.emit().expect("emit succeeds");
+
+    assert_eq!(output, "print __mlcg_0\nprint __mlcg_1");
+}
+
+#[test]
 fn foreign_processor_label_does_not_alias_local_label_with_same_type() {
     let local_processor = Processor::<TestProcessor>::new();
     let foreign_processor = Processor::<TestProcessor>::new();

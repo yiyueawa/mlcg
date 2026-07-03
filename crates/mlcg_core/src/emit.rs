@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use snafu::OptionExt;
 
@@ -12,6 +12,7 @@ use crate::{
 pub(crate) struct NameAllocator {
     names: BTreeMap<ValueId, String>,
     used: BTreeMap<String, usize>,
+    allocated: BTreeSet<String>,
 }
 
 impl NameAllocator {
@@ -22,12 +23,17 @@ impl NameAllocator {
 
         let base = hint.filter(|value| !value.is_empty()).unwrap_or("__mlcg");
         let count = self.used.entry(base.to_string()).or_insert(0);
-        let name = if *count == 0 && base != "__mlcg" {
-            base.to_string()
-        } else {
-            format!("{base}_{count}")
+        let name = loop {
+            let candidate = if *count == 0 && base != "__mlcg" {
+                base.to_string()
+            } else {
+                format!("{base}_{count}")
+            };
+            *count += 1;
+            if self.allocated.insert(candidate.clone()) {
+                break candidate;
+            }
         };
-        *count += 1;
         self.names.insert(id, name.clone());
         name
     }
