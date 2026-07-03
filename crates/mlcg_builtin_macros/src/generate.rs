@@ -60,12 +60,12 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
             }
         }
 
-        impl<P> From<Value<P>> for Arg<P> {
-            fn from(value: Value<P>) -> Self { Self::Value(value) }
+        impl<P, T> From<Value<P, T>> for Arg<P> {
+            fn from(value: Value<P, T>) -> Self { Self::Value(value.erase_type()) }
         }
 
-        impl<P> From<&Value<P>> for Arg<P> {
-            fn from(value: &Value<P>) -> Self { Self::Value(value.clone()) }
+        impl<P, T> From<&Value<P, T>> for Arg<P> {
+            fn from(value: &Value<P, T>) -> Self { Self::Value(value.erase_type()) }
         }
 
         impl<P> From<i32> for Arg<P> {
@@ -484,7 +484,7 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
             }
 
             #[allow(clippy::too_many_arguments, non_snake_case)]
-            impl<P> #trait_name<P> for Value<P>
+            impl<P, T> #trait_name<P> for Value<P, T>
             where
                 P: ::std::marker::Send + ::std::marker::Sync + 'static,
             {
@@ -519,7 +519,7 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
             }
 
             #[allow(clippy::too_many_arguments)]
-            impl<P> #trait_name<P> for Value<P>
+            impl<P, T> #trait_name<P> for Value<P, T>
             where
                 P: ::std::marker::Send + ::std::marker::Sync + 'static,
             {
@@ -554,7 +554,7 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
             }
 
             #[allow(clippy::too_many_arguments, non_snake_case)]
-            impl<P> #trait_name<P> for Value<P>
+            impl<P, T> #trait_name<P> for Value<P, T>
             where
                 P: ::std::marker::Send + ::std::marker::Sync + 'static,
             {

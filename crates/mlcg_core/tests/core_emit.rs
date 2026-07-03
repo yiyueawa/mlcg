@@ -1,6 +1,7 @@
 use mlcg_core::Processor;
 
 struct TestProcessor;
+struct Marker;
 
 #[test]
 fn processor_creates_named_and_temporary_values() {
@@ -12,6 +13,19 @@ fn processor_creates_named_and_temporary_values() {
     assert_eq!(named.name_hint().as_deref(), Some("x"));
     assert_eq!(temporary.name_hint(), None);
     assert_ne!(named.id(), temporary.id());
+}
+
+#[test]
+fn values_can_be_retagged_without_changing_identity() {
+    let processor = Processor::<TestProcessor>::new();
+
+    let named = processor.named("x");
+    let typed = named.cast::<Marker>();
+    let erased = typed.erase_type();
+
+    assert_eq!(typed.id(), named.id());
+    assert_eq!(erased.id(), named.id());
+    assert_eq!(erased.name_hint().as_deref(), Some("x"));
 }
 
 use mlcg_core::{Instruction, Label, LowerContext, PartialLine, PartialProgram, PartialToken};

@@ -44,4 +44,17 @@ impl<P, T> Value<P, T> {
     pub fn handle(&self) -> ProcessorHandle<P> {
         self.handle.clone()
     }
+
+    pub fn cast<U>(&self) -> Value<P, U> {
+        Value {
+            id: self.id,
+            handle: self.handle.clone(),
+            name_hint: self.name_hint.clone(),
+            _type: PhantomData,
+        }
+    }
+
+    pub fn erase_type(&self) -> Value<P, Any> {
+        self.cast()
+    }
 }
