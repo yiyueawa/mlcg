@@ -31,25 +31,25 @@ fn main() {
     let x = processor.named("x");
     let y = processor.named("y");
 
-    x.set(1);
+    x.set(1u32);
     y.set(true);
     let out = processor.op_add(x.clone(), y.clone());
     processor.op_add_into(out, x.clone(), y.clone());
     let multi: MultiOutput<P> = processor.multi(x.clone());
-    processor.multi_into(multi.outA.clone(), multi.outB.clone(), y.clone());
+    processor.multi_into(multi.outA.clone(), multi.outB.clone(), 2u64);
     let multi_recv: MultiRecvOutput<P> = x.multi_recv(y.clone());
-    x.multi_recv_into(multi_recv.outA.clone(), multi_recv.outB.clone(), 2);
+    x.multi_recv_into(multi_recv.outA.clone(), multi_recv.outB.clone(), 3isize);
     let recv_out = x.recv_out(y.clone());
-    x.recv_out_into(recv_out.clone(), false);
+    x.recv_out_into(recv_out.clone(), 1.5f32);
 
     let text = processor.emit().unwrap();
     assert!(text.contains("set x 1"));
     assert!(text.contains("set y true"));
     assert!(text.contains("op add"));
     assert!(text.contains("multi __mlcg_1 __mlcg_2 x"));
-    assert!(text.contains("multi __mlcg_1 __mlcg_2 y"));
+    assert!(text.contains("multi __mlcg_1 __mlcg_2 2"));
     assert!(text.contains("multi_recv __mlcg_3 __mlcg_4 x y"));
-    assert!(text.contains("multi_recv __mlcg_3 __mlcg_4 x 2"));
+    assert!(text.contains("multi_recv __mlcg_3 __mlcg_4 x 3"));
     assert!(text.contains("recv_out __mlcg_5 x y"));
-    assert!(text.contains("recv_out __mlcg_5 x false"));
+    assert!(text.contains("recv_out __mlcg_5 x 1.5"));
 }
