@@ -190,6 +190,9 @@ fn validate_instruction_names(manifest: &Manifest) -> Result<(), String> {
         if spec.rust_name.is_empty() {
             return Err("instruction has empty rust_name".to_string());
         }
+        if spec.rust_name.trim().is_empty() {
+            return Err("instruction has blank rust_name".to_string());
+        }
     }
 
     Ok(())
@@ -197,9 +200,21 @@ fn validate_instruction_names(manifest: &Manifest) -> Result<(), String> {
 
 fn validate_parameter_names(manifest: &Manifest) -> Result<(), String> {
     for spec in &manifest.instructions {
+        validate_receiver_parameter(spec)?;
         validate_named_parameters(spec, "input", &spec.inputs)?;
         validate_named_parameters(spec, "output", &spec.outputs)?;
         validate_named_parameters(spec, "label", &spec.labels)?;
+    }
+
+    Ok(())
+}
+
+fn validate_receiver_parameter(spec: &InstructionSpec) -> Result<(), String> {
+    if !spec.receiver.is_empty() && spec.receiver.trim().is_empty() {
+        return Err(format!(
+            "instruction `{}` has blank receiver parameter name",
+            spec.rust_name
+        ));
     }
 
     Ok(())
@@ -213,6 +228,12 @@ fn validate_named_parameters(
     if names.iter().any(String::is_empty) {
         return Err(format!(
             "instruction `{}` has empty {kind} parameter name",
+            spec.rust_name
+        ));
+    }
+    if names.iter().any(|name| name.trim().is_empty()) {
+        return Err(format!(
+            "instruction `{}` has blank {kind} parameter name",
             spec.rust_name
         ));
     }

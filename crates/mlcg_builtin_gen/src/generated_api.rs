@@ -29,6 +29,11 @@ fn validate_instruction_names(manifest: &Manifest) -> Result<(), GenerateError> 
                 message: "instruction has empty rust_name".to_string(),
             });
         }
+        if instruction.rust_name.trim().is_empty() {
+            return Err(GenerateError::GeneratedApi {
+                message: "instruction has blank rust_name".to_string(),
+            });
+        }
     }
 
     Ok(())
@@ -36,9 +41,23 @@ fn validate_instruction_names(manifest: &Manifest) -> Result<(), GenerateError> 
 
 fn validate_parameter_names(manifest: &Manifest) -> Result<(), GenerateError> {
     for instruction in &manifest.instructions {
+        validate_receiver_parameter(instruction)?;
         validate_named_parameters(instruction, "input", &instruction.inputs)?;
         validate_named_parameters(instruction, "output", &instruction.outputs)?;
         validate_named_parameters(instruction, "label", &instruction.labels)?;
+    }
+
+    Ok(())
+}
+
+fn validate_receiver_parameter(instruction: &Instruction) -> Result<(), GenerateError> {
+    if !instruction.receiver.is_empty() && instruction.receiver.trim().is_empty() {
+        return Err(GenerateError::GeneratedApi {
+            message: format!(
+                "instruction `{}` has blank receiver parameter name",
+                instruction.rust_name
+            ),
+        });
     }
 
     Ok(())
@@ -53,6 +72,14 @@ fn validate_named_parameters(
         return Err(GenerateError::GeneratedApi {
             message: format!(
                 "instruction `{}` has empty {kind} parameter name",
+                instruction.rust_name
+            ),
+        });
+    }
+    if names.iter().any(|name| name.trim().is_empty()) {
+        return Err(GenerateError::GeneratedApi {
+            message: format!(
+                "instruction `{}` has blank {kind} parameter name",
                 instruction.rust_name
             ),
         });

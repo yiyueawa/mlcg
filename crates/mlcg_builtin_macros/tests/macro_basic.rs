@@ -489,6 +489,85 @@ outputs = []
     )
     .expect("write trybuild empty input name manifest");
 
+    let blank_rust_name_manifest = r#"
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "bad"
+rust_name = " "
+emit = ["bad"]
+receiver = ""
+inputs = []
+outputs = []
+"#;
+    let blank_rust_name_manifest_path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/blank_rust_name_manifest.toml");
+    fs::write(&blank_rust_name_manifest_path, blank_rust_name_manifest)
+        .expect("write blank rust name manifest");
+    let trybuild_blank_rust_name_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(
+        "../../target/tests/trybuild/mlcg_builtin_macros/tests/blank_rust_name_manifest.toml",
+    );
+    fs::write(
+        &trybuild_blank_rust_name_manifest_path,
+        blank_rust_name_manifest,
+    )
+    .expect("write trybuild blank rust name manifest");
+
+    let blank_input_name_manifest = r#"
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "bad"
+rust_name = "bad"
+emit = ["bad", "$ "]
+receiver = ""
+inputs = [" "]
+outputs = []
+"#;
+    let blank_input_name_manifest_path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/blank_input_name_manifest.toml");
+    fs::write(&blank_input_name_manifest_path, blank_input_name_manifest)
+        .expect("write blank input name manifest");
+    let trybuild_blank_input_name_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(
+        "../../target/tests/trybuild/mlcg_builtin_macros/tests/blank_input_name_manifest.toml",
+    );
+    fs::write(
+        &trybuild_blank_input_name_manifest_path,
+        blank_input_name_manifest,
+    )
+    .expect("write trybuild blank input name manifest");
+
+    let blank_receiver_name_manifest = r#"
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "bad"
+rust_name = "bad"
+emit = ["bad", "$ "]
+receiver = " "
+inputs = []
+outputs = []
+"#;
+    let blank_receiver_name_manifest_path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/blank_receiver_name_manifest.toml");
+    fs::write(
+        &blank_receiver_name_manifest_path,
+        blank_receiver_name_manifest,
+    )
+    .expect("write blank receiver name manifest");
+    let trybuild_blank_receiver_name_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join(
+        "../../target/tests/trybuild/mlcg_builtin_macros/tests/blank_receiver_name_manifest.toml",
+    );
+    fs::write(
+        &trybuild_blank_receiver_name_manifest_path,
+        blank_receiver_name_manifest,
+    )
+    .expect("write trybuild blank receiver name manifest");
+
     let t = trybuild::TestCases::new();
     t.pass("tests/ui/pass_macro_basic.rs");
     t.pass("tests/ui/pass_std_trait_name.rs");
@@ -508,4 +587,7 @@ outputs = []
     t.compile_fail("tests/ui/fail_non_emitted_parameter.rs");
     t.compile_fail("tests/ui/fail_empty_rust_name.rs");
     t.compile_fail("tests/ui/fail_empty_input_name.rs");
+    t.compile_fail("tests/ui/fail_blank_rust_name.rs");
+    t.compile_fail("tests/ui/fail_blank_input_name.rs");
+    t.compile_fail("tests/ui/fail_blank_receiver_name.rs");
 }
