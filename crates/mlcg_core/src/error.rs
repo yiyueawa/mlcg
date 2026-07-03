@@ -27,6 +27,15 @@ pub enum EmitError {
     #[snafu(display("unknown value {value:?}"))]
     UnknownValue { value: ValueId },
 
+    #[snafu(display("empty value name for {value:?}"))]
+    EmptyValueName { value: ValueId },
+
+    #[snafu(display("blank value name for {value:?}"))]
+    BlankValueName { value: ValueId },
+
+    #[snafu(display("value name `{name}` contains whitespace for {value:?}"))]
+    WhitespaceValueName { value: ValueId, name: String },
+
     #[snafu(display("unresolved processor token"))]
     UnresolvedProcessorToken,
 

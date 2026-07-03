@@ -179,11 +179,34 @@ impl<P: 'static> ProcessorHandle<P> {
         let mut allocator = NameAllocator::default();
         let mut value_names = BTreeMap::new();
         for (id, hint) in &state.values {
+            validate_value_name_hint(*id, hint.as_deref())?;
             value_names.insert(*id, allocator.name_for(*id, hint.as_deref()));
         }
 
         emit_partial(&partial, self, &labels, &value_names)
     }
+}
+
+fn validate_value_name_hint(id: ValueId, hint: Option<&str>) -> Result<(), EmitError> {
+    let Some(name) = hint else {
+        return Ok(());
+    };
+
+    if name.is_empty() {
+        return emit_error::EmptyValueNameSnafu { value: id }.fail();
+    }
+    if name.trim().is_empty() {
+        return emit_error::BlankValueNameSnafu { value: id }.fail();
+    }
+    if name.chars().any(char::is_whitespace) {
+        return emit_error::WhitespaceValueNameSnafu {
+            value: id,
+            name: name.to_string(),
+        }
+        .fail();
+    }
+
+    Ok(())
 }
 
 fn next_value_id() -> ValueId {

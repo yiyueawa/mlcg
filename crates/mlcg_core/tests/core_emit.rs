@@ -205,6 +205,34 @@ fn explicit_mlcg_base_name_is_preserved() {
 }
 
 #[test]
+fn empty_explicit_value_name_is_an_emit_error() {
+    let processor = Processor::<TestProcessor>::new();
+    let value = processor.named("");
+    processor.push(PrintValue(value));
+
+    let error = processor
+        .emit()
+        .expect_err("empty explicit value names must not be silently rewritten");
+
+    assert!(error.to_string().contains("empty value name"));
+}
+
+#[test]
+fn whitespace_explicit_value_name_is_an_emit_error() {
+    let processor = Processor::<TestProcessor>::new();
+    let value = processor.named("bad name");
+    processor.push(PrintValue(value));
+
+    let error = processor
+        .emit()
+        .expect_err("whitespace in explicit value names would corrupt mlog token boundaries");
+
+    assert!(error
+        .to_string()
+        .contains("value name `bad name` contains whitespace"));
+}
+
+#[test]
 fn foreign_processor_label_does_not_alias_local_label_with_same_type() {
     let local_processor = Processor::<TestProcessor>::new();
     let foreign_processor = Processor::<TestProcessor>::new();
