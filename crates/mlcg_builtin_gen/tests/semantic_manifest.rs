@@ -208,6 +208,61 @@ fn derives_receiver_and_output_roles_from_field_names() {
 }
 
 #[test]
+fn normalizes_generated_rust_names_from_source_symbols() {
+    let source = r#"
+        @RegisterStatement("odd-op")
+        public static class OddOpStatement extends LStatement{
+            public StrangeOp op = StrangeOp.two__words;
+            public String result = "result", lhs = "a", rhs = "b";
+            @Override public LInstruction build(LAssembler builder){ return new OddOpI(op, builder.var(result), builder.var(lhs), builder.var(rhs)); }
+        }
+    "#;
+
+    let mut raw = scan_raw_statements("fixture", source).expect("scan succeeds");
+    raw.enums = vec![RawEnum {
+        name: "StrangeOp".to_string(),
+        variants: vec!["two--words".to_string()],
+        arities: [("two--words".to_string(), 2)].into_iter().collect(),
+    }];
+
+    let manifest = derive_semantic_manifest(&raw);
+
+    assert!(
+        manifest
+            .instructions
+            .iter()
+            .any(|instruction| instruction.rust_name == "odd_op_two_words"),
+        "generated rust name should collapse separators"
+    );
+
+    let source = r#"
+        @RegisterStatement("2-op")
+        public static class NumberedOpStatement extends LStatement{
+            public StrangeOp op = StrangeOp.three;
+            public String result = "result", lhs = "a", rhs = "b";
+            @Override public LInstruction build(LAssembler builder){ return new NumberedOpI(op, builder.var(result), builder.var(lhs), builder.var(rhs)); }
+        }
+    "#;
+
+    let mut raw = scan_raw_statements("fixture", source).expect("scan succeeds");
+    raw.enums = vec![RawEnum {
+        name: "StrangeOp".to_string(),
+        variants: vec!["3-way".to_string()],
+        arities: [("3-way".to_string(), 2)].into_iter().collect(),
+    }];
+
+    let manifest = derive_semantic_manifest(&raw);
+
+    assert!(
+        manifest
+            .instructions
+            .iter()
+            .any(|instruction| instruction.rust_name == "symbol_2_op_symbol_3_way"),
+        "generated rust name should not start any segment with a digit"
+    );
+}
+
+#[test]
 fn avoids_fallback_receiver_for_plain_output_queries_without_preferred_subject() {
     let source = r#"
         @RegisterStatement("link_like")

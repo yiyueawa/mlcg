@@ -356,13 +356,28 @@ fn rust_name(statement: &RawStatement, enum_selections: &[EnumSelection]) -> Str
 }
 
 fn sanitize_name(name: &str) -> String {
-    name.chars()
-        .map(|ch| {
-            if ch.is_ascii_alphanumeric() {
-                ch.to_ascii_lowercase()
-            } else {
-                '_'
-            }
-        })
-        .collect()
+    let mut out = String::new();
+    let mut last_was_separator = true;
+
+    for ch in name.chars() {
+        if ch.is_ascii_alphanumeric() {
+            out.push(ch.to_ascii_lowercase());
+            last_was_separator = false;
+        } else if !last_was_separator {
+            out.push('_');
+            last_was_separator = true;
+        }
+    }
+
+    if out.ends_with('_') {
+        out.pop();
+    }
+
+    if out.is_empty() {
+        "symbol".to_string()
+    } else if out.starts_with(|ch: char| ch.is_ascii_digit()) {
+        format!("symbol_{out}")
+    } else {
+        out
+    }
 }
