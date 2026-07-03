@@ -3,13 +3,13 @@ use snafu::ResultExt;
 
 use crate::{error::GenerateError, error::SerializeSnafu};
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Manifest {
     pub version: String,
     pub instructions: Vec<Instruction>,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Instruction {
     pub family: String,
     pub variant: String,

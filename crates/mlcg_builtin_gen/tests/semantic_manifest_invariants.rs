@@ -3,7 +3,18 @@ use std::fs;
 use mlcg_builtin_gen::{
     generated_api::validate_generated_rust_api_symbols,
     manifest::{Instruction, Manifest},
+    raw_statement::RawStatementManifest,
+    semantic_manifest::derive_semantic_manifest,
 };
+
+#[test]
+fn v158_1_semantic_manifest_matches_raw_manifest_derivation() {
+    let raw = read_v158_1_raw_manifest();
+    let derived = derive_semantic_manifest(&raw);
+    let committed = read_v158_1_manifest();
+
+    assert_eq!(derived, committed);
+}
 
 #[test]
 fn v158_1_semantic_manifest_classifies_every_emit_placeholder() {
@@ -91,6 +102,15 @@ fn read_v158_1_manifest() -> Manifest {
     );
     toml::from_str(&fs::read_to_string(manifest_path).expect("read v158.1 manifest"))
         .expect("parse v158.1 manifest")
+}
+
+fn read_v158_1_raw_manifest() -> RawStatementManifest {
+    let manifest_path = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../mlcg_builtin/manifests/raw/v158_1_statements.toml"
+    );
+    toml::from_str(&fs::read_to_string(manifest_path).expect("read v158.1 raw manifest"))
+        .expect("parse v158.1 raw manifest")
 }
 
 fn emit_placeholders(emit: &[String]) -> Vec<&str> {
