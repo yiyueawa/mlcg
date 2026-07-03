@@ -45,6 +45,9 @@ pub enum EmitError {
     #[snafu(display("raw token `{token}` contains whitespace"))]
     WhitespaceRawToken { token: String },
 
+    #[snafu(display("empty line"))]
+    EmptyLine,
+
     #[snafu(display("unresolved processor token"))]
     UnresolvedProcessorToken,
 

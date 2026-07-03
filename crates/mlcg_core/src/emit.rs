@@ -51,6 +51,10 @@ pub(crate) fn emit_partial<P: 'static>(
 ) -> Result<String, EmitError> {
     let mut out = String::new();
     for (line_index, line) in partial.lines().iter().enumerate() {
+        if line.tokens().is_empty() {
+            return emit_error::EmptyLineSnafu.fail();
+        }
+
         if line_index > 0 {
             out.push('\n');
         }

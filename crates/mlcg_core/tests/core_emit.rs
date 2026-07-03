@@ -86,6 +86,20 @@ impl Instruction<TestProcessor> for TwoLines {
 }
 
 #[derive(Debug)]
+struct EmptyLine;
+
+impl Instruction<TestProcessor> for EmptyLine {
+    fn lower(
+        &self,
+        _ctx: &mut LowerContext<TestProcessor>,
+        out: &mut PartialProgram<TestProcessor>,
+    ) -> Result<(), mlcg_core::LowerError> {
+        out.push_line(PartialLine::new(Vec::new()));
+        Ok(())
+    }
+}
+
+#[derive(Debug)]
 struct PrintValue(Value<TestProcessor>);
 
 impl Instruction<TestProcessor> for PrintValue {
@@ -159,6 +173,18 @@ fn whitespace_raw_token_is_an_emit_error() {
     assert!(error
         .to_string()
         .contains("raw token `bad token` contains whitespace"));
+}
+
+#[test]
+fn empty_partial_line_is_an_emit_error() {
+    let processor = Processor::<TestProcessor>::new();
+    processor.push(EmptyLine);
+
+    let error = processor
+        .emit()
+        .expect_err("empty partial lines must not create blank mlog lines");
+
+    assert!(error.to_string().contains("empty line"));
 }
 
 #[test]
