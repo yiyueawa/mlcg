@@ -50,7 +50,10 @@ fn main() {
     processor.multi_into(owned_multi_tuple, 12u32);
     let borrowed_owned_multi_tuple = (multi.outA.clone(), multi.outB.clone());
     processor.multi_into(&borrowed_owned_multi_tuple, 14u32);
-    let typed_targets = (processor.named("typed_a").cast::<Marker>(), processor.named("typed_b").cast::<Marker>());
+    let typed_targets = (
+        processor.named("typed_a").cast::<Marker>(),
+        processor.named("typed_b").cast::<Marker>(),
+    );
     processor.multi_into(&typed_targets, 16u32);
     let (tuple_out_a, tuple_out_b) = processor.multi(typed_x.clone()).into_tuple();
     processor.multi_into((tuple_out_a, tuple_out_b), 4u32);
