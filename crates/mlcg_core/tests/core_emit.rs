@@ -136,6 +136,32 @@ fn labels_resolve_after_multiline_lowering() {
 }
 
 #[test]
+fn empty_raw_token_is_an_emit_error() {
+    let processor = Processor::<TestProcessor>::new();
+    processor.push(RawLine(&["print", ""]));
+
+    let error = processor
+        .emit()
+        .expect_err("empty raw tokens must not create ambiguous mlog");
+
+    assert!(error.to_string().contains("empty raw token"));
+}
+
+#[test]
+fn whitespace_raw_token_is_an_emit_error() {
+    let processor = Processor::<TestProcessor>::new();
+    processor.push(RawLine(&["print", "bad token"]));
+
+    let error = processor
+        .emit()
+        .expect_err("raw tokens containing whitespace would corrupt mlog token boundaries");
+
+    assert!(error
+        .to_string()
+        .contains("raw token `bad token` contains whitespace"));
+}
+
+#[test]
 fn unplaced_label_is_an_emit_error() {
     let processor = Processor::<TestProcessor>::new();
     let missing = processor.label();

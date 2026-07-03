@@ -36,6 +36,15 @@ pub enum EmitError {
     #[snafu(display("value name `{name}` contains whitespace for {value:?}"))]
     WhitespaceValueName { value: ValueId, name: String },
 
+    #[snafu(display("empty raw token"))]
+    EmptyRawToken,
+
+    #[snafu(display("blank raw token"))]
+    BlankRawToken,
+
+    #[snafu(display("raw token `{token}` contains whitespace"))]
+    WhitespaceRawToken { token: String },
+
     #[snafu(display("unresolved processor token"))]
     UnresolvedProcessorToken,
 

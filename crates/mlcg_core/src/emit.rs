@@ -59,7 +59,10 @@ pub(crate) fn emit_partial<P: 'static>(
                 out.push(' ');
             }
             match token {
-                PartialToken::Raw(raw) => out.push_str(raw),
+                PartialToken::Raw(raw) => {
+                    validate_raw_token(raw)?;
+                    out.push_str(raw);
+                }
                 PartialToken::Value(value) => {
                     if !value.belongs_to(handle) {
                         return emit_error::ForeignValueSnafu { value: value.id() }.fail();
@@ -85,4 +88,21 @@ pub(crate) fn emit_partial<P: 'static>(
         }
     }
     Ok(out)
+}
+
+fn validate_raw_token(token: &str) -> Result<(), EmitError> {
+    if token.is_empty() {
+        return emit_error::EmptyRawTokenSnafu.fail();
+    }
+    if token.trim().is_empty() {
+        return emit_error::BlankRawTokenSnafu.fail();
+    }
+    if token.chars().any(char::is_whitespace) {
+        return emit_error::WhitespaceRawTokenSnafu {
+            token: token.to_string(),
+        }
+        .fail();
+    }
+
+    Ok(())
 }
