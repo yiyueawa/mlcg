@@ -291,6 +291,40 @@ fn applies_transitive_superclass_constructor_defaults() {
 }
 
 #[test]
+fn subclass_field_hides_superclass_field_with_same_name() {
+    let source = r#"
+        public static class BaseStatement extends LStatement{
+            public String value = "base";
+        }
+
+        @RegisterStatement("hidden")
+        public static class HiddenStatement extends BaseStatement{
+            public String value = "child", output = "result";
+            @Override public LInstruction build(LAssembler builder){
+                return new HiddenI(builder.var(value), builder.var(output));
+            }
+        }
+    "#;
+
+    let manifest = scan_raw_statements("fixture", source).expect("scan succeeds");
+    let hidden = manifest
+        .statements
+        .iter()
+        .find(|statement| statement.name == "hidden")
+        .expect("hidden exists");
+    let fields: Vec<_> = hidden
+        .fields
+        .iter()
+        .map(|field| (field.name.as_str(), field.default.as_deref()))
+        .collect();
+
+    assert_eq!(
+        fields,
+        [("value", Some("child")), ("output", Some("result"))]
+    );
+}
+
+#[test]
 fn ignores_fields_that_only_appear_inside_build_string_literals() {
     let source = r#"
         @RegisterStatement("literal")

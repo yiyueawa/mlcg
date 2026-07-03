@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use serde::{Deserialize, Serialize};
 use snafu::OptionExt;
@@ -289,6 +289,7 @@ fn parse_fields_with_superclasses(
     let mut fields = parse_fields(body);
     fields.extend(superclass_fields(classes, class));
     apply_constructor_defaults(class, body, &mut fields);
+    remove_hidden_fields(&mut fields);
     fields
 }
 
@@ -316,6 +317,11 @@ fn apply_constructor_defaults(class: &str, body: &str, fields: &mut [RawField]) 
             field.default = Some(default.clone());
         }
     }
+}
+
+fn remove_hidden_fields(fields: &mut Vec<RawField>) {
+    let mut seen = BTreeSet::new();
+    fields.retain(|field| seen.insert(field.name.clone()));
 }
 
 fn parse_constructor_assignments(class: &str, body: &str) -> BTreeMap<String, String> {
