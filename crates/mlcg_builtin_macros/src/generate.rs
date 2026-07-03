@@ -103,36 +103,72 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
             fn from(value: i32) -> Self { Self::Raw(value.to_string()) }
         }
 
+        impl<P> ::std::convert::From<&i32> for Arg<P> {
+            fn from(value: &i32) -> Self { Self::Raw(value.to_string()) }
+        }
+
         impl<P> ::std::convert::From<i64> for Arg<P> {
             fn from(value: i64) -> Self { Self::Raw(value.to_string()) }
+        }
+
+        impl<P> ::std::convert::From<&i64> for Arg<P> {
+            fn from(value: &i64) -> Self { Self::Raw(value.to_string()) }
         }
 
         impl<P> ::std::convert::From<isize> for Arg<P> {
             fn from(value: isize) -> Self { Self::Raw(value.to_string()) }
         }
 
+        impl<P> ::std::convert::From<&isize> for Arg<P> {
+            fn from(value: &isize) -> Self { Self::Raw(value.to_string()) }
+        }
+
         impl<P> ::std::convert::From<u32> for Arg<P> {
             fn from(value: u32) -> Self { Self::Raw(value.to_string()) }
+        }
+
+        impl<P> ::std::convert::From<&u32> for Arg<P> {
+            fn from(value: &u32) -> Self { Self::Raw(value.to_string()) }
         }
 
         impl<P> ::std::convert::From<u64> for Arg<P> {
             fn from(value: u64) -> Self { Self::Raw(value.to_string()) }
         }
 
+        impl<P> ::std::convert::From<&u64> for Arg<P> {
+            fn from(value: &u64) -> Self { Self::Raw(value.to_string()) }
+        }
+
         impl<P> ::std::convert::From<usize> for Arg<P> {
             fn from(value: usize) -> Self { Self::Raw(value.to_string()) }
+        }
+
+        impl<P> ::std::convert::From<&usize> for Arg<P> {
+            fn from(value: &usize) -> Self { Self::Raw(value.to_string()) }
         }
 
         impl<P> ::std::convert::From<bool> for Arg<P> {
             fn from(value: bool) -> Self { Self::Raw(value.to_string()) }
         }
 
+        impl<P> ::std::convert::From<&bool> for Arg<P> {
+            fn from(value: &bool) -> Self { Self::Raw(value.to_string()) }
+        }
+
         impl<P> ::std::convert::From<f64> for Arg<P> {
             fn from(value: f64) -> Self { Self::Raw(value.to_string()) }
         }
 
+        impl<P> ::std::convert::From<&f64> for Arg<P> {
+            fn from(value: &f64) -> Self { Self::Raw(value.to_string()) }
+        }
+
         impl<P> ::std::convert::From<f32> for Arg<P> {
             fn from(value: f32) -> Self { Self::Raw(value.to_string()) }
+        }
+
+        impl<P> ::std::convert::From<&f32> for Arg<P> {
+            fn from(value: &f32) -> Self { Self::Raw(value.to_string()) }
         }
 
         impl<P> ::std::convert::From<&str> for Arg<P> {

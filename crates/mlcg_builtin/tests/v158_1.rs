@@ -4,6 +4,7 @@ use mlcg_core::Processor;
 struct P;
 
 #[test]
+#[allow(clippy::needless_borrows_for_generic_args)]
 fn generated_v158_1_api_emits_mlog_program() {
     let processor = Processor::<P>::new();
     let x = processor.named("x");
@@ -13,6 +14,8 @@ fn generated_v158_1_api_emits_mlog_program() {
     let sum = processor.op_add(x.clone(), y.clone());
     let inverted = processor.op_not(sum.clone());
     processor.op_add_into(inverted.clone(), sum, 2);
+    let borrowed_increment = 3u32;
+    processor.op_add_into(inverted.clone(), x.clone(), &borrowed_increment);
     processor.print("message");
     let borrowed_message = String::from("borrowed_message");
     processor.print(&borrowed_message);
@@ -31,6 +34,15 @@ fn generated_v158_1_api_emits_mlog_program() {
     processor.ulocate_building_into(&located_tuple, "@core", true, "@copper");
     let radar_target = processor.uradar("enemy", "any", "any", "distance", true);
     processor.uradar_into(radar_target.clone(), "enemy", "any", "any", "health", false);
+    let borrowed_sort_order = true;
+    processor.uradar_into(
+        radar_target.clone(),
+        "enemy",
+        "any",
+        "any",
+        "health",
+        &borrowed_sort_order,
+    );
     processor.print(value_read);
     processor.print(value_sum);
     processor.print(sensed);
@@ -49,7 +61,7 @@ fn generated_v158_1_api_emits_mlog_program() {
 
     assert_eq!(
         output,
-        "set x 1\nop add __mlcg_0 x y\nop not __mlcg_1 __mlcg_0 0\nop add __mlcg_1 __mlcg_0 2\nprint message\nprint borrowed_message\nread __mlcg_2 cell1 0\nread x cell1 1\nprint __mlcg_2\nread __mlcg_3 cell 2\nop add __mlcg_4 x y\nwrite x cell 3\nsensor __mlcg_5 cell @enabled\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nuradar enemy any any distance 0 true __mlcg_10\nuradar enemy any any health 0 false __mlcg_10\nprint __mlcg_3\nprint __mlcg_4\nprint __mlcg_5\nprint __mlcg_10\nprint __mlcg_6\nprint __mlcg_7\nprint __mlcg_8\nprint __mlcg_9\njump 29 equal x 1\nprint before_done\nprint after_done"
+        "set x 1\nop add __mlcg_0 x y\nop not __mlcg_1 __mlcg_0 0\nop add __mlcg_1 __mlcg_0 2\nop add __mlcg_1 x 3\nprint message\nprint borrowed_message\nread __mlcg_2 cell1 0\nread x cell1 1\nprint __mlcg_2\nread __mlcg_3 cell 2\nop add __mlcg_4 x y\nwrite x cell 3\nsensor __mlcg_5 cell @enabled\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nuradar enemy any any distance 0 true __mlcg_10\nuradar enemy any any health 0 false __mlcg_10\nuradar enemy any any health 0 true __mlcg_10\nprint __mlcg_3\nprint __mlcg_4\nprint __mlcg_5\nprint __mlcg_10\nprint __mlcg_6\nprint __mlcg_7\nprint __mlcg_8\nprint __mlcg_9\njump 31 equal x 1\nprint before_done\nprint after_done"
     );
 }
 
