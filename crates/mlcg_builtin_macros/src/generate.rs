@@ -465,6 +465,7 @@ fn generate_output_struct(spec: &InstructionSpec) -> TokenStream {
         .map(|field| quote! { #field: #field.into().0 });
     let from_tuple_types = field_generics.iter();
     let from_tuple_fields = (0..field_idents.len()).map(syn::Index::from);
+    let from_borrowed_tuple_fields = (0..field_idents.len()).map(syn::Index::from);
 
     quote! {
         #[allow(non_snake_case)]
@@ -513,6 +514,12 @@ fn generate_output_struct(spec: &InstructionSpec) -> TokenStream {
         {
             fn from(value: (#(#field_generics,)*)) -> Self {
                 Self::new(#(value.#from_tuple_fields,)*)
+            }
+        }
+
+        impl<'a, P> ::std::convert::From<&'a (#(#tuple_types,)*)> for #output_struct<P> {
+            fn from(value: &'a (#(#tuple_types,)*)) -> Self {
+                Self::new(#(&value.#from_borrowed_tuple_fields,)*)
             }
         }
 
