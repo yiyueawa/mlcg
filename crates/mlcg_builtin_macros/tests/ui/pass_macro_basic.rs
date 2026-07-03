@@ -6,7 +6,8 @@ mod generated {
 
 use generated::prelude::{
     Arg, MultiOutput, MultiRecvOutput, ProcessorMultiExt, ProcessorMultiRecvExt,
-    ProcessorOpAddExt, ProcessorSetExt, ValueMultiRecvExt, ValueSetExt,
+    ProcessorOpAddExt, ProcessorRecvOutExt, ProcessorSetExt, ValueMultiRecvExt, ValueRecvOutExt,
+    ValueSetExt,
 };
 
 struct P;
@@ -14,8 +15,12 @@ struct P;
 fn assert_imported()
 where
     Arg<P>: Sized,
-    Processor<P>: ProcessorSetExt<P> + ProcessorOpAddExt<P> + ProcessorMultiExt<P> + ProcessorMultiRecvExt<P>,
-    Value<P>: ValueSetExt<P> + ValueMultiRecvExt<P>,
+    Processor<P>: ProcessorSetExt<P>
+        + ProcessorOpAddExt<P>
+        + ProcessorMultiExt<P>
+        + ProcessorMultiRecvExt<P>
+        + ProcessorRecvOutExt<P>,
+    Value<P>: ValueSetExt<P> + ValueMultiRecvExt<P> + ValueRecvOutExt<P>,
 {
 }
 
@@ -34,6 +39,8 @@ fn main() {
     processor.multi_into(multi.outA.clone(), multi.outB.clone(), y.clone());
     let multi_recv: MultiRecvOutput<P> = x.multi_recv(y.clone());
     x.multi_recv_into(multi_recv.outA.clone(), multi_recv.outB.clone(), 2);
+    let recv_out = x.recv_out(y.clone());
+    x.recv_out_into(recv_out.clone(), false);
 
     let text = processor.emit().unwrap();
     assert!(text.contains("set x 1"));
@@ -43,4 +50,6 @@ fn main() {
     assert!(text.contains("multi __mlcg_1 __mlcg_2 y"));
     assert!(text.contains("multi_recv __mlcg_3 __mlcg_4 x y"));
     assert!(text.contains("multi_recv __mlcg_3 __mlcg_4 x 2"));
+    assert!(text.contains("recv_out __mlcg_5 x y"));
+    assert!(text.contains("recv_out __mlcg_5 x false"));
 }

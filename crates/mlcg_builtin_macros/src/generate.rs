@@ -456,14 +456,18 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
     if spec.outputs.len() == 1 {
         let output_ident = safe_ident(&spec.outputs[0]);
         quote! {
-            #[allow(clippy::too_many_arguments)]
+            #[allow(clippy::too_many_arguments, non_snake_case)]
             pub trait #trait_name<P> {
                 fn #method<#(#input_generics,)*>(&self, #(#input_params_sig,)*) -> Value<P>
                 where
                     #(#input_where,)*;
+
+                fn #into_method<#(#explicit_value_generics,)*>(&self, #(#explicit_value_params_sig,)*)
+                where
+                    #(#explicit_value_where,)*;
             }
 
-            #[allow(clippy::too_many_arguments)]
+            #[allow(clippy::too_many_arguments, non_snake_case)]
             impl<P> #trait_name<P> for Value<P>
             where
                 P: ::std::marker::Send + ::std::marker::Sync + 'static,
@@ -479,6 +483,13 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
                         #(#fields,)*
                     });
                     #output_ident
+                }
+
+                fn #into_method<#(#explicit_value_generics,)*>(&self, #(#explicit_value_params_sig,)*)
+                where
+                    #(#explicit_value_where,)*
+                {
+                    self.handle().push(#struct_name { _processor: ::std::marker::PhantomData, #(#explicit_value_fields,)* });
                 }
             }
         }
