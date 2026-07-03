@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use mlcg_core::Processor;
 
 struct TestProcessor;
@@ -27,8 +29,6 @@ fn values_can_be_retagged_without_changing_identity() {
     assert_eq!(erased.id(), named.id());
     assert_eq!(erased.name_hint().as_deref(), Some("x"));
 }
-
-use std::marker::PhantomData;
 
 use mlcg_core::{
     Instruction, Label, LowerContext, PartialLine, PartialProgram, PartialToken, Value,
