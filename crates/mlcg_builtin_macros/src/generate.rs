@@ -458,6 +458,12 @@ fn generate_output_struct(spec: &InstructionSpec) -> TokenStream {
                 Self::new(#(value.#from_tuple_fields,)*)
             }
         }
+
+        impl<P> From<&#output_struct<P>> for #output_struct<P> {
+            fn from(value: &#output_struct<P>) -> Self {
+                value.clone()
+            }
+        }
     }
 }
 
