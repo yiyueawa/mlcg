@@ -265,6 +265,31 @@ fn generated_rust_api_symbol_validation_rejects_invalid_parameter_identifier() {
 }
 
 #[test]
+fn generated_rust_api_symbol_validation_rejects_emit_token_with_whitespace() {
+    let manifest = Manifest {
+        version: "fixture".to_string(),
+        instructions: vec![Instruction {
+            family: "fixture".to_string(),
+            variant: "bad".to_string(),
+            rust_name: "bad".to_string(),
+            emit: strings(["bad token"]),
+            receiver: String::new(),
+            inputs: Vec::new(),
+            outputs: Vec::new(),
+            labels: Vec::new(),
+        }],
+    };
+
+    let error = validate_generated_rust_api_symbols(&manifest)
+        .expect_err("emit token with whitespace is rejected");
+
+    assert_eq!(
+        error.to_string(),
+        "instruction `bad` emits token `bad token` containing whitespace"
+    );
+}
+
+#[test]
 fn generated_rust_api_symbol_validation_rejects_blank_receiver_name() {
     let manifest = Manifest {
         version: "fixture".to_string(),

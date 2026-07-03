@@ -11,6 +11,7 @@ const RESERVED_ITEM_SYMBOLS: &[&str] = &["Arg", "OutputArg", "LabelArg"];
 pub fn validate_generated_rust_api_symbols(manifest: &Manifest) -> Result<(), GenerateError> {
     validate_instruction_names(manifest)?;
     validate_parameter_names(manifest)?;
+    validate_emit_tokens(manifest)?;
     validate_generated_identifiers(manifest)?;
     validate_item_symbols(manifest)?;
     validate_processor_methods(manifest)?;
@@ -34,6 +35,33 @@ fn validate_instruction_names(manifest: &Manifest) -> Result<(), GenerateError> 
             return Err(GenerateError::GeneratedApi {
                 message: "instruction has blank rust_name".to_string(),
             });
+        }
+    }
+
+    Ok(())
+}
+
+fn validate_emit_tokens(manifest: &Manifest) -> Result<(), GenerateError> {
+    for instruction in &manifest.instructions {
+        for token in &instruction.emit {
+            if token.is_empty() {
+                return Err(GenerateError::GeneratedApi {
+                    message: format!("instruction `{}` emits empty token", instruction.rust_name),
+                });
+            }
+            if token.trim().is_empty() {
+                return Err(GenerateError::GeneratedApi {
+                    message: format!("instruction `{}` emits blank token", instruction.rust_name),
+                });
+            }
+            if token.chars().any(char::is_whitespace) {
+                return Err(GenerateError::GeneratedApi {
+                    message: format!(
+                        "instruction `{}` emits token `{token}` containing whitespace",
+                        instruction.rust_name
+                    ),
+                });
+            }
         }
     }
 

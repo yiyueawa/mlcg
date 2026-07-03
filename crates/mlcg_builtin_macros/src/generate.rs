@@ -174,6 +174,7 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
 fn validate_manifest(manifest: &Manifest) -> Result<(), String> {
     validate_instruction_names(manifest)?;
     validate_parameter_names(manifest)?;
+    validate_emit_tokens(manifest)?;
     validate_generated_identifiers(manifest)?;
     validate_item_symbols(manifest)?;
     validate_processor_methods(manifest)?;
@@ -193,6 +194,33 @@ fn validate_instruction_names(manifest: &Manifest) -> Result<(), String> {
         }
         if spec.rust_name.trim().is_empty() {
             return Err("instruction has blank rust_name".to_string());
+        }
+    }
+
+    Ok(())
+}
+
+fn validate_emit_tokens(manifest: &Manifest) -> Result<(), String> {
+    for spec in &manifest.instructions {
+        for token in &spec.emit {
+            if token.is_empty() {
+                return Err(format!(
+                    "instruction `{}` emits empty token",
+                    spec.rust_name
+                ));
+            }
+            if token.trim().is_empty() {
+                return Err(format!(
+                    "instruction `{}` emits blank token",
+                    spec.rust_name
+                ));
+            }
+            if token.chars().any(char::is_whitespace) {
+                return Err(format!(
+                    "instruction `{}` emits token `{token}` containing whitespace",
+                    spec.rust_name
+                ));
+            }
         }
     }
 

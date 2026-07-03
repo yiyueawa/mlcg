@@ -621,6 +621,35 @@ outputs = []
     )
     .expect("write trybuild invalid input name manifest");
 
+    let whitespace_emit_token_manifest = r#"
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "bad"
+rust_name = "bad"
+emit = ["bad token"]
+receiver = ""
+inputs = []
+outputs = []
+"#;
+    let whitespace_emit_token_manifest_path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/whitespace_emit_token_manifest.toml");
+    fs::write(
+        &whitespace_emit_token_manifest_path,
+        whitespace_emit_token_manifest,
+    )
+    .expect("write whitespace emit token manifest");
+    let trybuild_whitespace_emit_token_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join(
+        "../../target/tests/trybuild/mlcg_builtin_macros/tests/whitespace_emit_token_manifest.toml",
+    );
+    fs::write(
+        &trybuild_whitespace_emit_token_manifest_path,
+        whitespace_emit_token_manifest,
+    )
+    .expect("write trybuild whitespace emit token manifest");
+
     let t = trybuild::TestCases::new();
     t.pass("tests/ui/pass_macro_basic.rs");
     t.pass("tests/ui/pass_std_trait_name.rs");
@@ -645,4 +674,5 @@ outputs = []
     t.compile_fail("tests/ui/fail_blank_receiver_name.rs");
     t.compile_fail("tests/ui/fail_invalid_rust_name.rs");
     t.compile_fail("tests/ui/fail_invalid_input_name.rs");
+    t.compile_fail("tests/ui/fail_whitespace_emit_token.rs");
 }
