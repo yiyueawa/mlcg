@@ -95,6 +95,31 @@ fn generated_rust_api_symbol_validation_rejects_into_method_collision() {
     );
 }
 
+#[test]
+fn generated_rust_api_symbol_validation_rejects_helper_item_collision() {
+    let manifest = Manifest {
+        version: "fixture".to_string(),
+        instructions: vec![Instruction {
+            family: "fixture".to_string(),
+            variant: "arg".to_string(),
+            rust_name: "arg".to_string(),
+            emit: strings(["arg"]),
+            receiver: String::new(),
+            inputs: Vec::new(),
+            outputs: Vec::new(),
+            labels: Vec::new(),
+        }],
+    };
+
+    let error = validate_generated_rust_api_symbols(&manifest)
+        .expect_err("generated helper item collision is rejected");
+
+    assert_eq!(
+        error.to_string(),
+        "generated item `Arg` for instruction `arg` collides with reserved generated helper `Arg`"
+    );
+}
+
 fn read_v158_1_manifest() -> Manifest {
     let manifest_path = concat!(
         env!("CARGO_MANIFEST_DIR"),

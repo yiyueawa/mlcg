@@ -5,6 +5,9 @@ use quote::{format_ident, quote};
 
 use crate::manifest::{InstructionSpec, Manifest};
 
+const RESERVED_OWNER_PREFIX: &str = "\0reserved:";
+const RESERVED_ITEM_SYMBOLS: &[&str] = &["Arg", "OutputArg", "LabelArg"];
+
 pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
     if let Err(error) = validate_manifest(manifest) {
         return quote! {
@@ -196,6 +199,9 @@ fn validate_manifest(manifest: &Manifest) -> Result<(), String> {
 
 fn validate_item_symbols(manifest: &Manifest) -> Result<(), String> {
     let mut seen = HashMap::new();
+    for symbol in RESERVED_ITEM_SYMBOLS {
+        reserve_manifest_symbol(&mut seen, symbol);
+    }
 
     for spec in &manifest.instructions {
         record_manifest_symbol(&mut seen, "item", struct_name(spec).to_string(), spec)?;
@@ -221,6 +227,10 @@ fn validate_item_symbols(manifest: &Manifest) -> Result<(), String> {
     }
 
     Ok(())
+}
+
+fn reserve_manifest_symbol(seen: &mut HashMap<String, String>, name: &str) {
+    seen.insert(name.to_string(), format!("{RESERVED_OWNER_PREFIX}{name}"));
 }
 
 fn validate_processor_methods(manifest: &Manifest) -> Result<(), String> {
@@ -336,6 +346,12 @@ fn record_manifest_symbol(
     spec: &InstructionSpec,
 ) -> Result<(), String> {
     if let Some(previous) = seen.insert(name.clone(), spec.rust_name.clone()) {
+        if let Some(reserved) = previous.strip_prefix(RESERVED_OWNER_PREFIX) {
+            return Err(format!(
+                "generated {kind} `{name}` for instruction `{}` collides with reserved generated helper `{reserved}`",
+                spec.rust_name
+            ));
+        }
         return Err(format!(
             "generated {kind} `{name}` for instruction `{}` collides with instruction `{previous}`",
             spec.rust_name

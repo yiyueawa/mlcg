@@ -111,10 +111,36 @@ family = "broken"
     fs::write(&trybuild_invalid_manifest_path, invalid_manifest)
         .expect("write trybuild invalid manifest");
 
+    let helper_collision_manifest = r#"
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "arg"
+rust_name = "arg"
+emit = ["arg"]
+receiver = ""
+inputs = []
+outputs = []
+"#;
+    let helper_collision_manifest_path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/helper_collision_manifest.toml");
+    fs::write(&helper_collision_manifest_path, helper_collision_manifest)
+        .expect("write helper collision manifest");
+    let trybuild_helper_collision_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(
+        "../../target/tests/trybuild/mlcg_builtin_macros/tests/helper_collision_manifest.toml",
+    );
+    fs::write(
+        &trybuild_helper_collision_manifest_path,
+        helper_collision_manifest,
+    )
+    .expect("write trybuild helper collision manifest");
+
     let t = trybuild::TestCases::new();
     t.pass("tests/ui/pass_macro_basic.rs");
     t.compile_fail("tests/ui/fail_method_collision.rs");
     t.compile_fail("tests/ui/fail_missing_manifest.rs");
     t.compile_fail("tests/ui/fail_invalid_manifest.rs");
     t.compile_fail("tests/ui/fail_raw_output_argument.rs");
+    t.compile_fail("tests/ui/fail_helper_collision.rs");
 }
