@@ -139,6 +139,10 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
             fn from(value: &str) -> Self { Self::Raw(value.to_string()) }
         }
 
+        impl<P> ::std::convert::From<&::std::string::String> for Arg<P> {
+            fn from(value: &::std::string::String) -> Self { Self::Raw(value.clone()) }
+        }
+
         impl<P> ::std::convert::From<::std::string::String> for Arg<P> {
             fn from(value: ::std::string::String) -> Self { Self::Raw(value) }
         }

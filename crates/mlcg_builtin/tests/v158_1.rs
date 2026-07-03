@@ -14,6 +14,8 @@ fn generated_v158_1_api_emits_mlog_program() {
     let inverted = processor.op_not(sum.clone());
     processor.op_add_into(inverted.clone(), sum, 2);
     processor.print("message");
+    let borrowed_message = String::from("borrowed_message");
+    processor.print(&borrowed_message);
     let read_value = processor.read("cell1", 0);
     processor.read_into(x.clone(), "cell1", 1);
     processor.print(read_value);
@@ -47,7 +49,7 @@ fn generated_v158_1_api_emits_mlog_program() {
 
     assert_eq!(
         output,
-        "set x 1\nop add __mlcg_0 x y\nop not __mlcg_1 __mlcg_0 0\nop add __mlcg_1 __mlcg_0 2\nprint message\nread __mlcg_2 cell1 0\nread x cell1 1\nprint __mlcg_2\nread __mlcg_3 cell 2\nop add __mlcg_4 x y\nwrite x cell 3\nsensor __mlcg_5 cell @enabled\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nuradar enemy any any distance 0 true __mlcg_10\nuradar enemy any any health 0 false __mlcg_10\nprint __mlcg_3\nprint __mlcg_4\nprint __mlcg_5\nprint __mlcg_10\nprint __mlcg_6\nprint __mlcg_7\nprint __mlcg_8\nprint __mlcg_9\njump 28 equal x 1\nprint before_done\nprint after_done"
+        "set x 1\nop add __mlcg_0 x y\nop not __mlcg_1 __mlcg_0 0\nop add __mlcg_1 __mlcg_0 2\nprint message\nprint borrowed_message\nread __mlcg_2 cell1 0\nread x cell1 1\nprint __mlcg_2\nread __mlcg_3 cell 2\nop add __mlcg_4 x y\nwrite x cell 3\nsensor __mlcg_5 cell @enabled\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nuradar enemy any any distance 0 true __mlcg_10\nuradar enemy any any health 0 false __mlcg_10\nprint __mlcg_3\nprint __mlcg_4\nprint __mlcg_5\nprint __mlcg_10\nprint __mlcg_6\nprint __mlcg_7\nprint __mlcg_8\nprint __mlcg_9\njump 29 equal x 1\nprint before_done\nprint after_done"
     );
 }
 
