@@ -315,7 +315,11 @@ fn to_pascal_string(name: &str) -> String {
             out.push_str(chars.as_str());
         }
     }
-    out
+    if is_rust_keyword(&out) {
+        format!("Arg{out}")
+    } else {
+        out
+    }
 }
 
 fn safe_ident(name: &str) -> String {

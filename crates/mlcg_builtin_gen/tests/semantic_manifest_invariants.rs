@@ -145,6 +145,43 @@ fn generated_rust_api_symbol_validation_reports_multi_output_field_collision_as_
     );
 }
 
+#[test]
+fn generated_rust_api_symbol_validation_rejects_keyword_item_collision_after_escaping() {
+    let manifest = Manifest {
+        version: "fixture".to_string(),
+        instructions: vec![
+            Instruction {
+                family: "fixture".to_string(),
+                variant: "self".to_string(),
+                rust_name: "self".to_string(),
+                emit: strings(["self"]),
+                receiver: String::new(),
+                inputs: Vec::new(),
+                outputs: Vec::new(),
+                labels: Vec::new(),
+            },
+            Instruction {
+                family: "fixture".to_string(),
+                variant: "arg_self".to_string(),
+                rust_name: "arg_self".to_string(),
+                emit: strings(["arg_self"]),
+                receiver: String::new(),
+                inputs: Vec::new(),
+                outputs: Vec::new(),
+                labels: Vec::new(),
+            },
+        ],
+    };
+
+    let error = validate_generated_rust_api_symbols(&manifest)
+        .expect_err("escaped keyword item collision is rejected");
+
+    assert_eq!(
+        error.to_string(),
+        "generated item `ArgSelf` for instruction `arg_self` collides with instruction `self`"
+    );
+}
+
 fn read_v158_1_manifest() -> Manifest {
     let manifest_path = concat!(
         env!("CARGO_MANIFEST_DIR"),

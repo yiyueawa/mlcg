@@ -1,0 +1,11 @@
+
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "self"
+rust_name = "self"
+emit = ["self"]
+receiver = ""
+inputs = []
+outputs = []
