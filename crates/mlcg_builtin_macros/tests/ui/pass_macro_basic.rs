@@ -44,6 +44,10 @@ fn main() {
     processor.multi_into(multi.clone(), 2u64);
     processor.multi_into(&multi, 6u32);
     processor.multi_into(multi.as_tuple(), 8u32);
+    let borrowed_multi_tuple: (&Value<P>, &Value<P>) = (&multi).into();
+    processor.multi_into(borrowed_multi_tuple, 10u32);
+    let owned_multi_tuple: (Value<P>, Value<P>) = multi.clone().into();
+    processor.multi_into(owned_multi_tuple, 12u32);
     let (tuple_out_a, tuple_out_b) = processor.multi(typed_x.clone()).into_tuple();
     processor.multi_into((tuple_out_a, tuple_out_b), 4u32);
     let multi_recv: MultiRecvOutput<P> = x.multi_recv(y.clone());
@@ -65,6 +69,8 @@ fn main() {
     assert!(text.contains("multi __mlcg_1 __mlcg_2 2"));
     assert!(text.contains("multi __mlcg_1 __mlcg_2 6"));
     assert!(text.contains("multi __mlcg_1 __mlcg_2 8"));
+    assert!(text.contains("multi __mlcg_1 __mlcg_2 10"));
+    assert!(text.contains("multi __mlcg_1 __mlcg_2 12"));
     assert!(text.contains("multi __mlcg_3 __mlcg_4 x"));
     assert!(text.contains("multi __mlcg_3 __mlcg_4 4"));
     assert!(text.contains("multi_recv __mlcg_5 __mlcg_6 x y"));

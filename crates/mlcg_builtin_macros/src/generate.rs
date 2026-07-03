@@ -438,12 +438,18 @@ fn generate_output_struct(spec: &InstructionSpec) -> TokenStream {
         .iter()
         .map(|field| quote! { pub #field: ::mlcg_core::Value<P> })
         .collect();
-    let tuple_types = field_idents
+    let tuple_types: Vec<_> = field_idents
         .iter()
-        .map(|_| quote! { ::mlcg_core::Value<P> });
-    let tuple_ref_types = field_idents
+        .map(|_| quote! { ::mlcg_core::Value<P> })
+        .collect();
+    let tuple_ref_types: Vec<_> = field_idents
         .iter()
-        .map(|_| quote! { &::mlcg_core::Value<P> });
+        .map(|_| quote! { &::mlcg_core::Value<P> })
+        .collect();
+    let tuple_borrow_types: Vec<_> = field_idents
+        .iter()
+        .map(|_| quote! { &'a ::mlcg_core::Value<P> })
+        .collect();
     let tuple_fields = field_idents.iter();
     let tuple_ref_fields = field_idents.iter();
     let constructor_params = field_idents
@@ -513,6 +519,18 @@ fn generate_output_struct(spec: &InstructionSpec) -> TokenStream {
         impl<P> ::std::convert::From<&#output_struct<P>> for #output_struct<P> {
             fn from(value: &#output_struct<P>) -> Self {
                 value.clone()
+            }
+        }
+
+        impl<P> ::std::convert::From<#output_struct<P>> for (#(#tuple_types,)*) {
+            fn from(value: #output_struct<P>) -> Self {
+                value.into_tuple()
+            }
+        }
+
+        impl<'a, P> ::std::convert::From<&'a #output_struct<P>> for (#(#tuple_borrow_types,)*) {
+            fn from(value: &'a #output_struct<P>) -> Self {
+                value.as_tuple()
             }
         }
     }
