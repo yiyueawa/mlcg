@@ -36,6 +36,9 @@ pub enum EmitError {
     #[snafu(display("value name `{name}` contains whitespace for {value:?}"))]
     WhitespaceValueName { value: ValueId, name: String },
 
+    #[snafu(display("duplicate value name `{name}`"))]
+    DuplicateValueName { name: String },
+
     #[snafu(display("empty raw token"))]
     EmptyRawToken,
 

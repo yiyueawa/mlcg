@@ -1,5 +1,5 @@
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, BTreeSet},
     marker::PhantomData,
     sync::atomic::{AtomicU64, Ordering},
     sync::{Arc, Mutex},
@@ -177,9 +177,15 @@ impl<P: 'static> ProcessorHandle<P> {
         }
 
         let mut allocator = NameAllocator::default();
+        let mut explicit_names = BTreeSet::new();
         let mut value_names = BTreeMap::new();
         for (id, hint) in &state.values {
             validate_value_name_hint(*id, hint.as_deref())?;
+            if let Some(name) = hint {
+                if !explicit_names.insert(name.clone()) {
+                    return emit_error::DuplicateValueNameSnafu { name: name.clone() }.fail();
+                }
+            }
             value_names.insert(*id, allocator.name_for(*id, hint.as_deref()));
         }
 

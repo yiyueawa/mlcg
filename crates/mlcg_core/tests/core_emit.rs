@@ -257,6 +257,21 @@ fn explicit_mlcg_base_name_is_preserved() {
 }
 
 #[test]
+fn duplicate_explicit_value_name_is_an_emit_error() {
+    let processor = Processor::<TestProcessor>::new();
+    let first = processor.named("x");
+    let second = processor.named("x");
+    processor.push(PrintValue(first));
+    processor.push(PrintValue(second));
+
+    let error = processor
+        .emit()
+        .expect_err("duplicate explicit value names must not be silently rewritten");
+
+    assert!(error.to_string().contains("duplicate value name `x`"));
+}
+
+#[test]
 fn empty_explicit_value_name_is_an_emit_error() {
     let processor = Processor::<TestProcessor>::new();
     let value = processor.named("");
