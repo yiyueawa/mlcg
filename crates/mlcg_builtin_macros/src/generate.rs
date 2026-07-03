@@ -1,9 +1,17 @@
+use std::collections::{HashMap, HashSet};
+
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 
 use crate::manifest::{InstructionSpec, Manifest};
 
 pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
+    if let Err(error) = validate_manifest(manifest) {
+        return quote! {
+            compile_error!(#error);
+        };
+    }
+
     let _version = &manifest.version;
     let _source_tags: Vec<_> = manifest
         .instructions
@@ -146,6 +154,188 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
             pub use super::{Arg, LabelArg, #(#prelude_exports,)*};
         }
     }
+}
+
+fn validate_manifest(manifest: &Manifest) -> Result<(), String> {
+    validate_item_symbols(manifest)?;
+    validate_processor_methods(manifest)?;
+    validate_value_methods(manifest)?;
+
+    for spec in &manifest.instructions {
+        validate_instruction_symbols(spec)?;
+    }
+
+    Ok(())
+}
+
+fn validate_item_symbols(manifest: &Manifest) -> Result<(), String> {
+    let mut seen = HashMap::new();
+
+    for spec in &manifest.instructions {
+        record_manifest_symbol(&mut seen, "item", struct_name(spec).to_string(), spec)?;
+        record_manifest_symbol(
+            &mut seen,
+            "item",
+            processor_trait_name(spec).to_string(),
+            spec,
+        )?;
+
+        if !spec.receiver.is_empty() {
+            record_manifest_symbol(&mut seen, "item", value_trait_name(spec).to_string(), spec)?;
+        }
+
+        if spec.outputs.len() > 1 {
+            record_manifest_symbol(
+                &mut seen,
+                "item",
+                output_struct_name(spec).to_string(),
+                spec,
+            )?;
+        }
+    }
+
+    Ok(())
+}
+
+fn validate_processor_methods(manifest: &Manifest) -> Result<(), String> {
+    let mut seen = HashMap::new();
+
+    for spec in &manifest.instructions {
+        record_manifest_symbol(
+            &mut seen,
+            "processor method",
+            safe_ident(&spec.rust_name).to_string(),
+            spec,
+        )?;
+
+        if !spec.outputs.is_empty() {
+            record_manifest_symbol(
+                &mut seen,
+                "processor method",
+                safe_ident(&format!("{}_into", spec.rust_name)).to_string(),
+                spec,
+            )?;
+        }
+    }
+
+    Ok(())
+}
+
+fn validate_value_methods(manifest: &Manifest) -> Result<(), String> {
+    let mut seen = HashMap::new();
+
+    for spec in manifest
+        .instructions
+        .iter()
+        .filter(|spec| !spec.receiver.is_empty())
+    {
+        record_manifest_symbol(
+            &mut seen,
+            "value method",
+            safe_ident(&spec.rust_name).to_string(),
+            spec,
+        )?;
+
+        if !spec.outputs.is_empty() {
+            record_manifest_symbol(
+                &mut seen,
+                "value method",
+                safe_ident(&format!("{}_into", spec.rust_name)).to_string(),
+                spec,
+            )?;
+        }
+    }
+
+    Ok(())
+}
+
+fn validate_instruction_symbols(spec: &InstructionSpec) -> Result<(), String> {
+    validate_unique_instruction_names(
+        "instruction field",
+        spec,
+        placeholders(spec)
+            .into_iter()
+            .map(|placeholder| placeholder.to_string()),
+    )?;
+
+    validate_unique_instruction_names(
+        "processor auto parameter",
+        spec,
+        auto_processor_params(spec)
+            .into_iter()
+            .map(|param| safe_ident(&param).to_string()),
+    )?;
+    validate_unique_instruction_names(
+        "processor explicit parameter",
+        spec,
+        explicit_processor_params(spec)
+            .into_iter()
+            .map(|param| safe_ident(&param).to_string()),
+    )?;
+
+    if !spec.receiver.is_empty() {
+        validate_unique_instruction_names(
+            "value parameter",
+            spec,
+            value_params(spec)
+                .into_iter()
+                .map(|param| safe_ident(&param).to_string()),
+        )?;
+        validate_unique_instruction_names(
+            "value explicit parameter",
+            spec,
+            explicit_value_params(spec)
+                .into_iter()
+                .map(|param| safe_ident(&param).to_string()),
+        )?;
+    }
+
+    if spec.outputs.len() > 1 {
+        validate_unique_instruction_names(
+            "output field",
+            spec,
+            spec.outputs
+                .iter()
+                .map(|output| safe_ident(output).to_string()),
+        )?;
+    }
+
+    Ok(())
+}
+
+fn record_manifest_symbol(
+    seen: &mut HashMap<String, String>,
+    kind: &str,
+    name: String,
+    spec: &InstructionSpec,
+) -> Result<(), String> {
+    if let Some(previous) = seen.insert(name.clone(), spec.rust_name.clone()) {
+        return Err(format!(
+            "generated {kind} `{name}` for instruction `{}` collides with instruction `{previous}`",
+            spec.rust_name
+        ));
+    }
+
+    Ok(())
+}
+
+fn validate_unique_instruction_names(
+    kind: &str,
+    spec: &InstructionSpec,
+    names: impl IntoIterator<Item = String>,
+) -> Result<(), String> {
+    let mut seen = HashSet::new();
+
+    for name in names {
+        if !seen.insert(name.clone()) {
+            return Err(format!(
+                "generated {kind} `{name}` appears more than once in instruction `{}`",
+                spec.rust_name
+            ));
+        }
+    }
+
+    Ok(())
 }
 
 fn generate_output_struct(spec: &InstructionSpec) -> TokenStream {

@@ -67,6 +67,37 @@ outputs = ["out"]
         .expect("create trybuild manifest dir");
     fs::write(&trybuild_manifest_path, manifest).expect("write trybuild manifest");
 
+    let collision_manifest = r#"
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "foo"
+rust_name = "foo"
+emit = ["foo", "$out"]
+receiver = ""
+inputs = []
+outputs = ["out"]
+
+[[instructions]]
+family = "fixture"
+variant = "foo_into"
+rust_name = "foo_into"
+emit = ["foo_into"]
+receiver = ""
+inputs = []
+outputs = []
+"#;
+    let collision_manifest_path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/method_collision_manifest.toml");
+    fs::write(&collision_manifest_path, collision_manifest).expect("write collision manifest");
+    let trybuild_collision_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(
+        "../../target/tests/trybuild/mlcg_builtin_macros/tests/method_collision_manifest.toml",
+    );
+    fs::write(&trybuild_collision_manifest_path, collision_manifest)
+        .expect("write trybuild collision manifest");
+
     let t = trybuild::TestCases::new();
     t.pass("tests/ui/pass_macro_basic.rs");
+    t.compile_fail("tests/ui/fail_method_collision.rs");
 }
