@@ -1,0 +1,11 @@
+
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "bad"
+rust_name = "bad"
+emit = ["bad", "$bad-name"]
+receiver = ""
+inputs = ["bad-name"]
+outputs = []

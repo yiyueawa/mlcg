@@ -165,6 +165,31 @@ fn generated_rust_api_symbol_validation_rejects_blank_rust_name() {
 }
 
 #[test]
+fn generated_rust_api_symbol_validation_rejects_invalid_rust_name_identifier() {
+    let manifest = Manifest {
+        version: "fixture".to_string(),
+        instructions: vec![Instruction {
+            family: "fixture".to_string(),
+            variant: "bad".to_string(),
+            rust_name: "bad-name".to_string(),
+            emit: strings(["bad"]),
+            receiver: String::new(),
+            inputs: Vec::new(),
+            outputs: Vec::new(),
+            labels: Vec::new(),
+        }],
+    };
+
+    let error = validate_generated_rust_api_symbols(&manifest)
+        .expect_err("invalid generated rust name is rejected");
+
+    assert_eq!(
+        error.to_string(),
+        "instruction `bad-name` generates invalid Rust method identifier `bad-name`"
+    );
+}
+
+#[test]
 fn generated_rust_api_symbol_validation_rejects_empty_parameter_name() {
     let manifest = Manifest {
         version: "fixture".to_string(),
@@ -211,6 +236,31 @@ fn generated_rust_api_symbol_validation_rejects_blank_parameter_name() {
     assert_eq!(
         error.to_string(),
         "instruction `bad` has blank input parameter name"
+    );
+}
+
+#[test]
+fn generated_rust_api_symbol_validation_rejects_invalid_parameter_identifier() {
+    let manifest = Manifest {
+        version: "fixture".to_string(),
+        instructions: vec![Instruction {
+            family: "fixture".to_string(),
+            variant: "bad".to_string(),
+            rust_name: "bad".to_string(),
+            emit: strings(["bad", "$bad-name"]),
+            receiver: String::new(),
+            inputs: strings(["bad-name"]),
+            outputs: Vec::new(),
+            labels: Vec::new(),
+        }],
+    };
+
+    let error = validate_generated_rust_api_symbols(&manifest)
+        .expect_err("invalid generated parameter name is rejected");
+
+    assert_eq!(
+        error.to_string(),
+        "instruction `bad` input parameter `bad-name` generates invalid Rust identifier `bad-name`"
     );
 }
 

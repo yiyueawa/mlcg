@@ -1,0 +1,7 @@
+error: instruction `bad-name` generates invalid Rust method identifier `bad-name`
+ --> tests/ui/fail_invalid_rust_name.rs:2:5
+  |
+2 |     mlcg_builtin_macros::include_manifest!("tests/invalid_rust_name_manifest.toml");
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `mlcg_builtin_macros::include_manifest` (in Nightly builds, run with -Z macro-backtrace for more info)

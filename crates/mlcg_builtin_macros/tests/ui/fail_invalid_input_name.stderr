@@ -1,0 +1,7 @@
+error: instruction `bad` input parameter `bad-name` generates invalid Rust identifier `bad-name`
+ --> tests/ui/fail_invalid_input_name.rs:2:5
+  |
+2 |     mlcg_builtin_macros::include_manifest!("tests/invalid_input_name_manifest.toml");
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `mlcg_builtin_macros::include_manifest` (in Nightly builds, run with -Z macro-backtrace for more info)

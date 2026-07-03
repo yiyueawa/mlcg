@@ -11,6 +11,7 @@ const RESERVED_ITEM_SYMBOLS: &[&str] = &["Arg", "OutputArg", "LabelArg"];
 pub fn validate_generated_rust_api_symbols(manifest: &Manifest) -> Result<(), GenerateError> {
     validate_instruction_names(manifest)?;
     validate_parameter_names(manifest)?;
+    validate_generated_identifiers(manifest)?;
     validate_item_symbols(manifest)?;
     validate_processor_methods(manifest)?;
     validate_value_methods(manifest)?;
@@ -34,6 +35,73 @@ fn validate_instruction_names(manifest: &Manifest) -> Result<(), GenerateError> 
                 message: "instruction has blank rust_name".to_string(),
             });
         }
+    }
+
+    Ok(())
+}
+
+fn validate_generated_identifiers(manifest: &Manifest) -> Result<(), GenerateError> {
+    for instruction in &manifest.instructions {
+        let method = safe_ident(&instruction.rust_name);
+        if !is_valid_rust_ident(&method) {
+            return Err(GenerateError::GeneratedApi {
+                message: format!(
+                    "instruction `{}` generates invalid Rust method identifier `{method}`",
+                    instruction.rust_name
+                ),
+            });
+        }
+
+        let item = to_pascal_string(&instruction.rust_name);
+        if !is_valid_rust_ident(&item) {
+            return Err(GenerateError::GeneratedApi {
+                message: format!(
+                    "instruction `{}` generates invalid Rust item identifier `{item}`",
+                    instruction.rust_name
+                ),
+            });
+        }
+
+        if !instruction.receiver.is_empty() {
+            validate_parameter_identifier(instruction, "receiver", &instruction.receiver)?;
+        }
+        for input in &instruction.inputs {
+            validate_parameter_identifier(instruction, "input", input)?;
+        }
+        for output in &instruction.outputs {
+            validate_parameter_identifier(instruction, "output", output)?;
+        }
+        for label in &instruction.labels {
+            validate_parameter_identifier(instruction, "label", label)?;
+        }
+    }
+
+    Ok(())
+}
+
+fn validate_parameter_identifier(
+    instruction: &Instruction,
+    kind: &str,
+    name: &str,
+) -> Result<(), GenerateError> {
+    let ident = safe_ident(name);
+    if !is_valid_rust_ident(&ident) {
+        return Err(GenerateError::GeneratedApi {
+            message: format!(
+                "instruction `{}` {kind} parameter `{name}` generates invalid Rust identifier `{ident}`",
+                instruction.rust_name
+            ),
+        });
+    }
+
+    let generic = format!("Mlcg{}Arg", to_pascal_string(name));
+    if !is_valid_rust_ident(&generic) {
+        return Err(GenerateError::GeneratedApi {
+            message: format!(
+                "instruction `{}` {kind} parameter `{name}` generates invalid Rust generic identifier `{generic}`",
+                instruction.rust_name
+            ),
+        });
     }
 
     Ok(())
@@ -461,6 +529,17 @@ fn safe_ident(name: &str) -> String {
     } else {
         name.to_string()
     }
+}
+
+fn is_valid_rust_ident(name: &str) -> bool {
+    let mut chars = name.chars();
+    let Some(first) = chars.next() else {
+        return false;
+    };
+    if !(first == '_' || first.is_ascii_alphabetic()) {
+        return false;
+    }
+    chars.all(|char| char == '_' || char.is_ascii_alphanumeric()) && !is_rust_keyword(name)
 }
 
 fn is_rust_keyword(name: &str) -> bool {

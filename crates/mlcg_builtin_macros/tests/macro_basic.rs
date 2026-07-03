@@ -568,6 +568,59 @@ outputs = []
     )
     .expect("write trybuild blank receiver name manifest");
 
+    let invalid_rust_name_manifest = r#"
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "bad"
+rust_name = "bad-name"
+emit = ["bad"]
+receiver = ""
+inputs = []
+outputs = []
+"#;
+    let invalid_rust_name_manifest_path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/invalid_rust_name_manifest.toml");
+    fs::write(&invalid_rust_name_manifest_path, invalid_rust_name_manifest)
+        .expect("write invalid rust name manifest");
+    let trybuild_invalid_rust_name_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(
+        "../../target/tests/trybuild/mlcg_builtin_macros/tests/invalid_rust_name_manifest.toml",
+    );
+    fs::write(
+        &trybuild_invalid_rust_name_manifest_path,
+        invalid_rust_name_manifest,
+    )
+    .expect("write trybuild invalid rust name manifest");
+
+    let invalid_input_name_manifest = r#"
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "bad"
+rust_name = "bad"
+emit = ["bad", "$bad-name"]
+receiver = ""
+inputs = ["bad-name"]
+outputs = []
+"#;
+    let invalid_input_name_manifest_path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/invalid_input_name_manifest.toml");
+    fs::write(
+        &invalid_input_name_manifest_path,
+        invalid_input_name_manifest,
+    )
+    .expect("write invalid input name manifest");
+    let trybuild_invalid_input_name_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(
+        "../../target/tests/trybuild/mlcg_builtin_macros/tests/invalid_input_name_manifest.toml",
+    );
+    fs::write(
+        &trybuild_invalid_input_name_manifest_path,
+        invalid_input_name_manifest,
+    )
+    .expect("write trybuild invalid input name manifest");
+
     let t = trybuild::TestCases::new();
     t.pass("tests/ui/pass_macro_basic.rs");
     t.pass("tests/ui/pass_std_trait_name.rs");
@@ -590,4 +643,6 @@ outputs = []
     t.compile_fail("tests/ui/fail_blank_rust_name.rs");
     t.compile_fail("tests/ui/fail_blank_input_name.rs");
     t.compile_fail("tests/ui/fail_blank_receiver_name.rs");
+    t.compile_fail("tests/ui/fail_invalid_rust_name.rs");
+    t.compile_fail("tests/ui/fail_invalid_input_name.rs");
 }

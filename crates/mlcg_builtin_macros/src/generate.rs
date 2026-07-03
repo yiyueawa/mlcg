@@ -174,6 +174,7 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
 fn validate_manifest(manifest: &Manifest) -> Result<(), String> {
     validate_instruction_names(manifest)?;
     validate_parameter_names(manifest)?;
+    validate_generated_identifiers(manifest)?;
     validate_item_symbols(manifest)?;
     validate_processor_methods(manifest)?;
     validate_value_methods(manifest)?;
@@ -193,6 +194,65 @@ fn validate_instruction_names(manifest: &Manifest) -> Result<(), String> {
         if spec.rust_name.trim().is_empty() {
             return Err("instruction has blank rust_name".to_string());
         }
+    }
+
+    Ok(())
+}
+
+fn validate_generated_identifiers(manifest: &Manifest) -> Result<(), String> {
+    for spec in &manifest.instructions {
+        let method = safe_ident_name(&spec.rust_name);
+        if !is_valid_rust_ident(&method) {
+            return Err(format!(
+                "instruction `{}` generates invalid Rust method identifier `{method}`",
+                spec.rust_name
+            ));
+        }
+
+        let item = to_pascal_string(&spec.rust_name);
+        if !is_valid_rust_ident(&item) {
+            return Err(format!(
+                "instruction `{}` generates invalid Rust item identifier `{item}`",
+                spec.rust_name
+            ));
+        }
+
+        if !spec.receiver.is_empty() {
+            validate_parameter_identifier(spec, "receiver", &spec.receiver)?;
+        }
+        for input in &spec.inputs {
+            validate_parameter_identifier(spec, "input", input)?;
+        }
+        for output in &spec.outputs {
+            validate_parameter_identifier(spec, "output", output)?;
+        }
+        for label in &spec.labels {
+            validate_parameter_identifier(spec, "label", label)?;
+        }
+    }
+
+    Ok(())
+}
+
+fn validate_parameter_identifier(
+    spec: &InstructionSpec,
+    kind: &str,
+    name: &str,
+) -> Result<(), String> {
+    let ident = safe_ident_name(name);
+    if !is_valid_rust_ident(&ident) {
+        return Err(format!(
+            "instruction `{}` {kind} parameter `{name}` generates invalid Rust identifier `{ident}`",
+            spec.rust_name
+        ));
+    }
+
+    let generic = format!("Mlcg{}Arg", to_pascal_string(name));
+    if !is_valid_rust_ident(&generic) {
+        return Err(format!(
+            "instruction `{}` {kind} parameter `{name}` generates invalid Rust generic identifier `{generic}`",
+            spec.rust_name
+        ));
     }
 
     Ok(())
@@ -1249,11 +1309,26 @@ fn to_pascal_string(name: &str) -> String {
 }
 
 fn safe_ident(name: &str) -> Ident {
+    format_ident!("{}", safe_ident_name(name))
+}
+
+fn safe_ident_name(name: &str) -> String {
     if is_rust_keyword(name) {
-        format_ident!("arg_{}", name)
+        format!("arg_{name}")
     } else {
-        format_ident!("{}", name)
+        name.to_string()
     }
+}
+
+fn is_valid_rust_ident(name: &str) -> bool {
+    let mut chars = name.chars();
+    let Some(first) = chars.next() else {
+        return false;
+    };
+    if !(first == '_' || first.is_ascii_alphabetic()) {
+        return false;
+    }
+    chars.all(|char| char == '_' || char.is_ascii_alphanumeric()) && !is_rust_keyword(name)
 }
 
 fn is_rust_keyword(name: &str) -> bool {
