@@ -20,6 +20,10 @@ fn generated_v158_1_api_emits_mlog_program() {
     processor.op_add_into(inverted.clone(), x.clone(), small_increment);
     let borrowed_signed_increment = -5i16;
     processor.op_add_into(inverted.clone(), x.clone(), &borrowed_signed_increment);
+    let wide_increment = 6u128;
+    processor.op_add_into(inverted.clone(), x.clone(), wide_increment);
+    let borrowed_wide_decrement = -7i128;
+    processor.op_add_into(inverted.clone(), x.clone(), &borrowed_wide_decrement);
     processor.print("message");
     let borrowed_message = String::from("borrowed_message");
     processor.print(&borrowed_message);
@@ -65,7 +69,7 @@ fn generated_v158_1_api_emits_mlog_program() {
 
     assert_eq!(
         output,
-        "set x 1\nop add __mlcg_0 x y\nop not __mlcg_1 __mlcg_0 0\nop add __mlcg_1 __mlcg_0 2\nop add __mlcg_1 x 3\nop add __mlcg_1 x 4\nop add __mlcg_1 x -5\nprint message\nprint borrowed_message\nread __mlcg_2 cell1 0\nread x cell1 1\nprint __mlcg_2\nread __mlcg_3 cell 2\nop add __mlcg_4 x y\nwrite x cell 3\nsensor __mlcg_5 cell @enabled\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nuradar enemy any any distance 0 true __mlcg_10\nuradar enemy any any health 0 false __mlcg_10\nuradar enemy any any health 0 true __mlcg_10\nprint __mlcg_3\nprint __mlcg_4\nprint __mlcg_5\nprint __mlcg_10\nprint __mlcg_6\nprint __mlcg_7\nprint __mlcg_8\nprint __mlcg_9\njump 33 equal x 1\nprint before_done\nprint after_done"
+        "set x 1\nop add __mlcg_0 x y\nop not __mlcg_1 __mlcg_0 0\nop add __mlcg_1 __mlcg_0 2\nop add __mlcg_1 x 3\nop add __mlcg_1 x 4\nop add __mlcg_1 x -5\nop add __mlcg_1 x 6\nop add __mlcg_1 x -7\nprint message\nprint borrowed_message\nread __mlcg_2 cell1 0\nread x cell1 1\nprint __mlcg_2\nread __mlcg_3 cell 2\nop add __mlcg_4 x y\nwrite x cell 3\nsensor __mlcg_5 cell @enabled\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nulocate building @core true @copper __mlcg_6 __mlcg_7 __mlcg_8 __mlcg_9\nuradar enemy any any distance 0 true __mlcg_10\nuradar enemy any any health 0 false __mlcg_10\nuradar enemy any any health 0 true __mlcg_10\nprint __mlcg_3\nprint __mlcg_4\nprint __mlcg_5\nprint __mlcg_10\nprint __mlcg_6\nprint __mlcg_7\nprint __mlcg_8\nprint __mlcg_9\njump 35 equal x 1\nprint before_done\nprint after_done"
     );
 }
 

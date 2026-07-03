@@ -131,6 +131,14 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
             fn from(value: &i64) -> Self { Self::Raw(value.to_string()) }
         }
 
+        impl<P> ::std::convert::From<i128> for Arg<P> {
+            fn from(value: i128) -> Self { Self::Raw(value.to_string()) }
+        }
+
+        impl<P> ::std::convert::From<&i128> for Arg<P> {
+            fn from(value: &i128) -> Self { Self::Raw(value.to_string()) }
+        }
+
         impl<P> ::std::convert::From<isize> for Arg<P> {
             fn from(value: isize) -> Self { Self::Raw(value.to_string()) }
         }
@@ -169,6 +177,14 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
 
         impl<P> ::std::convert::From<&u64> for Arg<P> {
             fn from(value: &u64) -> Self { Self::Raw(value.to_string()) }
+        }
+
+        impl<P> ::std::convert::From<u128> for Arg<P> {
+            fn from(value: u128) -> Self { Self::Raw(value.to_string()) }
+        }
+
+        impl<P> ::std::convert::From<&u128> for Arg<P> {
+            fn from(value: &u128) -> Self { Self::Raw(value.to_string()) }
         }
 
         impl<P> ::std::convert::From<usize> for Arg<P> {
