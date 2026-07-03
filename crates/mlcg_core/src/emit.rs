@@ -58,9 +58,12 @@ pub(crate) fn emit_partial<P: 'static>(
             match token {
                 PartialToken::Raw(raw) => out.push_str(raw),
                 PartialToken::Value(value) => {
+                    if !value.belongs_to(handle) {
+                        return emit_error::ForeignValueSnafu { value: value.id() }.fail();
+                    }
                     let name = value_names
-                        .get(value)
-                        .context(emit_error::UnknownValueSnafu { value: *value })?;
+                        .get(&value.id())
+                        .context(emit_error::UnknownValueSnafu { value: value.id() })?;
                     out.push_str(name);
                 }
                 PartialToken::Label(label) => {

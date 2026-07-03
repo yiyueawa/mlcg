@@ -21,6 +21,9 @@ pub enum EmitError {
     #[snafu(display("foreign label {label:?}"))]
     ForeignLabel { label: LabelId },
 
+    #[snafu(display("foreign value {value:?}"))]
+    ForeignValue { value: ValueId },
+
     #[snafu(display("unknown value {value:?}"))]
     UnknownValue { value: ValueId },
 

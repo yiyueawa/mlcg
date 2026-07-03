@@ -58,3 +58,9 @@ impl<P, T> Value<P, T> {
         self.cast()
     }
 }
+
+impl<P: 'static, T> Value<P, T> {
+    pub(crate) fn belongs_to(&self, handle: &ProcessorHandle<P>) -> bool {
+        self.handle.same_state(handle)
+    }
+}

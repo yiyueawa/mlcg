@@ -2,7 +2,7 @@ use std::{collections::BTreeMap, marker::PhantomData};
 
 use snafu::ensure;
 
-use crate::{error::emit_error, EmitError, Label, LabelId, Value, ValueId};
+use crate::{error::emit_error, EmitError, Label, LabelId, Value};
 
 #[derive(Debug)]
 pub struct LowerContext<P> {
@@ -60,7 +60,7 @@ impl<P> PartialLine<P> {
 #[derive(Debug)]
 pub enum PartialToken<P> {
     Raw(String),
-    Value(ValueId),
+    Value(Value<P>),
     Label(Label<P>),
     #[doc(hidden)]
     Processor(PhantomData<P>),
@@ -72,7 +72,7 @@ impl<P> PartialToken<P> {
     }
 
     pub fn value<T>(value: Value<P, T>) -> Self {
-        Self::Value(value.id())
+        Self::Value(value.erase_type())
     }
 
     pub fn label(label: Label<P>) -> Self {

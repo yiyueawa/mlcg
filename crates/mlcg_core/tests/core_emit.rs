@@ -154,7 +154,7 @@ fn foreign_processor_value_does_not_alias_local_value_with_same_type() {
         .emit()
         .expect_err("foreign value is not part of local processor state");
 
-    assert!(error.to_string().contains("unknown value"));
+    assert!(error.to_string().contains("foreign value"));
 }
 
 #[test]
