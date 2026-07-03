@@ -107,3 +107,17 @@ fn unplaced_label_is_an_emit_error() {
 
     assert!(error.to_string().contains("unplaced label"));
 }
+
+#[test]
+fn duplicate_label_placement_is_an_emit_error() {
+    let processor = Processor::<TestProcessor>::new();
+    let label = processor.label();
+
+    processor.place(label.clone());
+    processor.push(RawLine(&["noop"]));
+    processor.place(label);
+
+    let error = processor.emit().expect_err("label is placed twice");
+
+    assert!(error.to_string().contains("duplicate label placement"));
+}

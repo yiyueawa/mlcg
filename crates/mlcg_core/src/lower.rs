@@ -1,6 +1,8 @@
 use std::{collections::BTreeMap, marker::PhantomData};
 
-use crate::{Label, LabelId, Value, ValueId};
+use snafu::ensure;
+
+use crate::{error::emit_error, EmitError, Label, LabelId, Value, ValueId};
 
 #[derive(Debug)]
 pub struct LowerContext<P> {
@@ -84,8 +86,13 @@ pub(crate) struct LabelTable {
 }
 
 impl LabelTable {
-    pub(crate) fn insert(&mut self, label: LabelId, line: usize) {
+    pub(crate) fn insert(&mut self, label: LabelId, line: usize) -> Result<(), EmitError> {
+        ensure!(
+            !self.lines.contains_key(&label),
+            emit_error::DuplicateLabelPlacementSnafu { label }
+        );
         self.lines.insert(label, line);
+        Ok(())
     }
 
     pub(crate) fn get(&self, label: LabelId) -> Option<usize> {

@@ -171,7 +171,7 @@ impl<P: 'static> ProcessorHandle<P> {
                     .lower(&mut lower_ctx, &mut partial)
                     .context(emit_error::LowerSnafu)?,
                 ProgramItem::LabelPlacement(label) => {
-                    labels.insert(label.id(), partial.line_count())
+                    labels.insert(label.id(), partial.line_count())?
                 }
             }
         }

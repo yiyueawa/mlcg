@@ -15,6 +15,9 @@ pub enum EmitError {
     #[snafu(display("unplaced label {label:?}"))]
     UnplacedLabel { label: LabelId },
 
+    #[snafu(display("duplicate label placement {label:?}"))]
+    DuplicateLabelPlacement { label: LabelId },
+
     #[snafu(display("unknown value {value:?}"))]
     UnknownValue { value: ValueId },
 
