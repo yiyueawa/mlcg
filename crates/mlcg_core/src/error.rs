@@ -27,6 +27,9 @@ pub enum EmitError {
     #[snafu(display("unknown value {value:?}"))]
     UnknownValue { value: ValueId },
 
+    #[snafu(display("unresolved processor token"))]
+    UnresolvedProcessorToken,
+
     #[snafu(display("failed to lower instruction"))]
     Lower { source: LowerError },
 }

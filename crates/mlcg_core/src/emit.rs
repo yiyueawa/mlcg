@@ -78,7 +78,9 @@ pub(crate) fn emit_partial<P: 'static>(
                         .context(emit_error::UnplacedLabelSnafu { label: label.id() })?;
                     out.push_str(&line.to_string());
                 }
-                PartialToken::Processor(_) => {}
+                PartialToken::Processor(_) => {
+                    return emit_error::UnresolvedProcessorTokenSnafu.fail();
+                }
             }
         }
     }

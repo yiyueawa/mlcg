@@ -28,6 +28,8 @@ fn values_can_be_retagged_without_changing_identity() {
     assert_eq!(erased.name_hint().as_deref(), Some("x"));
 }
 
+use std::marker::PhantomData;
+
 use mlcg_core::{
     Instruction, Label, LowerContext, PartialLine, PartialProgram, PartialToken, Value,
 };
@@ -95,6 +97,23 @@ impl Instruction<TestProcessor> for PrintValue {
         out.push_line(PartialLine::new(vec![
             PartialToken::raw("print"),
             PartialToken::value(self.0.clone()),
+        ]));
+        Ok(())
+    }
+}
+
+#[derive(Debug)]
+struct ProcessorTokenLine;
+
+impl Instruction<TestProcessor> for ProcessorTokenLine {
+    fn lower(
+        &self,
+        _ctx: &mut LowerContext<TestProcessor>,
+        out: &mut PartialProgram<TestProcessor>,
+    ) -> Result<(), mlcg_core::LowerError> {
+        out.push_line(PartialLine::new(vec![
+            PartialToken::raw("print"),
+            PartialToken::Processor(PhantomData),
         ]));
         Ok(())
     }
@@ -217,4 +236,16 @@ fn foreign_processor_label_placement_is_an_emit_error() {
         .expect_err("foreign label placement is not part of local processor state");
 
     assert!(error.to_string().contains("foreign label"));
+}
+
+#[test]
+fn unresolved_processor_tokens_are_emit_errors() {
+    let processor = Processor::<TestProcessor>::new();
+    processor.push(ProcessorTokenLine);
+
+    let error = processor
+        .emit()
+        .expect_err("processor tokens must not be silently dropped");
+
+    assert!(error.to_string().contains("unresolved processor token"));
 }
