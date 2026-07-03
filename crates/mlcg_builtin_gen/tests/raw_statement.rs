@@ -569,6 +569,35 @@ fn does_not_confuse_build_with_build_prefixed_helper_methods() {
 }
 
 #[test]
+fn ignores_build_method_signatures_inside_comments() {
+    let source = r#"
+        @RegisterStatement("real")
+        public static class RealStatement extends LStatement{
+            public String value = "x";
+
+            /*
+            public LInstruction build(LAssembler builder){
+                return new WrongI();
+            }
+            */
+
+            @Override public LInstruction build(LAssembler builder){
+                return new RealI(builder.var(value));
+            }
+        }
+    "#;
+
+    let manifest = scan_raw_statements("fixture", source).expect("scan succeeds");
+    let real = manifest
+        .statements
+        .iter()
+        .find(|statement| statement.name == "real")
+        .expect("real exists");
+
+    assert_eq!(real.instruction.as_deref(), Some("RealI"));
+}
+
+#[test]
 fn scans_category_from_lcategory_category_method_only() {
     let source = r#"
         @RegisterStatement("cat")

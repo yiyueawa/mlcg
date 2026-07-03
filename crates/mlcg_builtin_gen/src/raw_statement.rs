@@ -431,8 +431,7 @@ fn parse_linstruction_build_body(body: &str) -> Option<&str> {
 
 fn parse_method_body<'a>(body: &'a str, return_type: &str, method_name: &str) -> Option<&'a str> {
     let mut offset = 0;
-    while let Some(relative) = body[offset..].find(return_type) {
-        let start = offset + relative;
+    while let Some(start) = find_code(body, return_type, offset) {
         let after_return_type = start + return_type.len();
         if !is_identifier_boundary(body, start, after_return_type) {
             offset = after_return_type;
