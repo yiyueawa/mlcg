@@ -1,0 +1,27 @@
+[workspace]
+members = [
+    "crates/mlcg_core",
+    "crates/mlcg_builtin_macros",
+    "crates/mlcg_builtin",
+    "crates/mlcg_builtin_gen",
+    "crates/mlcg",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/yiyue/mlcg"
+
+[workspace.dependencies]
+mlcg_core = { path = "crates/mlcg_core" }
+mlcg_builtin = { path = "crates/mlcg_builtin" }
+mlcg_builtin_macros = { path = "crates/mlcg_builtin_macros" }
+snafu = "0.8"
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+syn = { version = "2", features = ["full"] }
+quote = "1"
+proc-macro2 = "1"
+trybuild = "1"
+tempfile = "3"

@@ -1,0 +1,14 @@
+[package]
+name = "mlcg_builtin_gen"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+serde.workspace = true
+snafu.workspace = true
+toml.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

@@ -1,0 +1,9 @@
+[package]
+name = "mlcg_core"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+snafu.workspace = true
