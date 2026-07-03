@@ -1,15 +1,15 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use snafu::ResultExt;
 
 use crate::{error::GenerateError, error::SerializeSnafu};
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Manifest {
     pub version: String,
     pub instructions: Vec<Instruction>,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Instruction {
     pub family: String,
     pub variant: String,
@@ -18,7 +18,7 @@ pub struct Instruction {
     pub receiver: String,
     pub inputs: Vec<String>,
     pub outputs: Vec<String>,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub labels: Vec<String>,
 }
 
