@@ -229,11 +229,67 @@ fn scans_instruction_type_from_linstruction_build_method_only() {
 }
 
 #[test]
+fn does_not_confuse_build_with_build_prefixed_helper_methods() {
+    let source = r#"
+        @RegisterStatement("real")
+        public static class RealStatement extends LStatement{
+            public String value = "x";
+
+            public LInstruction buildHelper(){
+                return new WrongI();
+            }
+
+            @Override public LInstruction build(LAssembler builder){
+                return new RealI(builder.var(value));
+            }
+        }
+    "#;
+
+    let manifest = scan_raw_statements("fixture", source).expect("scan succeeds");
+    let real = manifest
+        .statements
+        .iter()
+        .find(|statement| statement.name == "real")
+        .expect("real exists");
+
+    assert_eq!(real.instruction.as_deref(), Some("RealI"));
+}
+
+#[test]
 fn scans_category_from_lcategory_category_method_only() {
     let source = r#"
         @RegisterStatement("cat")
         public static class CategoryStatement extends LStatement{
             public LCategory helper(){
+                return LCategory.wrong;
+            }
+
+            @Override public LInstruction build(LAssembler builder){
+                return new CatI();
+            }
+
+            @Override public LCategory category(){
+                return LCategory.control;
+            }
+        }
+    "#;
+
+    let manifest = scan_raw_statements("fixture", source).expect("scan succeeds");
+    let cat = manifest
+        .statements
+        .iter()
+        .find(|statement| statement.name == "cat")
+        .expect("cat exists");
+
+    assert_eq!(cat.category.as_deref(), Some("control"));
+}
+
+#[test]
+fn does_not_confuse_category_with_category_prefixed_helper_methods() {
+    let source = r#"
+        @RegisterStatement("cat")
+        public static class CategoryStatement extends LStatement{
+            public LCategory categoryHelper(){
                 return LCategory.wrong;
             }
 

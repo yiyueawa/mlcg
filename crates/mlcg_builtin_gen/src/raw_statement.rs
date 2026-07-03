@@ -203,7 +203,7 @@ fn parse_instruction(body: &str) -> Option<String> {
 }
 
 fn parse_category(body: &str) -> Option<String> {
-    let body = parse_method_body(body, "LCategory category")?;
+    let body = parse_method_body(body, "LCategory", "category")?;
     let marker = "return LCategory.";
     let start = body.find(marker)? + marker.len();
     let end = body[start..].find(|c: char| !(c.is_ascii_alphanumeric() || c == '_'))? + start;
@@ -334,14 +334,45 @@ fn parse_ignored_fields(body: &str, fields: &[RawField]) -> Vec<String> {
 }
 
 fn parse_linstruction_build_body(body: &str) -> Option<&str> {
-    parse_method_body(body, "LInstruction build")
+    parse_method_body(body, "LInstruction", "build")
 }
 
-fn parse_method_body<'a>(body: &'a str, marker: &str) -> Option<&'a str> {
-    let start = body.find(marker)?;
-    let brace_start = body[start..].find('{').map(|index| start + index)?;
-    let brace_end = matching_brace(body, brace_start)?;
-    Some(&body[brace_start + 1..brace_end])
+fn parse_method_body<'a>(body: &'a str, return_type: &str, method_name: &str) -> Option<&'a str> {
+    let mut offset = 0;
+    while let Some(relative) = body[offset..].find(return_type) {
+        let start = offset + relative;
+        let after_return_type = start + return_type.len();
+        if !is_identifier_boundary(body, start, after_return_type) {
+            offset = after_return_type;
+            continue;
+        }
+        let after_spaces = skip_whitespace(body, after_return_type);
+        let method_end = after_spaces + method_name.len();
+        if body[after_spaces..].starts_with(method_name)
+            && is_identifier_boundary(body, after_spaces, method_end)
+            && body[method_end..].trim_start().starts_with('(')
+        {
+            let brace_start = body[method_end..]
+                .find('{')
+                .map(|index| method_end + index)?;
+            let brace_end = matching_brace(body, brace_start)?;
+            return Some(&body[brace_start + 1..brace_end]);
+        }
+        offset = after_return_type;
+    }
+    None
+}
+
+fn skip_whitespace(source: &str, start: usize) -> usize {
+    source[start..]
+        .find(|ch: char| !ch.is_whitespace())
+        .map_or(source.len(), |index| start + index)
+}
+
+fn is_identifier_boundary(source: &str, start: usize, end: usize) -> bool {
+    let before = source[..start].chars().next_back();
+    let after = source[end..].chars().next();
+    !before.is_some_and(is_ident_char) && !after.is_some_and(is_ident_char)
 }
 
 fn contains_identifier(source: &str, ident: &str) -> bool {
