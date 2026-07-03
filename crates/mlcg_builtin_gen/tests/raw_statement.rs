@@ -622,6 +622,30 @@ fn ignores_build_method_signatures_inside_comments() {
 }
 
 #[test]
+fn ignores_instruction_returns_inside_build_comments() {
+    let source = r#"
+        @RegisterStatement("real")
+        public static class RealStatement extends LStatement{
+            public String value = "x";
+
+            @Override public LInstruction build(LAssembler builder){
+                // return new WrongI();
+                return new RealI(builder.var(value));
+            }
+        }
+    "#;
+
+    let manifest = scan_raw_statements("fixture", source).expect("scan succeeds");
+    let real = manifest
+        .statements
+        .iter()
+        .find(|statement| statement.name == "real")
+        .expect("real exists");
+
+    assert_eq!(real.instruction.as_deref(), Some("RealI"));
+}
+
+#[test]
 fn scans_category_from_lcategory_category_method_only() {
     let source = r#"
         @RegisterStatement("cat")
@@ -635,6 +659,32 @@ fn scans_category_from_lcategory_category_method_only() {
             }
 
             @Override public LCategory category(){
+                return LCategory.control;
+            }
+        }
+    "#;
+
+    let manifest = scan_raw_statements("fixture", source).expect("scan succeeds");
+    let cat = manifest
+        .statements
+        .iter()
+        .find(|statement| statement.name == "cat")
+        .expect("cat exists");
+
+    assert_eq!(cat.category.as_deref(), Some("control"));
+}
+
+#[test]
+fn ignores_category_returns_inside_category_comments() {
+    let source = r#"
+        @RegisterStatement("cat")
+        public static class CategoryStatement extends LStatement{
+            @Override public LInstruction build(LAssembler builder){
+                return new CatI();
+            }
+
+            @Override public LCategory category(){
+                /* return LCategory.wrong; */
                 return LCategory.control;
             }
         }

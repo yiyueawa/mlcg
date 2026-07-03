@@ -244,7 +244,7 @@ fn skip_block_comment(bytes: &[u8], start: usize) -> usize {
 fn parse_instruction(body: &str) -> Option<String> {
     let body = parse_linstruction_build_body(body)?;
     let marker = "return new ";
-    let start = body.find(marker)? + marker.len();
+    let start = find_code(body, marker, 0)? + marker.len();
     let end = body[start..].find('(')? + start;
     Some(body[start..end].trim().to_string())
 }
@@ -252,7 +252,7 @@ fn parse_instruction(body: &str) -> Option<String> {
 fn parse_category(body: &str) -> Option<String> {
     let body = parse_method_body(body, "LCategory", "category")?;
     let marker = "return LCategory.";
-    let start = body.find(marker)? + marker.len();
+    let start = find_code(body, marker, 0)? + marker.len();
     let end = body[start..].find(|c: char| !(c.is_ascii_alphanumeric() || c == '_'))? + start;
     Some(body[start..end].to_string())
 }
