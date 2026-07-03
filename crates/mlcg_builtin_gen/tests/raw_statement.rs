@@ -189,6 +189,27 @@ fn scans_enum_variants_from_source() {
 }
 
 #[test]
+fn ignores_enum_declarations_inside_comments() {
+    let source = r#"
+        /*
+        public enum LogicOp{
+            wrong;
+        }
+        */
+
+        public enum LogicOp{
+            add("+", true),
+            sub("-", true);
+        }
+    "#;
+
+    let variants = mlcg_builtin_gen::raw_statement::scan_raw_enum_variants("LogicOp", source)
+        .expect("scan succeeds");
+
+    assert_eq!(variants.variants, ["add", "sub"]);
+}
+
+#[test]
 fn infers_constant_true_enum_lambda_as_zero_arity() {
     let source = r#"
         public enum ConditionOp{

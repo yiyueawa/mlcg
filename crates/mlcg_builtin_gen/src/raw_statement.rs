@@ -538,11 +538,9 @@ fn clean_default(value: &str) -> String {
 
 pub fn scan_raw_enum_variants(name: &str, source: &str) -> Result<RawEnum, GenerateError> {
     let enum_marker = format!("enum {name}");
-    let enum_start = source
-        .find(&enum_marker)
-        .context(RequiredItemMissingSnafu {
-            item: "enum declaration",
-        })?;
+    let enum_start = find_code(source, &enum_marker, 0).context(RequiredItemMissingSnafu {
+        item: "enum declaration",
+    })?;
     let brace_start = source[enum_start..]
         .find('{')
         .map(|index| enum_start + index)
