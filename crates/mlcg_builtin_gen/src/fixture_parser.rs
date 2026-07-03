@@ -1,39 +1,11 @@
-use serde::Serialize;
-use snafu::{ensure, OptionExt, ResultExt, Snafu};
+use snafu::{ensure, OptionExt};
 
-#[derive(Debug, Snafu)]
-pub enum FixtureParseError {
-    #[snafu(display("line {line} is empty after trimming"))]
-    EmptyLine { line: usize },
+use crate::{
+    error::{GenerateError, InvalidKeyValueSnafu, MissingTokenSnafu},
+    manifest::{Instruction, Manifest},
+};
 
-    #[snafu(display("line {line} is missing token {name}"))]
-    MissingToken { line: usize, name: &'static str },
-
-    #[snafu(display("line {line} has invalid key-value token {token}"))]
-    InvalidKeyValue { line: usize, token: String },
-
-    #[snafu(display("failed to serialize manifest"))]
-    Serialize { source: toml::ser::Error },
-}
-
-#[derive(Debug, Serialize)]
-struct Manifest {
-    version: String,
-    instructions: Vec<Instruction>,
-}
-
-#[derive(Debug, Serialize)]
-struct Instruction {
-    family: String,
-    variant: String,
-    rust_name: String,
-    emit: Vec<String>,
-    receiver: String,
-    inputs: Vec<String>,
-    outputs: Vec<String>,
-}
-
-pub fn parse_fixture_manifest(version: &str, input: &str) -> Result<String, FixtureParseError> {
+pub fn parse_fixture_manifest(version: &str, input: &str) -> Result<String, GenerateError> {
     let mut instructions = Vec::new();
     for (index, raw_line) in input.lines().enumerate() {
         let line_no = index + 1;
@@ -93,11 +65,11 @@ pub fn parse_fixture_manifest(version: &str, input: &str) -> Result<String, Fixt
         });
     }
 
-    toml::to_string_pretty(&Manifest {
+    Manifest {
         version: version.to_string(),
         instructions,
-    })
-    .context(SerializeSnafu)
+    }
+    .to_toml()
 }
 
 fn split_list(value: &str) -> Vec<String> {

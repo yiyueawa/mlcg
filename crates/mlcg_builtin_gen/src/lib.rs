@@ -1,3 +1,7 @@
 #![forbid(unsafe_code)]
 
+pub mod cache;
+pub mod error;
 pub mod fixture_parser;
+pub mod manifest;
+pub mod source_parser;
