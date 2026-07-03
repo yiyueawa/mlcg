@@ -3,6 +3,8 @@ use std::{env, fs, path::PathBuf};
 use mlcg_builtin_gen::{
     cache::ensure_mindustry_cache,
     fixture_parser::parse_fixture_manifest,
+    generated_api::validate_generated_rust_api_symbols,
+    manifest::Manifest,
     raw_statement::RawStatementManifest,
     semantic_manifest::derive_semantic_manifest,
     source_parser::{parse_cached_mindustry, scan_cached_mindustry_raw},
@@ -28,7 +30,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .ok_or("usage: mlcg_builtin_gen fetch <version> <output-toml>")?;
             let cache = ensure_mindustry_cache(&version)?;
             let manifest = parse_cached_mindustry(&version, &cache)?;
-            fs::write(output, manifest.to_toml()?)?;
+            write_semantic_manifest(output, &manifest)?;
         }
         Some("scan-statements") => {
             let version = args
@@ -53,7 +55,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             let raw_toml = fs::read_to_string(&input)?;
             let raw_manifest: RawStatementManifest = toml::from_str(&raw_toml)?;
             let manifest = derive_semantic_manifest(&raw_manifest);
-            fs::write(output, manifest.to_toml()?)?;
+            write_semantic_manifest(output, &manifest)?;
         }
         Some("fixture") => {
             let version = args
@@ -78,5 +80,14 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             );
         }
     }
+    Ok(())
+}
+
+fn write_semantic_manifest(
+    output: PathBuf,
+    manifest: &Manifest,
+) -> Result<(), Box<dyn std::error::Error>> {
+    validate_generated_rust_api_symbols(manifest)?;
+    fs::write(output, manifest.to_toml()?)?;
     Ok(())
 }

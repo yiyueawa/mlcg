@@ -1,8 +1,11 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::manifest::{Instruction, Manifest};
+use crate::{
+    error::GenerateError,
+    manifest::{Instruction, Manifest},
+};
 
-pub fn validate_generated_rust_api_symbols(manifest: &Manifest) -> Result<(), String> {
+pub fn validate_generated_rust_api_symbols(manifest: &Manifest) -> Result<(), GenerateError> {
     validate_item_symbols(manifest)?;
     validate_processor_methods(manifest)?;
     validate_value_methods(manifest)?;
@@ -14,7 +17,7 @@ pub fn validate_generated_rust_api_symbols(manifest: &Manifest) -> Result<(), St
     Ok(())
 }
 
-fn validate_item_symbols(manifest: &Manifest) -> Result<(), String> {
+fn validate_item_symbols(manifest: &Manifest) -> Result<(), GenerateError> {
     let mut seen = HashMap::new();
 
     for instruction in &manifest.instructions {
@@ -48,7 +51,7 @@ fn validate_item_symbols(manifest: &Manifest) -> Result<(), String> {
     Ok(())
 }
 
-fn validate_processor_methods(manifest: &Manifest) -> Result<(), String> {
+fn validate_processor_methods(manifest: &Manifest) -> Result<(), GenerateError> {
     let mut seen = HashMap::new();
 
     for instruction in &manifest.instructions {
@@ -72,7 +75,7 @@ fn validate_processor_methods(manifest: &Manifest) -> Result<(), String> {
     Ok(())
 }
 
-fn validate_value_methods(manifest: &Manifest) -> Result<(), String> {
+fn validate_value_methods(manifest: &Manifest) -> Result<(), GenerateError> {
     let mut seen = HashMap::new();
 
     for instruction in manifest
@@ -100,7 +103,7 @@ fn validate_value_methods(manifest: &Manifest) -> Result<(), String> {
     Ok(())
 }
 
-fn validate_instruction_symbols(instruction: &Instruction) -> Result<(), String> {
+fn validate_instruction_symbols(instruction: &Instruction) -> Result<(), GenerateError> {
     validate_unique_instruction_names("instruction field", instruction, placeholders(instruction))?;
     validate_unique_instruction_names(
         "processor auto parameter",
@@ -150,12 +153,14 @@ fn record_manifest_symbol(
     kind: &str,
     name: String,
     instruction: &Instruction,
-) -> Result<(), String> {
+) -> Result<(), GenerateError> {
     if let Some(previous) = seen.insert(name.clone(), instruction.rust_name.clone()) {
-        return Err(format!(
-            "generated {kind} `{name}` for instruction `{}` collides with instruction `{previous}`",
-            instruction.rust_name
-        ));
+        return Err(GenerateError::GeneratedApi {
+            message: format!(
+                "generated {kind} `{name}` for instruction `{}` collides with instruction `{previous}`",
+                instruction.rust_name
+            ),
+        });
     }
 
     Ok(())
@@ -165,15 +170,17 @@ fn validate_unique_instruction_names(
     kind: &str,
     instruction: &Instruction,
     names: impl IntoIterator<Item = String>,
-) -> Result<(), String> {
+) -> Result<(), GenerateError> {
     let mut seen = HashSet::new();
 
     for name in names {
         if !seen.insert(name.clone()) {
-            return Err(format!(
-                "generated {kind} `{name}` appears more than once in instruction `{}`",
-                instruction.rust_name
-            ));
+            return Err(GenerateError::GeneratedApi {
+                message: format!(
+                    "generated {kind} `{name}` appears more than once in instruction `{}`",
+                    instruction.rust_name
+                ),
+            });
         }
     }
 

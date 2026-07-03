@@ -61,3 +61,58 @@ default = "message"
     assert!(semantic.contains("\"print\","));
     assert!(semantic.contains("\"$value\","));
 }
+
+#[test]
+fn derive_semantic_cli_rejects_manifest_that_would_generate_method_collision() {
+    let temp = tempfile::tempdir().expect("temp dir");
+    let raw_path = temp.path().join("raw.toml");
+    let semantic_path = temp.path().join("semantic.toml");
+    fs::write(
+        &raw_path,
+        r#"
+version = "fixture"
+
+[[statements]]
+name = "foo"
+class = "FooStatement"
+instruction = "FooI"
+
+[[statements.fields]]
+ty = "String"
+name = "output"
+default = "result"
+
+[[statements]]
+name = "foo_into"
+class = "FooIntoStatement"
+instruction = "FooIntoI"
+fields = []
+"#,
+    )
+    .expect("write raw manifest");
+
+    let output = Command::new(env!("CARGO_BIN_EXE_mlcg_builtin_gen"))
+        .arg("derive-semantic")
+        .arg(&raw_path)
+        .arg(&semantic_path)
+        .output()
+        .expect("run derive-semantic");
+
+    assert!(
+        !output.status.success(),
+        "derive-semantic unexpectedly succeeded\nstdout:\n{}\nstderr:\n{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(
+        String::from_utf8_lossy(&output.stderr).contains(
+            "generated processor method `foo_into` for instruction `foo_into` collides with instruction `foo`"
+        ),
+        "stderr did not explain generated API collision:\n{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(
+        !semantic_path.exists(),
+        "invalid semantic manifest should not be written"
+    );
+}

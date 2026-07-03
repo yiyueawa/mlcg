@@ -79,7 +79,7 @@ fn generated_rust_api_symbol_validation_rejects_into_method_collision() {
         .expect_err("processor method collision is rejected");
 
     assert_eq!(
-        error,
+        error.to_string(),
         "generated processor method `foo_into` for instruction `foo_into` collides with instruction `foo`"
     );
 }

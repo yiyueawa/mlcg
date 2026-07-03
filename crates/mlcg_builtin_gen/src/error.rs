@@ -28,4 +28,7 @@ pub enum GenerateError {
 
     #[snafu(display("required source item not found: {item}"))]
     RequiredItemMissing { item: &'static str },
+
+    #[snafu(display("{message}"))]
+    GeneratedApi { message: String },
 }
