@@ -386,6 +386,30 @@ outputs = []
     )
     .expect("write trybuild unclassified placeholder manifest");
 
+    let duplicate_role_manifest = r#"
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "bad"
+rust_name = "bad"
+emit = ["bad", "$slot"]
+receiver = ""
+inputs = ["slot"]
+outputs = ["slot"]
+"#;
+    let duplicate_role_manifest_path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/duplicate_role_manifest.toml");
+    fs::write(&duplicate_role_manifest_path, duplicate_role_manifest)
+        .expect("write duplicate role manifest");
+    let trybuild_duplicate_role_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../target/tests/trybuild/mlcg_builtin_macros/tests/duplicate_role_manifest.toml");
+    fs::write(
+        &trybuild_duplicate_role_manifest_path,
+        duplicate_role_manifest,
+    )
+    .expect("write trybuild duplicate role manifest");
+
     let t = trybuild::TestCases::new();
     t.pass("tests/ui/pass_macro_basic.rs");
     t.pass("tests/ui/pass_std_trait_name.rs");
@@ -401,4 +425,5 @@ outputs = []
     t.compile_fail("tests/ui/fail_helper_collision.rs");
     t.compile_fail("tests/ui/fail_output_field_collision.rs");
     t.compile_fail("tests/ui/fail_unclassified_placeholder.rs");
+    t.compile_fail("tests/ui/fail_duplicate_role.rs");
 }

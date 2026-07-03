@@ -171,6 +171,18 @@ fn validate_placeholder_roles(instruction: &Instruction) -> Result<(), GenerateE
     roles.extend(instruction.outputs.iter().map(String::as_str));
     roles.extend(instruction.labels.iter().map(String::as_str));
 
+    let mut seen_roles = HashSet::new();
+    for role in &roles {
+        if !seen_roles.insert(*role) {
+            return Err(GenerateError::GeneratedApi {
+                message: format!(
+                    "instruction `{}` classifies parameter `{role}` more than once",
+                    instruction.rust_name
+                ),
+            });
+        }
+    }
+
     for placeholder in placeholders {
         if !roles.iter().any(|role| role == &placeholder) {
             return Err(GenerateError::GeneratedApi {

@@ -232,6 +232,31 @@ fn generated_rust_api_symbol_validation_rejects_non_emitted_classified_parameter
     );
 }
 
+#[test]
+fn generated_rust_api_symbol_validation_rejects_parameter_with_multiple_roles() {
+    let manifest = Manifest {
+        version: "fixture".to_string(),
+        instructions: vec![Instruction {
+            family: "fixture".to_string(),
+            variant: "bad".to_string(),
+            rust_name: "bad".to_string(),
+            emit: strings(["bad", "$slot"]),
+            receiver: String::new(),
+            inputs: strings(["slot"]),
+            outputs: strings(["slot"]),
+            labels: Vec::new(),
+        }],
+    };
+
+    let error = validate_generated_rust_api_symbols(&manifest)
+        .expect_err("parameter with multiple roles is rejected");
+
+    assert_eq!(
+        error.to_string(),
+        "instruction `bad` classifies parameter `slot` more than once"
+    );
+}
+
 fn read_v158_1_manifest() -> Manifest {
     let manifest_path = concat!(
         env!("CARGO_MANIFEST_DIR"),

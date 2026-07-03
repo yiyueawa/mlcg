@@ -350,6 +350,16 @@ fn validate_placeholder_roles(spec: &InstructionSpec) -> Result<(), String> {
     roles.extend(spec.outputs.iter().map(String::as_str));
     roles.extend(spec.labels.iter().map(String::as_str));
 
+    let mut seen_roles = HashSet::new();
+    for role in &roles {
+        if !seen_roles.insert(*role) {
+            return Err(format!(
+                "instruction `{}` classifies parameter `{role}` more than once",
+                spec.rust_name
+            ));
+        }
+    }
+
     for placeholder in placeholders {
         if !roles.iter().any(|role| role == &placeholder) {
             return Err(format!(
