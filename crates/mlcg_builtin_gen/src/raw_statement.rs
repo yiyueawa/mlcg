@@ -203,6 +203,7 @@ fn parse_instruction(body: &str) -> Option<String> {
 }
 
 fn parse_category(body: &str) -> Option<String> {
+    let body = parse_method_body(body, "LCategory category")?;
     let marker = "return LCategory.";
     let start = body.find(marker)? + marker.len();
     let end = body[start..].find(|c: char| !(c.is_ascii_alphanumeric() || c == '_'))? + start;
@@ -333,7 +334,10 @@ fn parse_ignored_fields(body: &str, fields: &[RawField]) -> Vec<String> {
 }
 
 fn parse_linstruction_build_body(body: &str) -> Option<&str> {
-    let marker = "LInstruction build";
+    parse_method_body(body, "LInstruction build")
+}
+
+fn parse_method_body<'a>(body: &'a str, marker: &str) -> Option<&'a str> {
     let start = body.find(marker)?;
     let brace_start = body[start..].find('{').map(|index| start + index)?;
     let brace_end = matching_brace(body, brace_start)?;

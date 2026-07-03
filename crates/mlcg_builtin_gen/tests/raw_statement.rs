@@ -227,3 +227,32 @@ fn scans_instruction_type_from_linstruction_build_method_only() {
 
     assert_eq!(real.instruction.as_deref(), Some("RealI"));
 }
+
+#[test]
+fn scans_category_from_lcategory_category_method_only() {
+    let source = r#"
+        @RegisterStatement("cat")
+        public static class CategoryStatement extends LStatement{
+            public LCategory helper(){
+                return LCategory.wrong;
+            }
+
+            @Override public LInstruction build(LAssembler builder){
+                return new CatI();
+            }
+
+            @Override public LCategory category(){
+                return LCategory.control;
+            }
+        }
+    "#;
+
+    let manifest = scan_raw_statements("fixture", source).expect("scan succeeds");
+    let cat = manifest
+        .statements
+        .iter()
+        .find(|statement| statement.name == "cat")
+        .expect("cat exists");
+
+    assert_eq!(cat.category.as_deref(), Some("control"));
+}
