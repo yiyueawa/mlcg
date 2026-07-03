@@ -1,0 +1,15 @@
+error[E0308]: mismatched types
+ --> tests/ui/mixed_processors.rs:8:37
+  |
+8 |     accepts_same(first.new_value(), second.new_value());
+  |     ------------                    ^^^^^^^^^^^^^^^^^^ expected `main::MlcgProcessorMarker`, found a different `main::MlcgProcessorMarker`
+  |     |
+  |     arguments to this function are incorrect
+  |
+  = note: expected struct `mlcg::prelude::Value<main::MlcgProcessorMarker>`
+             found struct `mlcg::prelude::Value<main::MlcgProcessorMarker>`
+note: function defined here
+ --> tests/ui/mixed_processors.rs:3:4
+  |
+3 | fn accepts_same<P>(_: Value<P>, _: Value<P>) {}
+  |    ^^^^^^^^^^^^                 -----------
