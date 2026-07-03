@@ -43,6 +43,12 @@ fn validate_instruction_names(manifest: &Manifest) -> Result<(), GenerateError> 
 
 fn validate_emit_tokens(manifest: &Manifest) -> Result<(), GenerateError> {
     for instruction in &manifest.instructions {
+        if instruction.emit.is_empty() {
+            return Err(GenerateError::GeneratedApi {
+                message: format!("instruction `{}` has empty emit", instruction.rust_name),
+            });
+        }
+
         for token in &instruction.emit {
             if token.is_empty() {
                 return Err(GenerateError::GeneratedApi {

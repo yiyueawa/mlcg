@@ -290,6 +290,27 @@ fn generated_rust_api_symbol_validation_rejects_emit_token_with_whitespace() {
 }
 
 #[test]
+fn generated_rust_api_symbol_validation_rejects_empty_emit() {
+    let manifest = Manifest {
+        version: "fixture".to_string(),
+        instructions: vec![Instruction {
+            family: "fixture".to_string(),
+            variant: "bad".to_string(),
+            rust_name: "bad".to_string(),
+            emit: Vec::new(),
+            receiver: String::new(),
+            inputs: Vec::new(),
+            outputs: Vec::new(),
+            labels: Vec::new(),
+        }],
+    };
+
+    let error = validate_generated_rust_api_symbols(&manifest).expect_err("empty emit is rejected");
+
+    assert_eq!(error.to_string(), "instruction `bad` has empty emit");
+}
+
+#[test]
 fn generated_rust_api_symbol_validation_rejects_blank_receiver_name() {
     let manifest = Manifest {
         version: "fixture".to_string(),

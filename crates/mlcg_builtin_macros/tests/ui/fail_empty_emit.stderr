@@ -1,0 +1,7 @@
+error: instruction `bad` has empty emit
+ --> tests/ui/fail_empty_emit.rs:2:5
+  |
+2 |     mlcg_builtin_macros::include_manifest!("tests/empty_emit_manifest.toml");
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `mlcg_builtin_macros::include_manifest` (in Nightly builds, run with -Z macro-backtrace for more info)

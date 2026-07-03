@@ -202,6 +202,10 @@ fn validate_instruction_names(manifest: &Manifest) -> Result<(), String> {
 
 fn validate_emit_tokens(manifest: &Manifest) -> Result<(), String> {
     for spec in &manifest.instructions {
+        if spec.emit.is_empty() {
+            return Err(format!("instruction `{}` has empty emit", spec.rust_name));
+        }
+
         for token in &spec.emit {
             if token.is_empty() {
                 return Err(format!(
