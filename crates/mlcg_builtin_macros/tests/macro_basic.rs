@@ -410,6 +410,35 @@ outputs = ["slot"]
     )
     .expect("write trybuild duplicate role manifest");
 
+    let non_emitted_parameter_manifest = r#"
+version = "fixture"
+
+[[instructions]]
+family = "fixture"
+variant = "bad"
+rust_name = "bad"
+emit = ["bad"]
+receiver = ""
+inputs = ["unused"]
+outputs = []
+"#;
+    let non_emitted_parameter_manifest_path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/non_emitted_parameter_manifest.toml");
+    fs::write(
+        &non_emitted_parameter_manifest_path,
+        non_emitted_parameter_manifest,
+    )
+    .expect("write non-emitted parameter manifest");
+    let trybuild_non_emitted_parameter_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join(
+        "../../target/tests/trybuild/mlcg_builtin_macros/tests/non_emitted_parameter_manifest.toml",
+    );
+    fs::write(
+        &trybuild_non_emitted_parameter_manifest_path,
+        non_emitted_parameter_manifest,
+    )
+    .expect("write trybuild non-emitted parameter manifest");
+
     let t = trybuild::TestCases::new();
     t.pass("tests/ui/pass_macro_basic.rs");
     t.pass("tests/ui/pass_std_trait_name.rs");
@@ -426,4 +455,5 @@ outputs = ["slot"]
     t.compile_fail("tests/ui/fail_output_field_collision.rs");
     t.compile_fail("tests/ui/fail_unclassified_placeholder.rs");
     t.compile_fail("tests/ui/fail_duplicate_role.rs");
+    t.compile_fail("tests/ui/fail_non_emitted_parameter.rs");
 }

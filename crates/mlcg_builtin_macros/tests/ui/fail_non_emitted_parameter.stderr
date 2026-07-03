@@ -1,0 +1,7 @@
+error: instruction `bad` classifies non-emitted parameter `unused`
+ --> tests/ui/fail_non_emitted_parameter.rs:2:5
+  |
+2 |     mlcg_builtin_macros::include_manifest!("tests/non_emitted_parameter_manifest.toml");
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `mlcg_builtin_macros::include_manifest` (in Nightly builds, run with -Z macro-backtrace for more info)
