@@ -411,6 +411,44 @@ fn scans_comma_separated_fields_with_commas_inside_string_defaults() {
 }
 
 #[test]
+fn scans_constructor_assignment_defaults_with_semicolons_inside_strings() {
+    let source = r#"
+        @RegisterStatement("message")
+        public static class MessageStatement extends LStatement{
+            public String message = "default", output = "result";
+
+            public MessageStatement(){
+                message = "hello; world";
+            }
+
+            @Override public LInstruction build(LAssembler builder){
+                return new MessageI(builder.var(message), builder.var(output));
+            }
+        }
+    "#;
+
+    let manifest = scan_raw_statements("fixture", source).expect("scan succeeds");
+    let message = manifest
+        .statements
+        .iter()
+        .find(|statement| statement.name == "message")
+        .expect("message exists");
+    let fields: Vec<_> = message
+        .fields
+        .iter()
+        .map(|field| (field.name.as_str(), field.default.as_deref()))
+        .collect();
+
+    assert_eq!(
+        fields,
+        [
+            ("message", Some("hello; world")),
+            ("output", Some("result"))
+        ]
+    );
+}
+
+#[test]
 fn scans_instruction_type_from_linstruction_build_method_only() {
     let source = r#"
         @RegisterStatement("real")

@@ -338,7 +338,7 @@ fn parse_constructor_assignments(class: &str, body: &str) -> BTreeMap<String, St
     };
     let constructor_body = &body[brace_start + 1..brace_end];
 
-    for statement in constructor_body.split(';') {
+    for statement in top_level_semicolon_statements(constructor_body) {
         let Some((left, right)) = statement.split_once('=') else {
             continue;
         };
