@@ -28,7 +28,9 @@ fn values_can_be_retagged_without_changing_identity() {
     assert_eq!(erased.name_hint().as_deref(), Some("x"));
 }
 
-use mlcg_core::{Instruction, Label, LowerContext, PartialLine, PartialProgram, PartialToken};
+use mlcg_core::{
+    Instruction, Label, LowerContext, PartialLine, PartialProgram, PartialToken, Value,
+};
 
 #[derive(Debug)]
 struct RawLine(&'static [&'static str]);
@@ -81,6 +83,23 @@ impl Instruction<TestProcessor> for TwoLines {
     }
 }
 
+#[derive(Debug)]
+struct PrintValue(Value<TestProcessor>);
+
+impl Instruction<TestProcessor> for PrintValue {
+    fn lower(
+        &self,
+        _ctx: &mut LowerContext<TestProcessor>,
+        out: &mut PartialProgram<TestProcessor>,
+    ) -> Result<(), mlcg_core::LowerError> {
+        out.push_line(PartialLine::new(vec![
+            PartialToken::raw("print"),
+            PartialToken::value(self.0.clone()),
+        ]));
+        Ok(())
+    }
+}
+
 #[test]
 fn labels_resolve_after_multiline_lowering() {
     let processor = Processor::<TestProcessor>::new();
@@ -120,4 +139,20 @@ fn duplicate_label_placement_is_an_emit_error() {
     let error = processor.emit().expect_err("label is placed twice");
 
     assert!(error.to_string().contains("duplicate label placement"));
+}
+
+#[test]
+fn foreign_processor_value_does_not_alias_local_value_with_same_type() {
+    let local_processor = Processor::<TestProcessor>::new();
+    let foreign_processor = Processor::<TestProcessor>::new();
+
+    let _local = local_processor.named("local");
+    let foreign = foreign_processor.named("foreign");
+    local_processor.push(PrintValue(foreign));
+
+    let error = local_processor
+        .emit()
+        .expect_err("foreign value is not part of local processor state");
+
+    assert!(error.to_string().contains("unknown value"));
 }

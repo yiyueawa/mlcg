@@ -1,6 +1,7 @@
 use std::{
     collections::BTreeMap,
     marker::PhantomData,
+    sync::atomic::{AtomicU64, Ordering},
     sync::{Arc, Mutex},
 };
 
@@ -16,9 +17,10 @@ use crate::{
     EmitError, Instruction, LabelId, ValueId,
 };
 
+static NEXT_VALUE_ID: AtomicU64 = AtomicU64::new(0);
+
 #[derive(Debug)]
 pub(crate) struct ProgramState<P> {
-    pub(crate) next_value: u64,
     pub(crate) next_label: u64,
     pub(crate) values: BTreeMap<ValueId, Option<String>>,
     pub(crate) items: Vec<ProgramItem<P>>,
@@ -62,7 +64,6 @@ impl<P: 'static> Processor<P> {
         Self {
             handle: ProcessorHandle {
                 state: Arc::new(Mutex::new(ProgramState {
-                    next_value: 0,
                     next_label: 0,
                     values: BTreeMap::new(),
                     items: Vec::new(),
@@ -120,8 +121,7 @@ impl<P: 'static> Processor<P> {
             .state
             .lock()
             .expect("program state mutex poisoned");
-        let id = ValueId(state.next_value);
-        state.next_value += 1;
+        let id = next_value_id();
         state.values.insert(id, name_hint.clone());
         drop(state);
         Value {
@@ -136,8 +136,7 @@ impl<P: 'static> Processor<P> {
 impl<P: 'static> ProcessorHandle<P> {
     pub fn new_value(&self) -> Value<P, Any> {
         let mut state = self.state.lock().expect("program state mutex poisoned");
-        let id = ValueId(state.next_value);
-        state.next_value += 1;
+        let id = next_value_id();
         state.values.insert(id, None);
         drop(state);
         Value {
@@ -184,4 +183,8 @@ impl<P: 'static> ProcessorHandle<P> {
 
         emit_partial(&partial, &labels, &value_names)
     }
+}
+
+fn next_value_id() -> ValueId {
+    ValueId(NEXT_VALUE_ID.fetch_add(1, Ordering::Relaxed))
 }
