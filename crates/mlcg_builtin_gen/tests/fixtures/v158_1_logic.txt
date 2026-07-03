@@ -1,0 +1,5 @@
+statement set receiver=target emit=set,$target,$source inputs=source outputs=
+op add unary=false emit=op,add,$out,$lhs,$rhs inputs=lhs,rhs outputs=out
+op not unary=true emit=op,not,$out,$input,0 inputs=input outputs=out
+jump always emit=jump,$label,always,0,0 inputs= outputs= label=label
+jump equal emit=jump,$label,equal,$lhs,$rhs inputs=lhs,rhs outputs= label=label
