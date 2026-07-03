@@ -4,7 +4,7 @@ use mlcg_core::Processor;
 struct P;
 
 #[test]
-fn generated_v158_1_api_emits_representative_mlog() {
+fn generated_v158_1_api_emits_mlog_program() {
     let processor = Processor::<P>::new();
     let x = processor.named("x");
     let y = processor.named("y");
