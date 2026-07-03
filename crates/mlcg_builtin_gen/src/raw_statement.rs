@@ -48,12 +48,7 @@ pub fn scan_raw_statements(
     let mut offset = 0;
     let marker = "@RegisterStatement(\"";
 
-    while let Some(relative) = source[offset..].find(marker) {
-        let marker_start = offset + relative;
-        if is_line_comment_at(source, marker_start) {
-            offset = marker_start + marker.len();
-            continue;
-        }
+    while let Some(marker_start) = find_code(source, marker, offset) {
         let name_start = marker_start + marker.len();
         let name_end = source[name_start..]
             .find("\"")
@@ -63,13 +58,13 @@ pub fn scan_raw_statements(
             })?;
         let name = &source[name_start..name_end];
 
-        let class_search_start = name_end;
-        let class_relative = source[class_search_start..]
-            .find("public static class ")
+        let class_search_start = name_end + 1;
+        let class_marker = "public static class ";
+        let class_start = find_code(source, class_marker, class_search_start)
+            .map(|index| index + class_marker.len())
             .context(RequiredItemMissingSnafu {
                 item: "registered statement class declaration",
             })?;
-        let class_start = class_search_start + class_relative + "public static class ".len();
         let class_end = source[class_start..]
             .find(|c: char| c.is_whitespace() || c == '{')
             .map(|index| class_start + index)
@@ -119,8 +114,8 @@ fn parse_classes(source: &str) -> Result<BTreeMap<String, ClassInfo>, GenerateEr
     let mut offset = 0;
     let marker = "public static class ";
 
-    while let Some(relative) = source[offset..].find(marker) {
-        let class_start = offset + relative + marker.len();
+    while let Some(marker_start) = find_code(source, marker, offset) {
+        let class_start = marker_start + marker.len();
         let class_end = source[class_start..]
             .find(|c: char| c.is_whitespace() || c == '{')
             .map(|index| class_start + index)
@@ -192,6 +187,50 @@ fn skip_string(bytes: &[u8], quote: usize) -> usize {
         }
     }
     bytes.len().saturating_sub(1)
+}
+
+fn find_code(source: &str, marker: &str, start: usize) -> Option<usize> {
+    let bytes = source.as_bytes();
+    let marker = marker.as_bytes();
+    let mut index = start;
+
+    while index < bytes.len() {
+        if bytes[index..].starts_with(marker) {
+            return Some(index);
+        }
+
+        match bytes[index] {
+            b'"' => index = skip_string(bytes, index) + 1,
+            b'/' if bytes.get(index + 1) == Some(&b'/') => {
+                index = skip_line_comment(bytes, index + 2);
+            }
+            b'/' if bytes.get(index + 1) == Some(&b'*') => {
+                index = skip_block_comment(bytes, index + 2);
+            }
+            _ => index += 1,
+        }
+    }
+
+    None
+}
+
+fn skip_line_comment(bytes: &[u8], start: usize) -> usize {
+    let mut index = start;
+    while index < bytes.len() && bytes[index] != b'\n' {
+        index += 1;
+    }
+    (index + 1).min(bytes.len())
+}
+
+fn skip_block_comment(bytes: &[u8], start: usize) -> usize {
+    let mut index = start;
+    while index + 1 < bytes.len() {
+        if bytes[index] == b'*' && bytes[index + 1] == b'/' {
+            return index + 2;
+        }
+        index += 1;
+    }
+    bytes.len()
 }
 
 fn parse_instruction(body: &str) -> Option<String> {
@@ -464,13 +503,6 @@ fn clean_default(value: &str) -> String {
     } else {
         value.to_string()
     }
-}
-
-fn is_line_comment_at(source: &str, index: usize) -> bool {
-    let line_start = source[..index]
-        .rfind('\n')
-        .map_or(0, |position| position + 1);
-    source[line_start..index].contains("//")
 }
 
 pub fn scan_raw_enum_variants(name: &str, source: &str) -> Result<RawEnum, GenerateError> {

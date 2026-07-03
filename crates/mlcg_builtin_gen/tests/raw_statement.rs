@@ -106,6 +106,40 @@ fn ignores_commented_register_statement_annotations() {
 }
 
 #[test]
+fn ignores_class_declarations_inside_block_comments() {
+    let source = r#"
+        /*
+        public static class CommentedBaseStatement extends LStatement{
+            public String phantom = "bad";
+        }
+        */
+
+        @RegisterStatement("real")
+        public static class RealStatement extends CommentedBaseStatement{
+            public String output = "result";
+
+            @Override public LInstruction build(LAssembler builder){
+                return new RealI(builder.var(output));
+            }
+        }
+    "#;
+
+    let manifest = scan_raw_statements("fixture", source).expect("scan succeeds");
+    let real = manifest
+        .statements
+        .iter()
+        .find(|statement| statement.name == "real")
+        .expect("real exists");
+    let fields: Vec<_> = real
+        .fields
+        .iter()
+        .map(|field| field.name.as_str())
+        .collect();
+
+    assert_eq!(fields, ["output"]);
+}
+
+#[test]
 fn scans_enum_variants_from_source() {
     let source = r#"
         public enum LogicOp{
