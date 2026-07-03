@@ -1,108 +1,114 @@
 use mlcg_builtin_gen::{
-    raw_statement::scan_raw_statements, semantic_manifest::derive_semantic_manifest,
+    raw_statement::{scan_raw_statements, RawEnum},
+    semantic_manifest::derive_semantic_manifest,
 };
 
 #[test]
-fn derives_known_semantic_overrides_and_generic_statement_apis() {
+fn derives_semantics_from_field_roles_and_enum_variants_without_statement_name_special_cases() {
     let source = r#"
-        @RegisterStatement("read")
-        public static class ReadStatement extends LStatement{
-            public String output = "result", target = "cell1", address = "0";
-            @Override public LInstruction build(LAssembler builder){
-                return new ReadI(builder.var(target), builder.var(address), builder.var(output));
-            }
-        }
-
-        @RegisterStatement("set")
-        public static class SetStatement extends LStatement{
+        @RegisterStatement("copy")
+        public static class CopyStatement extends LStatement{
             public String to = "result";
             public String from = "0";
-            @Override public LInstruction build(LAssembler builder){ return new SetI(builder.var(from), builder.var(to)); }
+            @Override public LInstruction build(LAssembler builder){ return new CopyI(builder.var(from), builder.var(to)); }
         }
 
-        @RegisterStatement("print")
-        public static class PrintStatement extends LStatement{
-            public String value = "message";
-            @Override public LInstruction build(LAssembler builder){ return new PrintI(builder.var(value)); }
-        }
-
-        @RegisterStatement("op")
-        public static class OperationStatement extends LStatement{
+        @RegisterStatement("calc")
+        public static class CalcStatement extends LStatement{
             public LogicOp op = LogicOp.add;
             public String dest = "result", a = "a", b = "b";
-            @Override public LInstruction build(LAssembler builder){ return new OpI(op, builder.var(a), builder.var(b), builder.var(dest)); }
+            @Override public LInstruction build(LAssembler builder){ return new CalcI(op, builder.var(a), builder.var(b), builder.var(dest)); }
         }
 
-        @RegisterStatement("jump")
-        public static class JumpStatement extends LStatement{
+        @RegisterStatement("branch")
+        public static class BranchStatement extends LStatement{
             public int destIndex;
             public ConditionOp op = ConditionOp.notEqual;
             public String value = "x", compare = "false";
-            @Override public LInstruction build(LAssembler builder){ return new JumpI(op, builder.var(value), builder.var(compare), destIndex); }
+            @Override public LInstruction build(LAssembler builder){ return new BranchI(op, builder.var(value), builder.var(compare), destIndex); }
+        }
+
+        @RegisterStatement("read")
+        public static class ReadStatement extends LStatement{
+            public String output = "result", target = "cell1", address = "0";
+            @Override public LInstruction build(LAssembler builder){ return new ReadI(builder.var(target), builder.var(address), builder.var(output)); }
         }
     "#;
 
-    let raw = scan_raw_statements("158.1", source).expect("scan succeeds");
+    let mut raw = scan_raw_statements("fixture", source).expect("scan succeeds");
+    raw.enums = vec![
+        RawEnum {
+            name: "LogicOp".to_string(),
+            variants: vec!["add".to_string(), "not".to_string()],
+            arities: [("not".to_string(), 1)].into_iter().collect(),
+        },
+        RawEnum {
+            name: "ConditionOp".to_string(),
+            variants: vec!["equal".to_string(), "always".to_string()],
+            arities: std::collections::BTreeMap::new(),
+        },
+    ];
+
     let manifest = derive_semantic_manifest(&raw);
 
-    assert_eq!(manifest.version, "158.1");
+    let copy = manifest
+        .instructions
+        .iter()
+        .find(|instruction| instruction.rust_name == "copy")
+        .expect("copy exists");
+    assert_eq!(copy.emit, ["copy", "$to", "$from"]);
+    assert_eq!(copy.receiver, "to");
+    assert_eq!(copy.inputs, ["from"]);
+    assert!(copy.outputs.is_empty());
 
-    let set = manifest
+    let calc_add = manifest
         .instructions
         .iter()
-        .find(|instruction| instruction.rust_name == "set")
-        .expect("set override exists");
-    assert_eq!(set.emit, ["set", "$target", "$source"]);
-    assert_eq!(set.receiver, "target");
-    assert_eq!(set.inputs, ["source"]);
-    assert!(set.outputs.is_empty());
+        .find(|instruction| instruction.rust_name == "calc_add")
+        .expect("calc_add exists");
+    assert_eq!(calc_add.emit, ["calc", "add", "$dest", "$a", "$b"]);
+    assert_eq!(calc_add.receiver, "a");
+    assert_eq!(calc_add.inputs, ["b"]);
+    assert_eq!(calc_add.outputs, ["dest"]);
 
-    let op_add = manifest
+    let calc_not = manifest
         .instructions
         .iter()
-        .find(|instruction| instruction.rust_name == "op_add")
-        .expect("op_add override exists");
-    assert_eq!(op_add.emit, ["op", "add", "$out", "$lhs", "$rhs"]);
-    assert_eq!(op_add.outputs, ["out"]);
+        .find(|instruction| instruction.rust_name == "calc_not")
+        .expect("calc_not exists");
+    assert_eq!(calc_not.emit, ["calc", "not", "$dest", "$a", "0"]);
+    assert_eq!(calc_not.receiver, "a");
+    assert!(calc_not.inputs.is_empty());
+    assert_eq!(calc_not.outputs, ["dest"]);
 
-    assert!(manifest
+    let branch_equal = manifest
         .instructions
         .iter()
-        .any(|instruction| instruction.rust_name == "op_not"));
-    assert!(manifest
-        .instructions
-        .iter()
-        .any(|instruction| instruction.rust_name == "jump_equal"));
-    assert!(manifest
-        .instructions
-        .iter()
-        .any(|instruction| instruction.rust_name == "jump_always"));
+        .find(|instruction| instruction.rust_name == "branch_equal")
+        .expect("branch_equal exists");
+    assert_eq!(
+        branch_equal.emit,
+        ["branch", "$destIndex", "equal", "$value", "$compare"]
+    );
+    assert_eq!(branch_equal.receiver, "value");
+    assert_eq!(branch_equal.inputs, ["destIndex", "compare"]);
+    assert!(branch_equal.outputs.is_empty());
 
     let read = manifest
         .instructions
         .iter()
         .find(|instruction| instruction.rust_name == "read")
-        .expect("generic read exists");
-    assert_eq!(read.emit, ["read", "$output", "$target", "$address"]);
-    assert!(read.receiver.is_empty());
-    assert_eq!(read.inputs, ["target", "address"]);
+        .expect("read exists");
+    assert_eq!(read.receiver, "target");
+    assert_eq!(read.inputs, ["address"]);
     assert_eq!(read.outputs, ["output"]);
 
-    let print = manifest
-        .instructions
-        .iter()
-        .find(|instruction| instruction.rust_name == "print")
-        .expect("generic print exists");
-    assert_eq!(print.emit, ["print", "$value"]);
-    assert_eq!(print.inputs, ["value"]);
-    assert!(print.outputs.is_empty());
-
     assert!(!manifest
         .instructions
         .iter()
-        .any(|instruction| instruction.rust_name == "op"));
+        .any(|instruction| instruction.rust_name == "calc"));
     assert!(!manifest
         .instructions
         .iter()
-        .any(|instruction| instruction.rust_name == "jump"));
+        .any(|instruction| instruction.rust_name == "branch"));
 }

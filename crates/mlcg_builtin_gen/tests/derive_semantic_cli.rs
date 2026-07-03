@@ -55,8 +55,8 @@ default = "message"
     let semantic = fs::read_to_string(&semantic_path).expect("read semantic manifest");
     assert!(semantic.contains("rust_name = \"set\""));
     assert!(semantic.contains("\"set\","));
-    assert!(semantic.contains("\"$target\","));
-    assert!(semantic.contains("\"$source\","));
+    assert!(semantic.contains("\"$to\","));
+    assert!(semantic.contains("\"$from\","));
     assert!(semantic.contains("rust_name = \"print\""));
     assert!(semantic.contains("\"print\","));
     assert!(semantic.contains("\"$value\","));

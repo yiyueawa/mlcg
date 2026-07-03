@@ -1,141 +1,230 @@
-use std::collections::HashSet;
-
 use crate::{
     manifest::{Instruction, Manifest},
-    raw_statement::{RawStatement, RawStatementManifest},
+    raw_statement::{RawEnum, RawField, RawStatement, RawStatementManifest},
 };
 
+#[derive(Debug, Clone)]
+struct EnumSelection {
+    field: String,
+    variant: String,
+    arity: Option<usize>,
+}
+
 pub fn derive_semantic_manifest(raw: &RawStatementManifest) -> Manifest {
-    let mut instructions = Vec::new();
-    let mut superseded = HashSet::new();
-
-    if has_statement(raw, "set") {
-        instructions.push(Instruction {
-            family: "set".to_string(),
-            variant: "set".to_string(),
-            rust_name: "set".to_string(),
-            emit: strings(["set", "$target", "$source"]),
-            receiver: "target".to_string(),
-            inputs: strings(["source"]),
-            outputs: Vec::new(),
-        });
-        superseded.insert("set".to_string());
-    }
-
-    if has_statement(raw, "op") {
-        instructions.extend([
-            Instruction {
-                family: "op".to_string(),
-                variant: "add".to_string(),
-                rust_name: "op_add".to_string(),
-                emit: strings(["op", "add", "$out", "$lhs", "$rhs"]),
-                receiver: String::new(),
-                inputs: strings(["lhs", "rhs"]),
-                outputs: strings(["out"]),
-            },
-            Instruction {
-                family: "op".to_string(),
-                variant: "not".to_string(),
-                rust_name: "op_not".to_string(),
-                emit: strings(["op", "not", "$out", "$input", "0"]),
-                receiver: String::new(),
-                inputs: strings(["input"]),
-                outputs: strings(["out"]),
-            },
-        ]);
-        superseded.insert("op".to_string());
-    }
-
-    if has_statement(raw, "jump") {
-        instructions.extend([
-            Instruction {
-                family: "jump".to_string(),
-                variant: "equal".to_string(),
-                rust_name: "jump_equal".to_string(),
-                emit: strings(["jump", "$label", "equal", "$lhs", "$rhs"]),
-                receiver: String::new(),
-                inputs: strings(["label", "lhs", "rhs"]),
-                outputs: Vec::new(),
-            },
-            Instruction {
-                family: "jump".to_string(),
-                variant: "always".to_string(),
-                rust_name: "jump_always".to_string(),
-                emit: strings(["jump", "$label", "always", "0", "0"]),
-                receiver: String::new(),
-                inputs: strings(["label"]),
-                outputs: Vec::new(),
-            },
-        ]);
-        superseded.insert("jump".to_string());
-    }
-
-    instructions.extend(
-        raw.statements
-            .iter()
-            .filter(|statement| !superseded.contains(&statement.name))
-            .map(derive_generic_instruction),
-    );
-
     Manifest {
         version: raw.version.clone(),
-        instructions,
+        instructions: raw
+            .statements
+            .iter()
+            .flat_map(|statement| derive_statement_instructions(statement, &raw.enums))
+            .collect(),
     }
 }
 
-fn has_statement(raw: &RawStatementManifest, name: &str) -> bool {
-    raw.statements
+fn derive_statement_instructions(statement: &RawStatement, enums: &[RawEnum]) -> Vec<Instruction> {
+    let enum_fields: Vec<_> = statement
+        .fields
         .iter()
-        .any(|statement| statement.name == name)
+        .filter(|field| is_selector_field(&field.name))
+        .filter_map(|field| enum_variants(enums, &field.ty).map(|raw_enum| (field, raw_enum)))
+        .collect();
+
+    if enum_fields.is_empty() {
+        return vec![derive_instruction(statement, &[])];
+    }
+
+    let mut selections = Vec::new();
+    let mut out = Vec::new();
+    expand_enum_selections(statement, &enum_fields, 0, &mut selections, &mut out);
+    out
 }
 
-fn derive_generic_instruction(statement: &RawStatement) -> Instruction {
-    let output_candidates: Vec<_> = statement
+fn expand_enum_selections(
+    statement: &RawStatement,
+    enum_fields: &[(&RawField, &RawEnum)],
+    index: usize,
+    selections: &mut Vec<EnumSelection>,
+    out: &mut Vec<Instruction>,
+) {
+    if index == enum_fields.len() {
+        out.push(derive_instruction(statement, selections));
+        return;
+    }
+
+    let (field, raw_enum) = enum_fields[index];
+    for variant in &raw_enum.variants {
+        selections.push(EnumSelection {
+            field: field.name.clone(),
+            variant: variant.clone(),
+            arity: raw_enum.arities.get(variant).copied(),
+        });
+        expand_enum_selections(statement, enum_fields, index + 1, selections, out);
+        selections.pop();
+    }
+}
+
+fn derive_instruction(statement: &RawStatement, enum_selections: &[EnumSelection]) -> Instruction {
+    let output_names = output_fields(statement);
+    let operand_limit = operand_arity(enum_selections);
+    let receiver = receiver_field(statement, &output_names, enum_selections, operand_limit)
+        .unwrap_or_default();
+    let unused_operands =
+        unused_operand_fields(statement, &output_names, enum_selections, operand_limit);
+    let inputs = statement
+        .fields
+        .iter()
+        .filter(|field| !is_enum_selection(&field.name, enum_selections))
+        .filter(|field| !output_names.iter().any(|output| output == &field.name))
+        .filter(|field| receiver != field.name)
+        .filter(|field| !unused_operands.iter().any(|unused| unused == &field.name))
+        .map(|field| field.name.clone())
+        .collect();
+
+    Instruction {
+        family: statement.name.clone(),
+        variant: variant_name(statement, enum_selections),
+        rust_name: rust_name(statement, enum_selections),
+        emit: emit_tokens(statement, enum_selections, &unused_operands),
+        receiver,
+        inputs,
+        outputs: output_names,
+    }
+}
+
+fn emit_tokens(
+    statement: &RawStatement,
+    enum_selections: &[EnumSelection],
+    unused_operands: &[String],
+) -> Vec<String> {
+    let mut emit = Vec::with_capacity(statement.fields.len() + 1);
+    emit.push(statement.name.clone());
+    emit.extend(statement.fields.iter().map(|field| {
+        enum_selections
+            .iter()
+            .find_map(|selection| {
+                (selection.field == field.name).then(|| selection.variant.clone())
+            })
+            .unwrap_or_else(|| {
+                if unused_operands.iter().any(|unused| unused == &field.name) {
+                    "0".to_string()
+                } else {
+                    format!("${}", field.name)
+                }
+            })
+    }));
+    emit
+}
+
+fn output_fields(statement: &RawStatement) -> Vec<String> {
+    let outputs: Vec<_> = statement
         .fields
         .iter()
         .filter(|field| is_output_field(&field.name))
         .map(|field| field.name.clone())
         .collect();
-    let outputs = if output_candidates.len() == 1 {
-        output_candidates
+    if outputs.len() == 1 {
+        outputs
     } else {
         Vec::new()
-    };
-    let inputs = statement
-        .fields
-        .iter()
-        .filter(|field| !outputs.iter().any(|output| output == &field.name))
-        .map(|field| field.name.clone())
-        .collect();
-    let mut emit = Vec::with_capacity(statement.fields.len() + 1);
-    emit.push(statement.name.clone());
-    emit.extend(
-        statement
-            .fields
-            .iter()
-            .map(|field| format!("${}", field.name)),
-    );
-
-    Instruction {
-        family: statement.name.clone(),
-        variant: statement.name.clone(),
-        rust_name: rust_name(&statement.name),
-        emit,
-        receiver: String::new(),
-        inputs,
-        outputs,
     }
 }
 
+fn receiver_field(
+    statement: &RawStatement,
+    outputs: &[String],
+    enum_selections: &[EnumSelection],
+    operand_limit: Option<usize>,
+) -> Option<String> {
+    if operand_limit == Some(0) {
+        return None;
+    }
+
+    operand_fields(statement, outputs, enum_selections)
+        .into_iter()
+        .next()
+}
+
+fn unused_operand_fields(
+    statement: &RawStatement,
+    outputs: &[String],
+    enum_selections: &[EnumSelection],
+    operand_limit: Option<usize>,
+) -> Vec<String> {
+    let Some(limit) = operand_limit else {
+        return Vec::new();
+    };
+    operand_fields(statement, outputs, enum_selections)
+        .into_iter()
+        .skip(limit)
+        .collect()
+}
+
+fn operand_fields(
+    statement: &RawStatement,
+    outputs: &[String],
+    enum_selections: &[EnumSelection],
+) -> Vec<String> {
+    statement
+        .fields
+        .iter()
+        .filter(|field| field.ty == "String")
+        .filter(|field| !outputs.iter().any(|output| output == &field.name))
+        .filter(|field| !is_enum_selection(&field.name, enum_selections))
+        .map(|field| field.name.clone())
+        .collect()
+}
+
+fn operand_arity(enum_selections: &[EnumSelection]) -> Option<usize> {
+    enum_selections.iter().find_map(|selection| selection.arity)
+}
+
 fn is_output_field(name: &str) -> bool {
-    matches!(name, "output" | "result")
+    matches!(name, "output" | "result" | "dest")
         || name
             .strip_prefix("out")
             .and_then(|suffix| suffix.chars().next())
             .is_some_and(char::is_uppercase)
 }
 
-fn rust_name(name: &str) -> String {
+fn is_selector_field(name: &str) -> bool {
+    matches!(
+        name,
+        "op" | "type" | "rule" | "action" | "layer" | "shape" | "locate"
+    )
+}
+
+fn enum_variants<'a>(enums: &'a [RawEnum], ty: &str) -> Option<&'a RawEnum> {
+    enums.iter().find(|raw_enum| raw_enum.name == ty)
+}
+
+fn is_enum_selection(name: &str, enum_selections: &[EnumSelection]) -> bool {
+    enum_selections
+        .iter()
+        .any(|selection| selection.field == name)
+}
+
+fn variant_name(statement: &RawStatement, enum_selections: &[EnumSelection]) -> String {
+    if enum_selections.is_empty() {
+        statement.name.clone()
+    } else {
+        enum_selections
+            .iter()
+            .map(|selection| selection.variant.clone())
+            .collect::<Vec<_>>()
+            .join("_")
+    }
+}
+
+fn rust_name(statement: &RawStatement, enum_selections: &[EnumSelection]) -> String {
+    let mut name = sanitize_name(&statement.name);
+    for selection in enum_selections {
+        name.push('_');
+        name.push_str(&sanitize_name(&selection.variant));
+    }
+    name
+}
+
+fn sanitize_name(name: &str) -> String {
     name.chars()
         .map(|ch| {
             if ch.is_ascii_alphanumeric() {
@@ -145,8 +234,4 @@ fn rust_name(name: &str) -> String {
             }
         })
         .collect()
-}
-
-fn strings<const N: usize>(items: [&str; N]) -> Vec<String> {
-    items.into_iter().map(ToString::to_string).collect()
 }

@@ -1276,3 +1276,454 @@ category = "world"
 ty = "String"
 name = "value"
 default = '\"name\"'
+
+[[enums]]
+name = "BlockFlag"
+variants = [
+    "core",
+    "storage",
+    "generator",
+    "turret",
+    "factory",
+    "repair",
+    "battery",
+    "reactor",
+    "extinguisher",
+    "drill",
+    "shield",
+    "launchPad",
+    "unitCargoUnloadPoint",
+    "unitAssembler",
+    "hasFogRadius",
+    "steamVent",
+    "blockRepair",
+    "synced",
+]
+
+[[enums]]
+name = "ConditionOp"
+variants = [
+    "equal",
+    "notEqual",
+    "lessThan",
+    "lessThanEq",
+    "greaterThan",
+    "greaterThanEq",
+    "strictEqual",
+    "always",
+]
+
+[enums.arities]
+always = 2
+equal = 2
+greaterThan = 2
+greaterThanEq = 2
+lessThan = 2
+lessThanEq = 2
+notEqual = 2
+strictEqual = 2
+
+[[enums]]
+name = "ContentType"
+variants = [
+    "item",
+    "block",
+    "mech_UNUSED",
+    "bullet",
+    "liquid",
+    "status",
+    "unit",
+    "weather",
+    "effect_UNUSED",
+    "sector",
+    "loadout_UNUSED",
+    "typeid_UNUSED",
+    "error",
+    "planet",
+    "ammo_UNUSED",
+    "team",
+    "unitCommand",
+    "unitStance",
+]
+
+[[enums]]
+name = "CutsceneAction"
+variants = [
+    "pan",
+    "zoom",
+    "stop",
+]
+
+[[enums]]
+name = "FetchType"
+variants = [
+    "unit",
+    "unitCount",
+    "player",
+    "playerCount",
+    "core",
+    "coreCount",
+    "build",
+    "buildCount",
+]
+
+[[enums]]
+name = "GraphicsType"
+variants = [
+    "clear",
+    "color",
+    "col",
+    "stroke",
+    "line",
+    "rect",
+    "lineRect",
+    "poly",
+    "linePoly",
+    "triangle",
+    "image",
+    "print",
+    "translate",
+    "scale",
+    "rotate",
+    "reset",
+]
+
+[[enums]]
+name = "LAccess"
+variants = [
+    "totalItems",
+    "firstItem",
+    "totalLiquids",
+    "totalPower",
+    "itemCapacity",
+    "liquidCapacity",
+    "powerCapacity",
+    "powerNetStored",
+    "powerNetCapacity",
+    "powerNetIn",
+    "powerNetOut",
+    "ammo",
+    "ammoCapacity",
+    "currentAmmoType",
+    "memoryCapacity",
+    "health",
+    "maxHealth",
+    "heat",
+    "shield",
+    "armor",
+    "efficiency",
+    "progress",
+    "timescale",
+    "rotation",
+    "x",
+    "y",
+    "velocityX",
+    "velocityY",
+    "shootX",
+    "shootY",
+    "cameraX",
+    "cameraY",
+    "cameraWidth",
+    "cameraHeight",
+    "displayWidth",
+    "displayHeight",
+    "bufferSize",
+    "operations",
+    "size",
+    "solid",
+    "dead",
+    "range",
+    "shooting",
+    "boosting",
+    "mineX",
+    "mineY",
+    "mining",
+    "buildX",
+    "buildY",
+    "pingX",
+    "pingY",
+    "pingText",
+    "building",
+    "breaking",
+    "speed",
+    "team",
+    "type",
+    "flag",
+    "controlled",
+    "controller",
+    "name",
+    "payloadCount",
+    "payloadType",
+    "totalPayload",
+    "payloadCapacity",
+    "maxUnits",
+    "id",
+    "selectedBlock",
+    "selectedRotation",
+    "bulletLifetime",
+    "bulletTime",
+    "enabled",
+    "shoot",
+    "shootp",
+    "config",
+    "color",
+]
+
+[[enums]]
+name = "LLocate"
+variants = [
+    "ore",
+    "building",
+    "spawn",
+    "damaged",
+]
+
+[[enums]]
+name = "LMarkerControl"
+variants = [
+    "remove",
+    "world",
+    "minimap",
+    "autoscale",
+    "pos",
+    "endPos",
+    "drawLayer",
+    "color",
+    "radius",
+    "stroke",
+    "outline",
+    "rotation",
+    "shape",
+    "arc",
+    "flushText",
+    "fontSize",
+    "textHeight",
+    "textAlign",
+    "lineAlign",
+    "labelFlags",
+    "texture",
+    "textureSize",
+    "posi",
+    "uvi",
+    "colori",
+]
+
+[[enums]]
+name = "LUnitControl"
+variants = [
+    "idle",
+    "stop",
+    "move",
+    "approach",
+    "pathfind",
+    "autoPathfind",
+    "boost",
+    "target",
+    "targetp",
+    "itemDrop",
+    "itemTake",
+    "payDrop",
+    "payTake",
+    "payEnter",
+    "mine",
+    "flag",
+    "build",
+    "deconstruct",
+    "getBlock",
+    "within",
+    "unbind",
+]
+
+[[enums]]
+name = "LogicOp"
+variants = [
+    "add",
+    "sub",
+    "mul",
+    "div",
+    "idiv",
+    "mod",
+    "emod",
+    "pow",
+    "equal",
+    "notEqual",
+    "land",
+    "lessThan",
+    "lessThanEq",
+    "greaterThan",
+    "greaterThanEq",
+    "strictEqual",
+    "shl",
+    "shr",
+    "ushr",
+    "or",
+    "and",
+    "xor",
+    "not",
+    "max",
+    "min",
+    "angle",
+    "angleDiff",
+    "len",
+    "noise",
+    "abs",
+    "sign",
+    "log",
+    "logn",
+    "log10",
+    "floor",
+    "ceil",
+    "round",
+    "sqrt",
+    "rand",
+    "sin",
+    "cos",
+    "tan",
+    "asin",
+    "acos",
+    "atan",
+]
+
+[enums.arities]
+abs = 1
+acos = 1
+add = 2
+and = 2
+angle = 2
+angleDiff = 2
+asin = 1
+atan = 1
+cos = 1
+div = 2
+emod = 2
+equal = 2
+greaterThan = 2
+greaterThanEq = 2
+idiv = 2
+land = 2
+len = 2
+lessThan = 2
+lessThanEq = 2
+logn = 2
+mod = 2
+mul = 2
+noise = 2
+not = 1
+notEqual = 2
+or = 2
+rand = 1
+shl = 2
+shr = 2
+sin = 1
+strictEqual = 2
+sub = 2
+tan = 1
+ushr = 2
+xor = 2
+
+[[enums]]
+name = "LogicRule"
+variants = [
+    "currentWaveTime",
+    "waveTimer",
+    "waves",
+    "wave",
+    "waveSpacing",
+    "waveSending",
+    "attackMode",
+    "enemyCoreBuildRadius",
+    "dropZoneRadius",
+    "unitCap",
+    "mapArea",
+    "lighting",
+    "canGameOver",
+    "ambientLight",
+    "solarMultiplier",
+    "dragMultiplier",
+    "ban",
+    "unban",
+    "pauseDisabled",
+    "buildSpeed",
+    "unitHealth",
+    "unitBuildSpeed",
+    "unitMineSpeed",
+    "unitCost",
+    "unitDamage",
+    "blockHealth",
+    "blockDamage",
+    "rtsMinWeight",
+    "rtsMinSquad",
+]
+
+[[enums]]
+name = "MessageType"
+variants = [
+    "notify",
+    "announce",
+    "toast",
+    "mission",
+]
+
+[[enums]]
+name = "QueryShape"
+variants = [
+    "circle",
+    "rect",
+]
+
+[[enums]]
+name = "QueryType"
+variants = [
+    "unit",
+    "building",
+    "bullet",
+]
+
+[[enums]]
+name = "RadarSort"
+variants = [
+    "distance",
+    "health",
+    "shield",
+    "armor",
+    "maxHealth",
+]
+
+[enums.arities]
+armor = 2
+distance = 2
+health = 2
+maxHealth = 2
+shield = 2
+
+[[enums]]
+name = "RadarTarget"
+variants = [
+    "any",
+    "enemy",
+    "ally",
+    "player",
+    "attacker",
+    "flying",
+    "boss",
+    "ground",
+]
+
+[enums.arities]
+ally = 2
+any = 2
+attacker = 2
+boss = 2
+enemy = 2
+flying = 2
+ground = 2
+player = 2
+
+[[enums]]
+name = "TileLayer"
+variants = [
+    "floor",
+    "ore",
+    "block",
+    "building",
+]

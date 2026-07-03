@@ -178,7 +178,7 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
         .collect();
 
     if spec.outputs.len() == 1 {
-        let auto_params = spec.inputs.clone();
+        let auto_params = auto_processor_params(spec);
         let auto_param_idents: Vec<_> = auto_params.iter().map(|name| safe_ident(name)).collect();
         let auto_generics: Vec<_> = auto_params
             .iter()
@@ -198,8 +198,7 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
 
         quote! {
             #[allow(clippy::too_many_arguments)]
-            #[allow(clippy::too_many_arguments)]
-        pub trait #trait_name<P> {
+            pub trait #trait_name<P> {
                 fn #method<#(#auto_generics,)*>(&self, #(#auto_params_sig,)*) -> Value<P>
                 where
                     #(#auto_where,)*;
@@ -234,8 +233,7 @@ fn generate_processor_ext(spec: &InstructionSpec) -> TokenStream {
     } else if spec.outputs.is_empty() {
         quote! {
             #[allow(clippy::too_many_arguments)]
-            #[allow(clippy::too_many_arguments)]
-        pub trait #trait_name<P> {
+            pub trait #trait_name<P> {
                 fn #method<#(#explicit_generics,)*>(&self, #(#explicit_params_sig,)*)
                 where
                     #(#explicit_where,)*;
@@ -283,8 +281,10 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
         .iter()
         .map(|generic| quote! { #generic: Into<Arg<P>> })
         .collect();
+    let output_idents: Vec<_> = spec.outputs.iter().map(|name| safe_ident(name)).collect();
     let fields: Vec<_> = placeholders(spec)
         .into_iter()
+        .filter(|field| !output_idents.iter().any(|output| output == field))
         .map(|field| {
             if field == receiver {
                 quote! { #field: self.clone().into() }
@@ -294,27 +294,77 @@ fn generate_value_ext(spec: &InstructionSpec) -> TokenStream {
         })
         .collect();
 
-    quote! {
-        #[allow(clippy::too_many_arguments)]
-        pub trait #trait_name<P> {
-            fn #method<#(#input_generics,)*>(&self, #(#input_params_sig,)*)
-            where
-                #(#input_where,)*;
-        }
+    if spec.outputs.len() == 1 {
+        let output_ident = safe_ident(&spec.outputs[0]);
+        quote! {
+            #[allow(clippy::too_many_arguments)]
+            pub trait #trait_name<P> {
+                fn #method<#(#input_generics,)*>(&self, #(#input_params_sig,)*) -> Value<P>
+                where
+                    #(#input_where,)*;
+            }
 
-        #[allow(clippy::too_many_arguments)]
-        impl<P> #trait_name<P> for Value<P>
-        where
-            P: ::std::marker::Send + ::std::marker::Sync + 'static,
-        {
-            fn #method<#(#input_generics,)*>(&self, #(#input_params_sig,)*)
+            #[allow(clippy::too_many_arguments)]
+            impl<P> #trait_name<P> for Value<P>
             where
-                #(#input_where,)*
+                P: ::std::marker::Send + ::std::marker::Sync + 'static,
             {
-                self.handle().push(#struct_name { _processor: ::std::marker::PhantomData, #(#fields,)* });
+                fn #method<#(#input_generics,)*>(&self, #(#input_params_sig,)*) -> Value<P>
+                where
+                    #(#input_where,)*
+                {
+                    let #output_ident = self.handle().new_value();
+                    self.handle().push(#struct_name {
+                        _processor: ::std::marker::PhantomData,
+                        #output_ident: #output_ident.clone().into(),
+                        #(#fields,)*
+                    });
+                    #output_ident
+                }
             }
         }
+    } else if spec.outputs.is_empty() {
+        quote! {
+            #[allow(clippy::too_many_arguments)]
+            pub trait #trait_name<P> {
+                fn #method<#(#input_generics,)*>(&self, #(#input_params_sig,)*)
+                where
+                    #(#input_where,)*;
+            }
+
+            #[allow(clippy::too_many_arguments)]
+            impl<P> #trait_name<P> for Value<P>
+            where
+                P: ::std::marker::Send + ::std::marker::Sync + 'static,
+            {
+                fn #method<#(#input_generics,)*>(&self, #(#input_params_sig,)*)
+                where
+                    #(#input_where,)*
+                {
+                    self.handle().push(#struct_name { _processor: ::std::marker::PhantomData, #(#fields,)* });
+                }
+            }
+        }
+    } else {
+        panic!(
+            "instruction {} has {} value outputs; only zero or one is supported",
+            spec.rust_name,
+            spec.outputs.len()
+        );
     }
+}
+
+fn auto_processor_params(spec: &InstructionSpec) -> Vec<String> {
+    let mut params = Vec::new();
+    if !spec.receiver.is_empty() {
+        params.push(spec.receiver.clone());
+    }
+    for input in &spec.inputs {
+        if !params.contains(input) {
+            params.push(input.clone());
+        }
+    }
+    params
 }
 
 fn explicit_processor_params(spec: &InstructionSpec) -> Vec<String> {
@@ -348,11 +398,11 @@ fn struct_name(spec: &InstructionSpec) -> Ident {
 }
 
 fn processor_trait_name(spec: &InstructionSpec) -> Ident {
-    format_ident!("{}ProcessorExt", struct_name(spec))
+    format_ident!("Processor{}Ext", struct_name(spec))
 }
 
 fn value_trait_name(spec: &InstructionSpec) -> Ident {
-    format_ident!("{}ValueExt", struct_name(spec))
+    format_ident!("Value{}Ext", struct_name(spec))
 }
 
 fn to_pascal_ident(name: &str) -> Ident {

@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use serde::{Deserialize, Serialize};
 use snafu::OptionExt;
 
@@ -7,6 +9,16 @@ use crate::error::{GenerateError, RequiredItemMissingSnafu};
 pub struct RawStatementManifest {
     pub version: String,
     pub statements: Vec<RawStatement>,
+    #[serde(default)]
+    pub enums: Vec<RawEnum>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct RawEnum {
+    pub name: String,
+    pub variants: Vec<String>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub arities: BTreeMap<String, usize>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -87,6 +99,7 @@ pub fn scan_raw_statements(
     Ok(RawStatementManifest {
         version: version.to_string(),
         statements,
+        enums: Vec::new(),
     })
 }
 
@@ -210,4 +223,173 @@ fn is_line_comment_at(source: &str, index: usize) -> bool {
         .rfind('\n')
         .map_or(0, |position| position + 1);
     source[line_start..index].contains("//")
+}
+
+pub fn scan_raw_enum_variants(name: &str, source: &str) -> Result<RawEnum, GenerateError> {
+    let enum_marker = format!("enum {name}");
+    let enum_start = source
+        .find(&enum_marker)
+        .context(RequiredItemMissingSnafu {
+            item: "enum declaration",
+        })?;
+    let brace_start = source[enum_start..]
+        .find('{')
+        .map(|index| enum_start + index)
+        .context(RequiredItemMissingSnafu { item: "enum body" })?;
+    let brace_end = matching_brace(source, brace_start).context(RequiredItemMissingSnafu {
+        item: "enum closing brace",
+    })?;
+    let body = &source[brace_start + 1..brace_end];
+    let constants = parse_enum_constants(body);
+    Ok(RawEnum {
+        name: name.to_string(),
+        variants: constants
+            .iter()
+            .map(|constant| constant.name.clone())
+            .collect(),
+        arities: constants
+            .into_iter()
+            .filter_map(|constant| constant.arity.map(|arity| (constant.name, arity)))
+            .collect(),
+    })
+}
+
+#[derive(Debug)]
+struct RawEnumConstant {
+    name: String,
+    arity: Option<usize>,
+}
+
+fn parse_enum_constants(body: &str) -> Vec<RawEnumConstant> {
+    let mut variants = Vec::new();
+    let mut token = String::new();
+    let mut paren_depth = 0usize;
+    let mut brace_depth = 0usize;
+    let mut in_constants = true;
+    let mut chars = body.chars().peekable();
+
+    while let Some(ch) = chars.next() {
+        if !in_constants {
+            break;
+        }
+        match ch {
+            '"' => {
+                token.push(ch);
+                let mut escaped = false;
+                for next in chars.by_ref() {
+                    token.push(next);
+                    if escaped {
+                        escaped = false;
+                    } else if next == '\\' {
+                        escaped = true;
+                    } else if next == '"' {
+                        break;
+                    }
+                }
+            }
+            '/' if chars.peek() == Some(&'/') => {
+                for next in chars.by_ref() {
+                    if next == '\n' {
+                        break;
+                    }
+                }
+            }
+            '/' if chars.peek() == Some(&'*') => {
+                chars.next();
+                let mut prev = '\0';
+                for next in chars.by_ref() {
+                    if prev == '*' && next == '/' {
+                        break;
+                    }
+                    prev = next;
+                }
+            }
+            '(' => {
+                paren_depth += 1;
+                token.push(ch);
+            }
+            ')' => {
+                paren_depth = paren_depth.saturating_sub(1);
+                token.push(ch);
+            }
+            '{' => {
+                brace_depth += 1;
+                token.push(ch);
+            }
+            '}' => {
+                brace_depth = brace_depth.saturating_sub(1);
+                token.push(ch);
+            }
+            ',' if paren_depth == 0 && brace_depth == 0 => {
+                push_enum_variant(&mut variants, &token);
+                token.clear();
+            }
+            ';' if paren_depth == 0 && brace_depth == 0 => {
+                push_enum_variant(&mut variants, &token);
+                in_constants = false;
+            }
+            _ => token.push(ch),
+        }
+    }
+    if in_constants {
+        push_enum_variant(&mut variants, &token);
+    }
+    variants
+}
+
+fn push_enum_variant(variants: &mut Vec<RawEnumConstant>, token: &str) {
+    let trimmed = token.trim();
+    if trimmed.is_empty() || trimmed.starts_with('@') {
+        return;
+    }
+    let name: String = trimmed
+        .chars()
+        .skip_while(|ch| ch.is_whitespace())
+        .take_while(|ch| ch.is_ascii_alphanumeric() || *ch == '_')
+        .collect();
+    if !name.is_empty()
+        && name
+            .chars()
+            .next()
+            .is_some_and(|ch| ch.is_ascii_alphabetic() || ch == '_')
+    {
+        variants.push(RawEnumConstant {
+            name,
+            arity: infer_lambda_arity(trimmed),
+        });
+    }
+}
+
+fn infer_lambda_arity(token: &str) -> Option<usize> {
+    let arrow = token.find("->")?;
+    let before = token[..arrow].trim_end();
+    if before.ends_with(')') {
+        let open = matching_paren_before(before, before.len() - 1)?;
+        let params = before[open + 1..before.len() - 1].trim();
+        if params.is_empty() {
+            Some(0)
+        } else {
+            Some(params.split(',').count())
+        }
+    } else {
+        Some(1)
+    }
+}
+
+fn matching_paren_before(source: &str, close: usize) -> Option<usize> {
+    let bytes = source.as_bytes();
+    let mut depth = 0usize;
+    for index in (0..=close).rev() {
+        match bytes[index] {
+            b')' => depth += 1,
+            b'(' => {
+                depth = depth.checked_sub(1)?;
+                if depth == 0 {
+                    return Some(index);
+                }
+            }
+            _ => {}
+        }
+    }
+    None
 }

@@ -134,6 +134,20 @@ impl<P: 'static> Processor<P> {
 }
 
 impl<P: 'static> ProcessorHandle<P> {
+    pub fn new_value(&self) -> Value<P, Any> {
+        let mut state = self.state.lock().expect("program state mutex poisoned");
+        let id = ValueId(state.next_value);
+        state.next_value += 1;
+        state.values.insert(id, None);
+        drop(state);
+        Value {
+            id,
+            handle: self.clone(),
+            name_hint: None,
+            _type: PhantomData,
+        }
+    }
+
     pub fn push<I>(&self, instruction: I)
     where
         I: Instruction<P>,

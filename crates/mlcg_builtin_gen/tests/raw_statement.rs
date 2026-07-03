@@ -104,3 +104,20 @@ fn ignores_commented_register_statement_annotations() {
     assert_eq!(manifest.statements.len(), 1);
     assert_eq!(manifest.statements[0].name, "noop");
 }
+
+#[test]
+fn scans_enum_variants_from_source() {
+    let source = r#"
+        public enum LogicOp{
+            add("+", true),
+            sub("-", true),
+            not("!", false);
+        }
+    "#;
+
+    let variants = mlcg_builtin_gen::raw_statement::scan_raw_enum_variants("LogicOp", source)
+        .expect("scan succeeds");
+
+    assert_eq!(variants.name, "LogicOp");
+    assert_eq!(variants.variants, ["add", "sub", "not"]);
+}

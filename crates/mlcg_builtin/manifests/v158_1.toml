@@ -1,86 +1,6 @@
 version = "158.1"
 
 [[instructions]]
-family = "set"
-variant = "set"
-rust_name = "set"
-emit = [
-    "set",
-    "$target",
-    "$source",
-]
-receiver = "target"
-inputs = ["source"]
-outputs = []
-
-[[instructions]]
-family = "op"
-variant = "add"
-rust_name = "op_add"
-emit = [
-    "op",
-    "add",
-    "$out",
-    "$lhs",
-    "$rhs",
-]
-receiver = ""
-inputs = [
-    "lhs",
-    "rhs",
-]
-outputs = ["out"]
-
-[[instructions]]
-family = "op"
-variant = "not"
-rust_name = "op_not"
-emit = [
-    "op",
-    "not",
-    "$out",
-    "$input",
-    "0",
-]
-receiver = ""
-inputs = ["input"]
-outputs = ["out"]
-
-[[instructions]]
-family = "jump"
-variant = "equal"
-rust_name = "jump_equal"
-emit = [
-    "jump",
-    "$label",
-    "equal",
-    "$lhs",
-    "$rhs",
-]
-receiver = ""
-inputs = [
-    "label",
-    "lhs",
-    "rhs",
-]
-outputs = []
-
-[[instructions]]
-family = "jump"
-variant = "always"
-rust_name = "jump_always"
-emit = [
-    "jump",
-    "$label",
-    "always",
-    "0",
-    "0",
-]
-receiver = ""
-inputs = ["label"]
-outputs = []
-
-[[instructions]]
 family = "noop"
 variant = "noop"
 rust_name = "noop"
@@ -99,11 +19,8 @@ emit = [
     "$target",
     "$address",
 ]
-receiver = ""
-inputs = [
-    "target",
-    "address",
-]
+receiver = "target"
+inputs = ["address"]
 outputs = ["output"]
 
 [[instructions]]
@@ -116,9 +33,8 @@ emit = [
     "$target",
     "$address",
 ]
-receiver = ""
+receiver = "input"
 inputs = [
-    "input",
     "target",
     "address",
 ]
@@ -126,11 +42,11 @@ outputs = []
 
 [[instructions]]
 family = "draw"
-variant = "draw"
-rust_name = "draw"
+variant = "clear"
+rust_name = "draw_clear"
 emit = [
     "draw",
-    "$type",
+    "clear",
     "$x",
     "$y",
     "$p1",
@@ -138,10 +54,368 @@ emit = [
     "$p3",
     "$p4",
 ]
-receiver = ""
+receiver = "x"
 inputs = [
-    "type",
-    "x",
+    "y",
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "draw"
+variant = "color"
+rust_name = "draw_color"
+emit = [
+    "draw",
+    "color",
+    "$x",
+    "$y",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "x"
+inputs = [
+    "y",
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "draw"
+variant = "col"
+rust_name = "draw_col"
+emit = [
+    "draw",
+    "col",
+    "$x",
+    "$y",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "x"
+inputs = [
+    "y",
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "draw"
+variant = "stroke"
+rust_name = "draw_stroke"
+emit = [
+    "draw",
+    "stroke",
+    "$x",
+    "$y",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "x"
+inputs = [
+    "y",
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "draw"
+variant = "line"
+rust_name = "draw_line"
+emit = [
+    "draw",
+    "line",
+    "$x",
+    "$y",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "x"
+inputs = [
+    "y",
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "draw"
+variant = "rect"
+rust_name = "draw_rect"
+emit = [
+    "draw",
+    "rect",
+    "$x",
+    "$y",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "x"
+inputs = [
+    "y",
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "draw"
+variant = "lineRect"
+rust_name = "draw_linerect"
+emit = [
+    "draw",
+    "lineRect",
+    "$x",
+    "$y",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "x"
+inputs = [
+    "y",
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "draw"
+variant = "poly"
+rust_name = "draw_poly"
+emit = [
+    "draw",
+    "poly",
+    "$x",
+    "$y",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "x"
+inputs = [
+    "y",
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "draw"
+variant = "linePoly"
+rust_name = "draw_linepoly"
+emit = [
+    "draw",
+    "linePoly",
+    "$x",
+    "$y",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "x"
+inputs = [
+    "y",
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "draw"
+variant = "triangle"
+rust_name = "draw_triangle"
+emit = [
+    "draw",
+    "triangle",
+    "$x",
+    "$y",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "x"
+inputs = [
+    "y",
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "draw"
+variant = "image"
+rust_name = "draw_image"
+emit = [
+    "draw",
+    "image",
+    "$x",
+    "$y",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "x"
+inputs = [
+    "y",
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "draw"
+variant = "print"
+rust_name = "draw_print"
+emit = [
+    "draw",
+    "print",
+    "$x",
+    "$y",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "x"
+inputs = [
+    "y",
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "draw"
+variant = "translate"
+rust_name = "draw_translate"
+emit = [
+    "draw",
+    "translate",
+    "$x",
+    "$y",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "x"
+inputs = [
+    "y",
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "draw"
+variant = "scale"
+rust_name = "draw_scale"
+emit = [
+    "draw",
+    "scale",
+    "$x",
+    "$y",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "x"
+inputs = [
+    "y",
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "draw"
+variant = "rotate"
+rust_name = "draw_rotate"
+emit = [
+    "draw",
+    "rotate",
+    "$x",
+    "$y",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "x"
+inputs = [
+    "y",
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "draw"
+variant = "reset"
+rust_name = "draw_reset"
+emit = [
+    "draw",
+    "reset",
+    "$x",
+    "$y",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "x"
+inputs = [
     "y",
     "p1",
     "p2",
@@ -158,8 +432,8 @@ emit = [
     "print",
     "$value",
 ]
-receiver = ""
-inputs = ["value"]
+receiver = "value"
+inputs = []
 outputs = []
 
 [[instructions]]
@@ -170,8 +444,8 @@ emit = [
     "printchar",
     "$value",
 ]
-receiver = ""
-inputs = ["value"]
+receiver = "value"
+inputs = []
 outputs = []
 
 [[instructions]]
@@ -182,8 +456,8 @@ emit = [
     "format",
     "$value",
 ]
-receiver = ""
-inputs = ["value"]
+receiver = "value"
+inputs = []
 outputs = []
 
 [[instructions]]
@@ -194,8 +468,8 @@ emit = [
     "drawflush",
     "$target",
 ]
-receiver = ""
-inputs = ["target"]
+receiver = "target"
+inputs = []
 outputs = []
 
 [[instructions]]
@@ -206,8 +480,8 @@ emit = [
     "printflush",
     "$target",
 ]
-receiver = ""
-inputs = ["target"]
+receiver = "target"
+inputs = []
 outputs = []
 
 [[instructions]]
@@ -219,27 +493,1675 @@ emit = [
     "$output",
     "$address",
 ]
-receiver = ""
-inputs = ["address"]
+receiver = "address"
+inputs = []
 outputs = ["output"]
 
 [[instructions]]
 family = "control"
-variant = "control"
-rust_name = "control"
+variant = "totalItems"
+rust_name = "control_totalitems"
 emit = [
     "control",
-    "$type",
+    "totalItems",
     "$target",
     "$p1",
     "$p2",
     "$p3",
     "$p4",
 ]
-receiver = ""
+receiver = "target"
 inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "firstItem"
+rust_name = "control_firstitem"
+emit = [
+    "control",
+    "firstItem",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "totalLiquids"
+rust_name = "control_totalliquids"
+emit = [
+    "control",
+    "totalLiquids",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "totalPower"
+rust_name = "control_totalpower"
+emit = [
+    "control",
+    "totalPower",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "itemCapacity"
+rust_name = "control_itemcapacity"
+emit = [
+    "control",
+    "itemCapacity",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "liquidCapacity"
+rust_name = "control_liquidcapacity"
+emit = [
+    "control",
+    "liquidCapacity",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "powerCapacity"
+rust_name = "control_powercapacity"
+emit = [
+    "control",
+    "powerCapacity",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "powerNetStored"
+rust_name = "control_powernetstored"
+emit = [
+    "control",
+    "powerNetStored",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "powerNetCapacity"
+rust_name = "control_powernetcapacity"
+emit = [
+    "control",
+    "powerNetCapacity",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "powerNetIn"
+rust_name = "control_powernetin"
+emit = [
+    "control",
+    "powerNetIn",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "powerNetOut"
+rust_name = "control_powernetout"
+emit = [
+    "control",
+    "powerNetOut",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "ammo"
+rust_name = "control_ammo"
+emit = [
+    "control",
+    "ammo",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "ammoCapacity"
+rust_name = "control_ammocapacity"
+emit = [
+    "control",
+    "ammoCapacity",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "currentAmmoType"
+rust_name = "control_currentammotype"
+emit = [
+    "control",
+    "currentAmmoType",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "memoryCapacity"
+rust_name = "control_memorycapacity"
+emit = [
+    "control",
+    "memoryCapacity",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "health"
+rust_name = "control_health"
+emit = [
+    "control",
+    "health",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "maxHealth"
+rust_name = "control_maxhealth"
+emit = [
+    "control",
+    "maxHealth",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "heat"
+rust_name = "control_heat"
+emit = [
+    "control",
+    "heat",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "shield"
+rust_name = "control_shield"
+emit = [
+    "control",
+    "shield",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "armor"
+rust_name = "control_armor"
+emit = [
+    "control",
+    "armor",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "efficiency"
+rust_name = "control_efficiency"
+emit = [
+    "control",
+    "efficiency",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "progress"
+rust_name = "control_progress"
+emit = [
+    "control",
+    "progress",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "timescale"
+rust_name = "control_timescale"
+emit = [
+    "control",
+    "timescale",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "rotation"
+rust_name = "control_rotation"
+emit = [
+    "control",
+    "rotation",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "x"
+rust_name = "control_x"
+emit = [
+    "control",
+    "x",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "y"
+rust_name = "control_y"
+emit = [
+    "control",
+    "y",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "velocityX"
+rust_name = "control_velocityx"
+emit = [
+    "control",
+    "velocityX",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "velocityY"
+rust_name = "control_velocityy"
+emit = [
+    "control",
+    "velocityY",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "shootX"
+rust_name = "control_shootx"
+emit = [
+    "control",
+    "shootX",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "shootY"
+rust_name = "control_shooty"
+emit = [
+    "control",
+    "shootY",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "cameraX"
+rust_name = "control_camerax"
+emit = [
+    "control",
+    "cameraX",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "cameraY"
+rust_name = "control_cameray"
+emit = [
+    "control",
+    "cameraY",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "cameraWidth"
+rust_name = "control_camerawidth"
+emit = [
+    "control",
+    "cameraWidth",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "cameraHeight"
+rust_name = "control_cameraheight"
+emit = [
+    "control",
+    "cameraHeight",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "displayWidth"
+rust_name = "control_displaywidth"
+emit = [
+    "control",
+    "displayWidth",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "displayHeight"
+rust_name = "control_displayheight"
+emit = [
+    "control",
+    "displayHeight",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "bufferSize"
+rust_name = "control_buffersize"
+emit = [
+    "control",
+    "bufferSize",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "operations"
+rust_name = "control_operations"
+emit = [
+    "control",
+    "operations",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "size"
+rust_name = "control_size"
+emit = [
+    "control",
+    "size",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "solid"
+rust_name = "control_solid"
+emit = [
+    "control",
+    "solid",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "dead"
+rust_name = "control_dead"
+emit = [
+    "control",
+    "dead",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "range"
+rust_name = "control_range"
+emit = [
+    "control",
+    "range",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "shooting"
+rust_name = "control_shooting"
+emit = [
+    "control",
+    "shooting",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "boosting"
+rust_name = "control_boosting"
+emit = [
+    "control",
+    "boosting",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "mineX"
+rust_name = "control_minex"
+emit = [
+    "control",
+    "mineX",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "mineY"
+rust_name = "control_miney"
+emit = [
+    "control",
+    "mineY",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "mining"
+rust_name = "control_mining"
+emit = [
+    "control",
+    "mining",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "buildX"
+rust_name = "control_buildx"
+emit = [
+    "control",
+    "buildX",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "buildY"
+rust_name = "control_buildy"
+emit = [
+    "control",
+    "buildY",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "pingX"
+rust_name = "control_pingx"
+emit = [
+    "control",
+    "pingX",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "pingY"
+rust_name = "control_pingy"
+emit = [
+    "control",
+    "pingY",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "pingText"
+rust_name = "control_pingtext"
+emit = [
+    "control",
+    "pingText",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "building"
+rust_name = "control_building"
+emit = [
+    "control",
+    "building",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "breaking"
+rust_name = "control_breaking"
+emit = [
+    "control",
+    "breaking",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "speed"
+rust_name = "control_speed"
+emit = [
+    "control",
+    "speed",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "team"
+rust_name = "control_team"
+emit = [
+    "control",
+    "team",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "type"
+rust_name = "control_type"
+emit = [
+    "control",
     "type",
-    "target",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "flag"
+rust_name = "control_flag"
+emit = [
+    "control",
+    "flag",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "controlled"
+rust_name = "control_controlled"
+emit = [
+    "control",
+    "controlled",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "controller"
+rust_name = "control_controller"
+emit = [
+    "control",
+    "controller",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "name"
+rust_name = "control_name"
+emit = [
+    "control",
+    "name",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "payloadCount"
+rust_name = "control_payloadcount"
+emit = [
+    "control",
+    "payloadCount",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "payloadType"
+rust_name = "control_payloadtype"
+emit = [
+    "control",
+    "payloadType",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "totalPayload"
+rust_name = "control_totalpayload"
+emit = [
+    "control",
+    "totalPayload",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "payloadCapacity"
+rust_name = "control_payloadcapacity"
+emit = [
+    "control",
+    "payloadCapacity",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "maxUnits"
+rust_name = "control_maxunits"
+emit = [
+    "control",
+    "maxUnits",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "id"
+rust_name = "control_id"
+emit = [
+    "control",
+    "id",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "selectedBlock"
+rust_name = "control_selectedblock"
+emit = [
+    "control",
+    "selectedBlock",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "selectedRotation"
+rust_name = "control_selectedrotation"
+emit = [
+    "control",
+    "selectedRotation",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "bulletLifetime"
+rust_name = "control_bulletlifetime"
+emit = [
+    "control",
+    "bulletLifetime",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "bulletTime"
+rust_name = "control_bullettime"
+emit = [
+    "control",
+    "bulletTime",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "enabled"
+rust_name = "control_enabled"
+emit = [
+    "control",
+    "enabled",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "shoot"
+rust_name = "control_shoot"
+emit = [
+    "control",
+    "shoot",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "shootp"
+rust_name = "control_shootp"
+emit = [
+    "control",
+    "shootp",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "config"
+rust_name = "control_config"
+emit = [
+    "control",
+    "config",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "control"
+variant = "color"
+rust_name = "control_color"
+emit = [
+    "control",
+    "color",
+    "$target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "target"
+inputs = [
     "p1",
     "p2",
     "p3",
@@ -261,13 +2183,12 @@ emit = [
     "$sortOrder",
     "$output",
 ]
-receiver = ""
+receiver = "radar"
 inputs = [
     "target1",
     "target2",
     "target3",
     "sort",
-    "radar",
     "sortOrder",
 ]
 outputs = ["output"]
@@ -282,35 +2203,835 @@ emit = [
     "$from",
     "$type",
 ]
-receiver = ""
+receiver = "to"
 inputs = [
-    "to",
     "from",
     "type",
 ]
 outputs = []
 
 [[instructions]]
-family = "select"
-variant = "select"
-rust_name = "select"
+family = "set"
+variant = "set"
+rust_name = "set"
 emit = [
-    "select",
-    "$result",
-    "$op",
-    "$comp0",
-    "$comp1",
+    "set",
+    "$to",
+    "$from",
+]
+receiver = "to"
+inputs = ["from"]
+outputs = []
+
+[[instructions]]
+family = "op"
+variant = "add"
+rust_name = "op_add"
+emit = [
+    "op",
+    "add",
+    "$dest",
     "$a",
     "$b",
 ]
-receiver = ""
-inputs = [
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "sub"
+rust_name = "op_sub"
+emit = [
     "op",
-    "comp0",
-    "comp1",
-    "a",
-    "b",
+    "sub",
+    "$dest",
+    "$a",
+    "$b",
 ]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "mul"
+rust_name = "op_mul"
+emit = [
+    "op",
+    "mul",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "div"
+rust_name = "op_div"
+emit = [
+    "op",
+    "div",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "idiv"
+rust_name = "op_idiv"
+emit = [
+    "op",
+    "idiv",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "mod"
+rust_name = "op_mod"
+emit = [
+    "op",
+    "mod",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "emod"
+rust_name = "op_emod"
+emit = [
+    "op",
+    "emod",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "pow"
+rust_name = "op_pow"
+emit = [
+    "op",
+    "pow",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "equal"
+rust_name = "op_equal"
+emit = [
+    "op",
+    "equal",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "notEqual"
+rust_name = "op_notequal"
+emit = [
+    "op",
+    "notEqual",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "land"
+rust_name = "op_land"
+emit = [
+    "op",
+    "land",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "lessThan"
+rust_name = "op_lessthan"
+emit = [
+    "op",
+    "lessThan",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "lessThanEq"
+rust_name = "op_lessthaneq"
+emit = [
+    "op",
+    "lessThanEq",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "greaterThan"
+rust_name = "op_greaterthan"
+emit = [
+    "op",
+    "greaterThan",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "greaterThanEq"
+rust_name = "op_greaterthaneq"
+emit = [
+    "op",
+    "greaterThanEq",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "strictEqual"
+rust_name = "op_strictequal"
+emit = [
+    "op",
+    "strictEqual",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "shl"
+rust_name = "op_shl"
+emit = [
+    "op",
+    "shl",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "shr"
+rust_name = "op_shr"
+emit = [
+    "op",
+    "shr",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "ushr"
+rust_name = "op_ushr"
+emit = [
+    "op",
+    "ushr",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "or"
+rust_name = "op_or"
+emit = [
+    "op",
+    "or",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "and"
+rust_name = "op_and"
+emit = [
+    "op",
+    "and",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "xor"
+rust_name = "op_xor"
+emit = [
+    "op",
+    "xor",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "not"
+rust_name = "op_not"
+emit = [
+    "op",
+    "not",
+    "$dest",
+    "$a",
+    "0",
+]
+receiver = "a"
+inputs = []
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "max"
+rust_name = "op_max"
+emit = [
+    "op",
+    "max",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "min"
+rust_name = "op_min"
+emit = [
+    "op",
+    "min",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "angle"
+rust_name = "op_angle"
+emit = [
+    "op",
+    "angle",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "angleDiff"
+rust_name = "op_anglediff"
+emit = [
+    "op",
+    "angleDiff",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "len"
+rust_name = "op_len"
+emit = [
+    "op",
+    "len",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "noise"
+rust_name = "op_noise"
+emit = [
+    "op",
+    "noise",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "abs"
+rust_name = "op_abs"
+emit = [
+    "op",
+    "abs",
+    "$dest",
+    "$a",
+    "0",
+]
+receiver = "a"
+inputs = []
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "sign"
+rust_name = "op_sign"
+emit = [
+    "op",
+    "sign",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "log"
+rust_name = "op_log"
+emit = [
+    "op",
+    "log",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "logn"
+rust_name = "op_logn"
+emit = [
+    "op",
+    "logn",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "log10"
+rust_name = "op_log10"
+emit = [
+    "op",
+    "log10",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "floor"
+rust_name = "op_floor"
+emit = [
+    "op",
+    "floor",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "ceil"
+rust_name = "op_ceil"
+emit = [
+    "op",
+    "ceil",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "round"
+rust_name = "op_round"
+emit = [
+    "op",
+    "round",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "sqrt"
+rust_name = "op_sqrt"
+emit = [
+    "op",
+    "sqrt",
+    "$dest",
+    "$a",
+    "$b",
+]
+receiver = "a"
+inputs = ["b"]
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "rand"
+rust_name = "op_rand"
+emit = [
+    "op",
+    "rand",
+    "$dest",
+    "$a",
+    "0",
+]
+receiver = "a"
+inputs = []
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "sin"
+rust_name = "op_sin"
+emit = [
+    "op",
+    "sin",
+    "$dest",
+    "$a",
+    "0",
+]
+receiver = "a"
+inputs = []
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "cos"
+rust_name = "op_cos"
+emit = [
+    "op",
+    "cos",
+    "$dest",
+    "$a",
+    "0",
+]
+receiver = "a"
+inputs = []
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "tan"
+rust_name = "op_tan"
+emit = [
+    "op",
+    "tan",
+    "$dest",
+    "$a",
+    "0",
+]
+receiver = "a"
+inputs = []
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "asin"
+rust_name = "op_asin"
+emit = [
+    "op",
+    "asin",
+    "$dest",
+    "$a",
+    "0",
+]
+receiver = "a"
+inputs = []
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "acos"
+rust_name = "op_acos"
+emit = [
+    "op",
+    "acos",
+    "$dest",
+    "$a",
+    "0",
+]
+receiver = "a"
+inputs = []
+outputs = ["dest"]
+
+[[instructions]]
+family = "op"
+variant = "atan"
+rust_name = "op_atan"
+emit = [
+    "op",
+    "atan",
+    "$dest",
+    "$a",
+    "0",
+]
+receiver = "a"
+inputs = []
+outputs = ["dest"]
+
+[[instructions]]
+family = "select"
+variant = "equal"
+rust_name = "select_equal"
+emit = [
+    "select",
+    "$result",
+    "equal",
+    "$comp0",
+    "$comp1",
+    "0",
+    "0",
+]
+receiver = "comp0"
+inputs = ["comp1"]
+outputs = ["result"]
+
+[[instructions]]
+family = "select"
+variant = "notEqual"
+rust_name = "select_notequal"
+emit = [
+    "select",
+    "$result",
+    "notEqual",
+    "$comp0",
+    "$comp1",
+    "0",
+    "0",
+]
+receiver = "comp0"
+inputs = ["comp1"]
+outputs = ["result"]
+
+[[instructions]]
+family = "select"
+variant = "lessThan"
+rust_name = "select_lessthan"
+emit = [
+    "select",
+    "$result",
+    "lessThan",
+    "$comp0",
+    "$comp1",
+    "0",
+    "0",
+]
+receiver = "comp0"
+inputs = ["comp1"]
+outputs = ["result"]
+
+[[instructions]]
+family = "select"
+variant = "lessThanEq"
+rust_name = "select_lessthaneq"
+emit = [
+    "select",
+    "$result",
+    "lessThanEq",
+    "$comp0",
+    "$comp1",
+    "0",
+    "0",
+]
+receiver = "comp0"
+inputs = ["comp1"]
+outputs = ["result"]
+
+[[instructions]]
+family = "select"
+variant = "greaterThan"
+rust_name = "select_greaterthan"
+emit = [
+    "select",
+    "$result",
+    "greaterThan",
+    "$comp0",
+    "$comp1",
+    "0",
+    "0",
+]
+receiver = "comp0"
+inputs = ["comp1"]
+outputs = ["result"]
+
+[[instructions]]
+family = "select"
+variant = "greaterThanEq"
+rust_name = "select_greaterthaneq"
+emit = [
+    "select",
+    "$result",
+    "greaterThanEq",
+    "$comp0",
+    "$comp1",
+    "0",
+    "0",
+]
+receiver = "comp0"
+inputs = ["comp1"]
+outputs = ["result"]
+
+[[instructions]]
+family = "select"
+variant = "strictEqual"
+rust_name = "select_strictequal"
+emit = [
+    "select",
+    "$result",
+    "strictEqual",
+    "$comp0",
+    "$comp1",
+    "0",
+    "0",
+]
+receiver = "comp0"
+inputs = ["comp1"]
+outputs = ["result"]
+
+[[instructions]]
+family = "select"
+variant = "always"
+rust_name = "select_always"
+emit = [
+    "select",
+    "$result",
+    "always",
+    "$comp0",
+    "$comp1",
+    "0",
+    "0",
+]
+receiver = "comp0"
+inputs = ["comp1"]
 outputs = ["result"]
 
 [[instructions]]
@@ -321,8 +3042,8 @@ emit = [
     "wait",
     "$value",
 ]
-receiver = ""
-inputs = ["value"]
+receiver = "value"
+inputs = []
 outputs = []
 
 [[instructions]]
@@ -336,19 +3057,254 @@ outputs = []
 
 [[instructions]]
 family = "lookup"
-variant = "lookup"
-rust_name = "lookup"
+variant = "item"
+rust_name = "lookup_item"
 emit = [
     "lookup",
-    "$type",
+    "item",
     "$result",
     "$id",
 ]
-receiver = ""
-inputs = [
-    "type",
-    "id",
+receiver = "id"
+inputs = []
+outputs = ["result"]
+
+[[instructions]]
+family = "lookup"
+variant = "block"
+rust_name = "lookup_block"
+emit = [
+    "lookup",
+    "block",
+    "$result",
+    "$id",
 ]
+receiver = "id"
+inputs = []
+outputs = ["result"]
+
+[[instructions]]
+family = "lookup"
+variant = "mech_UNUSED"
+rust_name = "lookup_mech_unused"
+emit = [
+    "lookup",
+    "mech_UNUSED",
+    "$result",
+    "$id",
+]
+receiver = "id"
+inputs = []
+outputs = ["result"]
+
+[[instructions]]
+family = "lookup"
+variant = "bullet"
+rust_name = "lookup_bullet"
+emit = [
+    "lookup",
+    "bullet",
+    "$result",
+    "$id",
+]
+receiver = "id"
+inputs = []
+outputs = ["result"]
+
+[[instructions]]
+family = "lookup"
+variant = "liquid"
+rust_name = "lookup_liquid"
+emit = [
+    "lookup",
+    "liquid",
+    "$result",
+    "$id",
+]
+receiver = "id"
+inputs = []
+outputs = ["result"]
+
+[[instructions]]
+family = "lookup"
+variant = "status"
+rust_name = "lookup_status"
+emit = [
+    "lookup",
+    "status",
+    "$result",
+    "$id",
+]
+receiver = "id"
+inputs = []
+outputs = ["result"]
+
+[[instructions]]
+family = "lookup"
+variant = "unit"
+rust_name = "lookup_unit"
+emit = [
+    "lookup",
+    "unit",
+    "$result",
+    "$id",
+]
+receiver = "id"
+inputs = []
+outputs = ["result"]
+
+[[instructions]]
+family = "lookup"
+variant = "weather"
+rust_name = "lookup_weather"
+emit = [
+    "lookup",
+    "weather",
+    "$result",
+    "$id",
+]
+receiver = "id"
+inputs = []
+outputs = ["result"]
+
+[[instructions]]
+family = "lookup"
+variant = "effect_UNUSED"
+rust_name = "lookup_effect_unused"
+emit = [
+    "lookup",
+    "effect_UNUSED",
+    "$result",
+    "$id",
+]
+receiver = "id"
+inputs = []
+outputs = ["result"]
+
+[[instructions]]
+family = "lookup"
+variant = "sector"
+rust_name = "lookup_sector"
+emit = [
+    "lookup",
+    "sector",
+    "$result",
+    "$id",
+]
+receiver = "id"
+inputs = []
+outputs = ["result"]
+
+[[instructions]]
+family = "lookup"
+variant = "loadout_UNUSED"
+rust_name = "lookup_loadout_unused"
+emit = [
+    "lookup",
+    "loadout_UNUSED",
+    "$result",
+    "$id",
+]
+receiver = "id"
+inputs = []
+outputs = ["result"]
+
+[[instructions]]
+family = "lookup"
+variant = "typeid_UNUSED"
+rust_name = "lookup_typeid_unused"
+emit = [
+    "lookup",
+    "typeid_UNUSED",
+    "$result",
+    "$id",
+]
+receiver = "id"
+inputs = []
+outputs = ["result"]
+
+[[instructions]]
+family = "lookup"
+variant = "error"
+rust_name = "lookup_error"
+emit = [
+    "lookup",
+    "error",
+    "$result",
+    "$id",
+]
+receiver = "id"
+inputs = []
+outputs = ["result"]
+
+[[instructions]]
+family = "lookup"
+variant = "planet"
+rust_name = "lookup_planet"
+emit = [
+    "lookup",
+    "planet",
+    "$result",
+    "$id",
+]
+receiver = "id"
+inputs = []
+outputs = ["result"]
+
+[[instructions]]
+family = "lookup"
+variant = "ammo_UNUSED"
+rust_name = "lookup_ammo_unused"
+emit = [
+    "lookup",
+    "ammo_UNUSED",
+    "$result",
+    "$id",
+]
+receiver = "id"
+inputs = []
+outputs = ["result"]
+
+[[instructions]]
+family = "lookup"
+variant = "team"
+rust_name = "lookup_team"
+emit = [
+    "lookup",
+    "team",
+    "$result",
+    "$id",
+]
+receiver = "id"
+inputs = []
+outputs = ["result"]
+
+[[instructions]]
+family = "lookup"
+variant = "unitCommand"
+rust_name = "lookup_unitcommand"
+emit = [
+    "lookup",
+    "unitCommand",
+    "$result",
+    "$id",
+]
+receiver = "id"
+inputs = []
+outputs = ["result"]
+
+[[instructions]]
+family = "lookup"
+variant = "unitStance"
+rust_name = "lookup_unitstance"
+emit = [
+    "lookup",
+    "unitStance",
+    "$result",
+    "$id",
+]
+receiver = "id"
+inputs = []
 outputs = ["result"]
 
 [[instructions]]
@@ -363,9 +3319,8 @@ emit = [
     "$b",
     "$a",
 ]
-receiver = ""
+receiver = "r"
 inputs = [
-    "r",
     "g",
     "b",
     "a",
@@ -384,9 +3339,8 @@ emit = [
     "$a",
     "$value",
 ]
-receiver = ""
+receiver = "r"
 inputs = [
-    "r",
     "g",
     "b",
     "a",
@@ -404,6 +3358,150 @@ inputs = []
 outputs = []
 
 [[instructions]]
+family = "jump"
+variant = "equal"
+rust_name = "jump_equal"
+emit = [
+    "jump",
+    "$destIndex",
+    "equal",
+    "$value",
+    "$compare",
+]
+receiver = "value"
+inputs = [
+    "destIndex",
+    "compare",
+]
+outputs = []
+
+[[instructions]]
+family = "jump"
+variant = "notEqual"
+rust_name = "jump_notequal"
+emit = [
+    "jump",
+    "$destIndex",
+    "notEqual",
+    "$value",
+    "$compare",
+]
+receiver = "value"
+inputs = [
+    "destIndex",
+    "compare",
+]
+outputs = []
+
+[[instructions]]
+family = "jump"
+variant = "lessThan"
+rust_name = "jump_lessthan"
+emit = [
+    "jump",
+    "$destIndex",
+    "lessThan",
+    "$value",
+    "$compare",
+]
+receiver = "value"
+inputs = [
+    "destIndex",
+    "compare",
+]
+outputs = []
+
+[[instructions]]
+family = "jump"
+variant = "lessThanEq"
+rust_name = "jump_lessthaneq"
+emit = [
+    "jump",
+    "$destIndex",
+    "lessThanEq",
+    "$value",
+    "$compare",
+]
+receiver = "value"
+inputs = [
+    "destIndex",
+    "compare",
+]
+outputs = []
+
+[[instructions]]
+family = "jump"
+variant = "greaterThan"
+rust_name = "jump_greaterthan"
+emit = [
+    "jump",
+    "$destIndex",
+    "greaterThan",
+    "$value",
+    "$compare",
+]
+receiver = "value"
+inputs = [
+    "destIndex",
+    "compare",
+]
+outputs = []
+
+[[instructions]]
+family = "jump"
+variant = "greaterThanEq"
+rust_name = "jump_greaterthaneq"
+emit = [
+    "jump",
+    "$destIndex",
+    "greaterThanEq",
+    "$value",
+    "$compare",
+]
+receiver = "value"
+inputs = [
+    "destIndex",
+    "compare",
+]
+outputs = []
+
+[[instructions]]
+family = "jump"
+variant = "strictEqual"
+rust_name = "jump_strictequal"
+emit = [
+    "jump",
+    "$destIndex",
+    "strictEqual",
+    "$value",
+    "$compare",
+]
+receiver = "value"
+inputs = [
+    "destIndex",
+    "compare",
+]
+outputs = []
+
+[[instructions]]
+family = "jump"
+variant = "always"
+rust_name = "jump_always"
+emit = [
+    "jump",
+    "$destIndex",
+    "always",
+    "$value",
+    "$compare",
+]
+receiver = "value"
+inputs = [
+    "destIndex",
+    "compare",
+]
+outputs = []
+
+[[instructions]]
 family = "ubind"
 variant = "ubind"
 rust_name = "ubind"
@@ -411,27 +3509,465 @@ emit = [
     "ubind",
     "$type",
 ]
-receiver = ""
-inputs = ["type"]
+receiver = "type"
+inputs = []
 outputs = []
 
 [[instructions]]
 family = "ucontrol"
-variant = "ucontrol"
-rust_name = "ucontrol"
+variant = "idle"
+rust_name = "ucontrol_idle"
 emit = [
     "ucontrol",
-    "$type",
+    "idle",
     "$p1",
     "$p2",
     "$p3",
     "$p4",
     "$p5",
 ]
-receiver = ""
+receiver = "p1"
 inputs = [
-    "type",
-    "p1",
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+]
+outputs = []
+
+[[instructions]]
+family = "ucontrol"
+variant = "stop"
+rust_name = "ucontrol_stop"
+emit = [
+    "ucontrol",
+    "stop",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+    "$p5",
+]
+receiver = "p1"
+inputs = [
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+]
+outputs = []
+
+[[instructions]]
+family = "ucontrol"
+variant = "move"
+rust_name = "ucontrol_move"
+emit = [
+    "ucontrol",
+    "move",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+    "$p5",
+]
+receiver = "p1"
+inputs = [
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+]
+outputs = []
+
+[[instructions]]
+family = "ucontrol"
+variant = "approach"
+rust_name = "ucontrol_approach"
+emit = [
+    "ucontrol",
+    "approach",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+    "$p5",
+]
+receiver = "p1"
+inputs = [
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+]
+outputs = []
+
+[[instructions]]
+family = "ucontrol"
+variant = "pathfind"
+rust_name = "ucontrol_pathfind"
+emit = [
+    "ucontrol",
+    "pathfind",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+    "$p5",
+]
+receiver = "p1"
+inputs = [
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+]
+outputs = []
+
+[[instructions]]
+family = "ucontrol"
+variant = "autoPathfind"
+rust_name = "ucontrol_autopathfind"
+emit = [
+    "ucontrol",
+    "autoPathfind",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+    "$p5",
+]
+receiver = "p1"
+inputs = [
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+]
+outputs = []
+
+[[instructions]]
+family = "ucontrol"
+variant = "boost"
+rust_name = "ucontrol_boost"
+emit = [
+    "ucontrol",
+    "boost",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+    "$p5",
+]
+receiver = "p1"
+inputs = [
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+]
+outputs = []
+
+[[instructions]]
+family = "ucontrol"
+variant = "target"
+rust_name = "ucontrol_target"
+emit = [
+    "ucontrol",
+    "target",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+    "$p5",
+]
+receiver = "p1"
+inputs = [
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+]
+outputs = []
+
+[[instructions]]
+family = "ucontrol"
+variant = "targetp"
+rust_name = "ucontrol_targetp"
+emit = [
+    "ucontrol",
+    "targetp",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+    "$p5",
+]
+receiver = "p1"
+inputs = [
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+]
+outputs = []
+
+[[instructions]]
+family = "ucontrol"
+variant = "itemDrop"
+rust_name = "ucontrol_itemdrop"
+emit = [
+    "ucontrol",
+    "itemDrop",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+    "$p5",
+]
+receiver = "p1"
+inputs = [
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+]
+outputs = []
+
+[[instructions]]
+family = "ucontrol"
+variant = "itemTake"
+rust_name = "ucontrol_itemtake"
+emit = [
+    "ucontrol",
+    "itemTake",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+    "$p5",
+]
+receiver = "p1"
+inputs = [
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+]
+outputs = []
+
+[[instructions]]
+family = "ucontrol"
+variant = "payDrop"
+rust_name = "ucontrol_paydrop"
+emit = [
+    "ucontrol",
+    "payDrop",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+    "$p5",
+]
+receiver = "p1"
+inputs = [
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+]
+outputs = []
+
+[[instructions]]
+family = "ucontrol"
+variant = "payTake"
+rust_name = "ucontrol_paytake"
+emit = [
+    "ucontrol",
+    "payTake",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+    "$p5",
+]
+receiver = "p1"
+inputs = [
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+]
+outputs = []
+
+[[instructions]]
+family = "ucontrol"
+variant = "payEnter"
+rust_name = "ucontrol_payenter"
+emit = [
+    "ucontrol",
+    "payEnter",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+    "$p5",
+]
+receiver = "p1"
+inputs = [
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+]
+outputs = []
+
+[[instructions]]
+family = "ucontrol"
+variant = "mine"
+rust_name = "ucontrol_mine"
+emit = [
+    "ucontrol",
+    "mine",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+    "$p5",
+]
+receiver = "p1"
+inputs = [
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+]
+outputs = []
+
+[[instructions]]
+family = "ucontrol"
+variant = "flag"
+rust_name = "ucontrol_flag"
+emit = [
+    "ucontrol",
+    "flag",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+    "$p5",
+]
+receiver = "p1"
+inputs = [
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+]
+outputs = []
+
+[[instructions]]
+family = "ucontrol"
+variant = "build"
+rust_name = "ucontrol_build"
+emit = [
+    "ucontrol",
+    "build",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+    "$p5",
+]
+receiver = "p1"
+inputs = [
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+]
+outputs = []
+
+[[instructions]]
+family = "ucontrol"
+variant = "deconstruct"
+rust_name = "ucontrol_deconstruct"
+emit = [
+    "ucontrol",
+    "deconstruct",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+    "$p5",
+]
+receiver = "p1"
+inputs = [
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+]
+outputs = []
+
+[[instructions]]
+family = "ucontrol"
+variant = "getBlock"
+rust_name = "ucontrol_getblock"
+emit = [
+    "ucontrol",
+    "getBlock",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+    "$p5",
+]
+receiver = "p1"
+inputs = [
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+]
+outputs = []
+
+[[instructions]]
+family = "ucontrol"
+variant = "within"
+rust_name = "ucontrol_within"
+emit = [
+    "ucontrol",
+    "within",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+    "$p5",
+]
+receiver = "p1"
+inputs = [
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+]
+outputs = []
+
+[[instructions]]
+family = "ucontrol"
+variant = "unbind"
+rust_name = "ucontrol_unbind"
+emit = [
+    "ucontrol",
+    "unbind",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+    "$p5",
+]
+receiver = "p1"
+inputs = [
     "p2",
     "p3",
     "p4",
@@ -450,11 +3986,11 @@ outputs = []
 
 [[instructions]]
 family = "ulocate"
-variant = "ulocate"
-rust_name = "ulocate"
+variant = "ore"
+rust_name = "ulocate_ore"
 emit = [
     "ulocate",
-    "$locate",
+    "ore",
     "$flag",
     "$enemy",
     "$ore",
@@ -463,11 +3999,87 @@ emit = [
     "$outFound",
     "$outBuild",
 ]
-receiver = ""
+receiver = "enemy"
 inputs = [
-    "locate",
     "flag",
-    "enemy",
+    "ore",
+    "outX",
+    "outY",
+    "outFound",
+    "outBuild",
+]
+outputs = []
+
+[[instructions]]
+family = "ulocate"
+variant = "building"
+rust_name = "ulocate_building"
+emit = [
+    "ulocate",
+    "building",
+    "$flag",
+    "$enemy",
+    "$ore",
+    "$outX",
+    "$outY",
+    "$outFound",
+    "$outBuild",
+]
+receiver = "enemy"
+inputs = [
+    "flag",
+    "ore",
+    "outX",
+    "outY",
+    "outFound",
+    "outBuild",
+]
+outputs = []
+
+[[instructions]]
+family = "ulocate"
+variant = "spawn"
+rust_name = "ulocate_spawn"
+emit = [
+    "ulocate",
+    "spawn",
+    "$flag",
+    "$enemy",
+    "$ore",
+    "$outX",
+    "$outY",
+    "$outFound",
+    "$outBuild",
+]
+receiver = "enemy"
+inputs = [
+    "flag",
+    "ore",
+    "outX",
+    "outY",
+    "outFound",
+    "outBuild",
+]
+outputs = []
+
+[[instructions]]
+family = "ulocate"
+variant = "damaged"
+rust_name = "ulocate_damaged"
+emit = [
+    "ulocate",
+    "damaged",
+    "$flag",
+    "$enemy",
+    "$ore",
+    "$outX",
+    "$outY",
+    "$outFound",
+    "$outBuild",
+]
+receiver = "enemy"
+inputs = [
+    "flag",
     "ore",
     "outX",
     "outY",
@@ -478,23 +4090,135 @@ outputs = []
 
 [[instructions]]
 family = "query"
-variant = "query"
-rust_name = "query"
+variant = "circle_unit"
+rust_name = "query_circle_unit"
 emit = [
     "query",
-    "$shape",
-    "$type",
+    "circle",
+    "unit",
     "$team",
     "$x",
     "$y",
     "$w",
     "$h",
 ]
-receiver = ""
+receiver = "team"
 inputs = [
-    "shape",
-    "type",
-    "team",
+    "x",
+    "y",
+    "w",
+    "h",
+]
+outputs = []
+
+[[instructions]]
+family = "query"
+variant = "circle_building"
+rust_name = "query_circle_building"
+emit = [
+    "query",
+    "circle",
+    "building",
+    "$team",
+    "$x",
+    "$y",
+    "$w",
+    "$h",
+]
+receiver = "team"
+inputs = [
+    "x",
+    "y",
+    "w",
+    "h",
+]
+outputs = []
+
+[[instructions]]
+family = "query"
+variant = "circle_bullet"
+rust_name = "query_circle_bullet"
+emit = [
+    "query",
+    "circle",
+    "bullet",
+    "$team",
+    "$x",
+    "$y",
+    "$w",
+    "$h",
+]
+receiver = "team"
+inputs = [
+    "x",
+    "y",
+    "w",
+    "h",
+]
+outputs = []
+
+[[instructions]]
+family = "query"
+variant = "rect_unit"
+rust_name = "query_rect_unit"
+emit = [
+    "query",
+    "rect",
+    "unit",
+    "$team",
+    "$x",
+    "$y",
+    "$w",
+    "$h",
+]
+receiver = "team"
+inputs = [
+    "x",
+    "y",
+    "w",
+    "h",
+]
+outputs = []
+
+[[instructions]]
+family = "query"
+variant = "rect_building"
+rust_name = "query_rect_building"
+emit = [
+    "query",
+    "rect",
+    "building",
+    "$team",
+    "$x",
+    "$y",
+    "$w",
+    "$h",
+]
+receiver = "team"
+inputs = [
+    "x",
+    "y",
+    "w",
+    "h",
+]
+outputs = []
+
+[[instructions]]
+family = "query"
+variant = "rect_bullet"
+rust_name = "query_rect_bullet"
+emit = [
+    "query",
+    "rect",
+    "bullet",
+    "$team",
+    "$x",
+    "$y",
+    "$w",
+    "$h",
+]
+receiver = "team"
+inputs = [
     "x",
     "y",
     "w",
@@ -504,40 +4228,145 @@ outputs = []
 
 [[instructions]]
 family = "getblock"
-variant = "getblock"
-rust_name = "getblock"
+variant = "floor"
+rust_name = "getblock_floor"
 emit = [
     "getblock",
-    "$layer",
+    "floor",
     "$result",
     "$x",
     "$y",
 ]
-receiver = ""
-inputs = [
-    "layer",
-    "x",
-    "y",
+receiver = "x"
+inputs = ["y"]
+outputs = ["result"]
+
+[[instructions]]
+family = "getblock"
+variant = "ore"
+rust_name = "getblock_ore"
+emit = [
+    "getblock",
+    "ore",
+    "$result",
+    "$x",
+    "$y",
 ]
+receiver = "x"
+inputs = ["y"]
+outputs = ["result"]
+
+[[instructions]]
+family = "getblock"
+variant = "block"
+rust_name = "getblock_block"
+emit = [
+    "getblock",
+    "block",
+    "$result",
+    "$x",
+    "$y",
+]
+receiver = "x"
+inputs = ["y"]
+outputs = ["result"]
+
+[[instructions]]
+family = "getblock"
+variant = "building"
+rust_name = "getblock_building"
+emit = [
+    "getblock",
+    "building",
+    "$result",
+    "$x",
+    "$y",
+]
+receiver = "x"
+inputs = ["y"]
 outputs = ["result"]
 
 [[instructions]]
 family = "setblock"
-variant = "setblock"
-rust_name = "setblock"
+variant = "floor"
+rust_name = "setblock_floor"
 emit = [
     "setblock",
-    "$layer",
+    "floor",
     "$block",
     "$x",
     "$y",
     "$team",
     "$rotation",
 ]
-receiver = ""
+receiver = "block"
 inputs = [
-    "layer",
+    "x",
+    "y",
+    "team",
+    "rotation",
+]
+outputs = []
+
+[[instructions]]
+family = "setblock"
+variant = "ore"
+rust_name = "setblock_ore"
+emit = [
+    "setblock",
+    "ore",
+    "$block",
+    "$x",
+    "$y",
+    "$team",
+    "$rotation",
+]
+receiver = "block"
+inputs = [
+    "x",
+    "y",
+    "team",
+    "rotation",
+]
+outputs = []
+
+[[instructions]]
+family = "setblock"
+variant = "block"
+rust_name = "setblock_block"
+emit = [
+    "setblock",
     "block",
+    "$block",
+    "$x",
+    "$y",
+    "$team",
+    "$rotation",
+]
+receiver = "block"
+inputs = [
+    "x",
+    "y",
+    "team",
+    "rotation",
+]
+outputs = []
+
+[[instructions]]
+family = "setblock"
+variant = "building"
+rust_name = "setblock_building"
+emit = [
+    "setblock",
+    "building",
+    "$block",
+    "$x",
+    "$y",
+    "$team",
+    "$rotation",
+]
+receiver = "block"
+inputs = [
     "x",
     "y",
     "team",
@@ -558,9 +4387,8 @@ emit = [
     "$team",
     "$result",
 ]
-receiver = ""
+receiver = "type"
 inputs = [
-    "type",
     "x",
     "y",
     "rotation",
@@ -588,9 +4416,8 @@ emit = [
     "$aimX",
     "$aimY",
 ]
-receiver = ""
+receiver = "from"
 inputs = [
-    "from",
     "index",
     "x",
     "y",
@@ -616,10 +4443,9 @@ emit = [
     "$unit",
     "$duration",
 ]
-receiver = ""
+receiver = "effect"
 inputs = [
     "clear",
-    "effect",
     "unit",
     "duration",
 ]
@@ -634,11 +4460,8 @@ emit = [
     "$to",
     "$weather",
 ]
-receiver = ""
-inputs = [
-    "to",
-    "weather",
-]
+receiver = "to"
+inputs = ["weather"]
 outputs = []
 
 [[instructions]]
@@ -650,11 +4473,8 @@ emit = [
     "$weather",
     "$state",
 ]
-receiver = ""
-inputs = [
-    "weather",
-    "state",
-]
+receiver = "weather"
+inputs = ["state"]
 outputs = []
 
 [[instructions]]
@@ -667,9 +4487,8 @@ emit = [
     "$y",
     "$natural",
 ]
-receiver = ""
+receiver = "x"
 inputs = [
-    "x",
     "y",
     "natural",
 ]
@@ -677,21 +4496,635 @@ outputs = []
 
 [[instructions]]
 family = "setrule"
-variant = "setrule"
-rust_name = "setrule"
+variant = "currentWaveTime"
+rust_name = "setrule_currentwavetime"
 emit = [
     "setrule",
-    "$rule",
+    "currentWaveTime",
     "$value",
     "$p1",
     "$p2",
     "$p3",
     "$p4",
 ]
-receiver = ""
+receiver = "value"
 inputs = [
-    "rule",
-    "value",
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "waveTimer"
+rust_name = "setrule_wavetimer"
+emit = [
+    "setrule",
+    "waveTimer",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "waves"
+rust_name = "setrule_waves"
+emit = [
+    "setrule",
+    "waves",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "wave"
+rust_name = "setrule_wave"
+emit = [
+    "setrule",
+    "wave",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "waveSpacing"
+rust_name = "setrule_wavespacing"
+emit = [
+    "setrule",
+    "waveSpacing",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "waveSending"
+rust_name = "setrule_wavesending"
+emit = [
+    "setrule",
+    "waveSending",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "attackMode"
+rust_name = "setrule_attackmode"
+emit = [
+    "setrule",
+    "attackMode",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "enemyCoreBuildRadius"
+rust_name = "setrule_enemycorebuildradius"
+emit = [
+    "setrule",
+    "enemyCoreBuildRadius",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "dropZoneRadius"
+rust_name = "setrule_dropzoneradius"
+emit = [
+    "setrule",
+    "dropZoneRadius",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "unitCap"
+rust_name = "setrule_unitcap"
+emit = [
+    "setrule",
+    "unitCap",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "mapArea"
+rust_name = "setrule_maparea"
+emit = [
+    "setrule",
+    "mapArea",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "lighting"
+rust_name = "setrule_lighting"
+emit = [
+    "setrule",
+    "lighting",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "canGameOver"
+rust_name = "setrule_cangameover"
+emit = [
+    "setrule",
+    "canGameOver",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "ambientLight"
+rust_name = "setrule_ambientlight"
+emit = [
+    "setrule",
+    "ambientLight",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "solarMultiplier"
+rust_name = "setrule_solarmultiplier"
+emit = [
+    "setrule",
+    "solarMultiplier",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "dragMultiplier"
+rust_name = "setrule_dragmultiplier"
+emit = [
+    "setrule",
+    "dragMultiplier",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "ban"
+rust_name = "setrule_ban"
+emit = [
+    "setrule",
+    "ban",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "unban"
+rust_name = "setrule_unban"
+emit = [
+    "setrule",
+    "unban",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "pauseDisabled"
+rust_name = "setrule_pausedisabled"
+emit = [
+    "setrule",
+    "pauseDisabled",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "buildSpeed"
+rust_name = "setrule_buildspeed"
+emit = [
+    "setrule",
+    "buildSpeed",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "unitHealth"
+rust_name = "setrule_unithealth"
+emit = [
+    "setrule",
+    "unitHealth",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "unitBuildSpeed"
+rust_name = "setrule_unitbuildspeed"
+emit = [
+    "setrule",
+    "unitBuildSpeed",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "unitMineSpeed"
+rust_name = "setrule_unitminespeed"
+emit = [
+    "setrule",
+    "unitMineSpeed",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "unitCost"
+rust_name = "setrule_unitcost"
+emit = [
+    "setrule",
+    "unitCost",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "unitDamage"
+rust_name = "setrule_unitdamage"
+emit = [
+    "setrule",
+    "unitDamage",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "blockHealth"
+rust_name = "setrule_blockhealth"
+emit = [
+    "setrule",
+    "blockHealth",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "blockDamage"
+rust_name = "setrule_blockdamage"
+emit = [
+    "setrule",
+    "blockDamage",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "rtsMinWeight"
+rust_name = "setrule_rtsminweight"
+emit = [
+    "setrule",
+    "rtsMinWeight",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "setrule"
+variant = "rtsMinSquad"
+rust_name = "setrule_rtsminsquad"
+emit = [
+    "setrule",
+    "rtsMinSquad",
+    "$value",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "value"
+inputs = [
     "p1",
     "p2",
     "p3",
@@ -701,37 +5134,114 @@ outputs = []
 
 [[instructions]]
 family = "message"
-variant = "message"
-rust_name = "message"
+variant = "notify"
+rust_name = "message_notify"
 emit = [
     "message",
-    "$type",
+    "notify",
     "$duration",
     "$outSuccess",
 ]
-receiver = ""
-inputs = [
-    "type",
-    "duration",
+receiver = "duration"
+inputs = []
+outputs = ["outSuccess"]
+
+[[instructions]]
+family = "message"
+variant = "announce"
+rust_name = "message_announce"
+emit = [
+    "message",
+    "announce",
+    "$duration",
+    "$outSuccess",
 ]
+receiver = "duration"
+inputs = []
+outputs = ["outSuccess"]
+
+[[instructions]]
+family = "message"
+variant = "toast"
+rust_name = "message_toast"
+emit = [
+    "message",
+    "toast",
+    "$duration",
+    "$outSuccess",
+]
+receiver = "duration"
+inputs = []
+outputs = ["outSuccess"]
+
+[[instructions]]
+family = "message"
+variant = "mission"
+rust_name = "message_mission"
+emit = [
+    "message",
+    "mission",
+    "$duration",
+    "$outSuccess",
+]
+receiver = "duration"
+inputs = []
 outputs = ["outSuccess"]
 
 [[instructions]]
 family = "cutscene"
-variant = "cutscene"
-rust_name = "cutscene"
+variant = "pan"
+rust_name = "cutscene_pan"
 emit = [
     "cutscene",
-    "$action",
+    "pan",
     "$p1",
     "$p2",
     "$p3",
     "$p4",
 ]
-receiver = ""
+receiver = "p1"
 inputs = [
-    "action",
-    "p1",
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "cutscene"
+variant = "zoom"
+rust_name = "cutscene_zoom"
+emit = [
+    "cutscene",
+    "zoom",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "p1"
+inputs = [
+    "p2",
+    "p3",
+    "p4",
+]
+outputs = []
+
+[[instructions]]
+family = "cutscene"
+variant = "stop"
+rust_name = "cutscene_stop"
+emit = [
+    "cutscene",
+    "stop",
+    "$p1",
+    "$p2",
+    "$p3",
+    "$p4",
+]
+receiver = "p1"
+inputs = [
     "p2",
     "p3",
     "p4",
@@ -751,9 +5261,8 @@ emit = [
     "$color",
     "$data",
 ]
-receiver = ""
+receiver = "type"
 inputs = [
-    "type",
     "x",
     "y",
     "sizerot",
@@ -778,9 +5287,8 @@ emit = [
     "$pierce",
     "$effect",
 ]
-receiver = ""
+receiver = "team"
 inputs = [
-    "team",
     "x",
     "y",
     "radius",
@@ -800,26 +5308,157 @@ emit = [
     "setrate",
     "$amount",
 ]
-receiver = ""
-inputs = ["amount"]
+receiver = "amount"
+inputs = []
 outputs = []
 
 [[instructions]]
 family = "fetch"
-variant = "fetch"
-rust_name = "fetch"
+variant = "unit"
+rust_name = "fetch_unit"
 emit = [
     "fetch",
-    "$type",
+    "unit",
     "$result",
     "$team",
     "$index",
     "$extra",
 ]
-receiver = ""
+receiver = "team"
 inputs = [
-    "type",
-    "team",
+    "index",
+    "extra",
+]
+outputs = ["result"]
+
+[[instructions]]
+family = "fetch"
+variant = "unitCount"
+rust_name = "fetch_unitcount"
+emit = [
+    "fetch",
+    "unitCount",
+    "$result",
+    "$team",
+    "$index",
+    "$extra",
+]
+receiver = "team"
+inputs = [
+    "index",
+    "extra",
+]
+outputs = ["result"]
+
+[[instructions]]
+family = "fetch"
+variant = "player"
+rust_name = "fetch_player"
+emit = [
+    "fetch",
+    "player",
+    "$result",
+    "$team",
+    "$index",
+    "$extra",
+]
+receiver = "team"
+inputs = [
+    "index",
+    "extra",
+]
+outputs = ["result"]
+
+[[instructions]]
+family = "fetch"
+variant = "playerCount"
+rust_name = "fetch_playercount"
+emit = [
+    "fetch",
+    "playerCount",
+    "$result",
+    "$team",
+    "$index",
+    "$extra",
+]
+receiver = "team"
+inputs = [
+    "index",
+    "extra",
+]
+outputs = ["result"]
+
+[[instructions]]
+family = "fetch"
+variant = "core"
+rust_name = "fetch_core"
+emit = [
+    "fetch",
+    "core",
+    "$result",
+    "$team",
+    "$index",
+    "$extra",
+]
+receiver = "team"
+inputs = [
+    "index",
+    "extra",
+]
+outputs = ["result"]
+
+[[instructions]]
+family = "fetch"
+variant = "coreCount"
+rust_name = "fetch_corecount"
+emit = [
+    "fetch",
+    "coreCount",
+    "$result",
+    "$team",
+    "$index",
+    "$extra",
+]
+receiver = "team"
+inputs = [
+    "index",
+    "extra",
+]
+outputs = ["result"]
+
+[[instructions]]
+family = "fetch"
+variant = "build"
+rust_name = "fetch_build"
+emit = [
+    "fetch",
+    "build",
+    "$result",
+    "$team",
+    "$index",
+    "$extra",
+]
+receiver = "team"
+inputs = [
+    "index",
+    "extra",
+]
+outputs = ["result"]
+
+[[instructions]]
+family = "fetch"
+variant = "buildCount"
+rust_name = "fetch_buildcount"
+emit = [
+    "fetch",
+    "buildCount",
+    "$result",
+    "$team",
+    "$index",
+    "$extra",
+]
+receiver = "team"
+inputs = [
     "index",
     "extra",
 ]
@@ -833,8 +5472,8 @@ emit = [
     "sync",
     "$variable",
 ]
-receiver = ""
-inputs = ["variable"]
+receiver = "variable"
+inputs = []
 outputs = []
 
 [[instructions]]
@@ -847,9 +5486,8 @@ emit = [
     "$value",
     "$reliable",
 ]
-receiver = ""
+receiver = "channel"
 inputs = [
-    "channel",
     "value",
     "reliable",
 ]
@@ -864,8 +5502,8 @@ emit = [
     "$result",
     "$flag",
 ]
-receiver = ""
-inputs = ["flag"]
+receiver = "flag"
+inputs = []
 outputs = ["result"]
 
 [[instructions]]
@@ -877,11 +5515,8 @@ emit = [
     "$flag",
     "$value",
 ]
-receiver = ""
-inputs = [
-    "flag",
-    "value",
-]
+receiver = "flag"
+inputs = ["value"]
 outputs = []
 
 [[instructions]]
@@ -894,9 +5529,8 @@ emit = [
     "$of",
     "$value",
 ]
-receiver = ""
+receiver = "type"
 inputs = [
-    "type",
     "of",
     "value",
 ]
@@ -917,10 +5551,9 @@ emit = [
     "$y",
     "$limit",
 ]
-receiver = ""
+receiver = "id"
 inputs = [
     "positional",
-    "id",
     "volume",
     "pitch",
     "pan",
@@ -932,20 +5565,498 @@ outputs = []
 
 [[instructions]]
 family = "setmarker"
-variant = "setmarker"
-rust_name = "setmarker"
+variant = "remove"
+rust_name = "setmarker_remove"
 emit = [
     "setmarker",
-    "$type",
+    "remove",
     "$id",
     "$p1",
     "$p2",
     "$p3",
 ]
-receiver = ""
+receiver = "id"
 inputs = [
-    "type",
-    "id",
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "world"
+rust_name = "setmarker_world"
+emit = [
+    "setmarker",
+    "world",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "minimap"
+rust_name = "setmarker_minimap"
+emit = [
+    "setmarker",
+    "minimap",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "autoscale"
+rust_name = "setmarker_autoscale"
+emit = [
+    "setmarker",
+    "autoscale",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "pos"
+rust_name = "setmarker_pos"
+emit = [
+    "setmarker",
+    "pos",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "endPos"
+rust_name = "setmarker_endpos"
+emit = [
+    "setmarker",
+    "endPos",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "drawLayer"
+rust_name = "setmarker_drawlayer"
+emit = [
+    "setmarker",
+    "drawLayer",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "color"
+rust_name = "setmarker_color"
+emit = [
+    "setmarker",
+    "color",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "radius"
+rust_name = "setmarker_radius"
+emit = [
+    "setmarker",
+    "radius",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "stroke"
+rust_name = "setmarker_stroke"
+emit = [
+    "setmarker",
+    "stroke",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "outline"
+rust_name = "setmarker_outline"
+emit = [
+    "setmarker",
+    "outline",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "rotation"
+rust_name = "setmarker_rotation"
+emit = [
+    "setmarker",
+    "rotation",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "shape"
+rust_name = "setmarker_shape"
+emit = [
+    "setmarker",
+    "shape",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "arc"
+rust_name = "setmarker_arc"
+emit = [
+    "setmarker",
+    "arc",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "flushText"
+rust_name = "setmarker_flushtext"
+emit = [
+    "setmarker",
+    "flushText",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "fontSize"
+rust_name = "setmarker_fontsize"
+emit = [
+    "setmarker",
+    "fontSize",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "textHeight"
+rust_name = "setmarker_textheight"
+emit = [
+    "setmarker",
+    "textHeight",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "textAlign"
+rust_name = "setmarker_textalign"
+emit = [
+    "setmarker",
+    "textAlign",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "lineAlign"
+rust_name = "setmarker_linealign"
+emit = [
+    "setmarker",
+    "lineAlign",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "labelFlags"
+rust_name = "setmarker_labelflags"
+emit = [
+    "setmarker",
+    "labelFlags",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "texture"
+rust_name = "setmarker_texture"
+emit = [
+    "setmarker",
+    "texture",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "textureSize"
+rust_name = "setmarker_texturesize"
+emit = [
+    "setmarker",
+    "textureSize",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "posi"
+rust_name = "setmarker_posi"
+emit = [
+    "setmarker",
+    "posi",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "uvi"
+rust_name = "setmarker_uvi"
+emit = [
+    "setmarker",
+    "uvi",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
+    "p1",
+    "p2",
+    "p3",
+]
+outputs = []
+
+[[instructions]]
+family = "setmarker"
+variant = "colori"
+rust_name = "setmarker_colori"
+emit = [
+    "setmarker",
+    "colori",
+    "$id",
+    "$p1",
+    "$p2",
+    "$p3",
+]
+receiver = "id"
+inputs = [
     "p1",
     "p2",
     "p3",
@@ -964,9 +6075,8 @@ emit = [
     "$y",
     "$replace",
 ]
-receiver = ""
+receiver = "type"
 inputs = [
-    "type",
     "id",
     "x",
     "y",
@@ -982,6 +6092,6 @@ emit = [
     "localeprint",
     "$value",
 ]
-receiver = ""
-inputs = ["value"]
+receiver = "value"
+inputs = []
 outputs = []

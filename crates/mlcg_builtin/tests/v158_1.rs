@@ -17,11 +17,16 @@ fn generated_v158_1_api_emits_representative_mlog() {
     let read_value = processor.read("cell1", 0);
     processor.read_into(x.clone(), "cell1", 1);
     processor.print(read_value);
+    let cell = processor.named("cell");
+    let value_read = cell.read(2);
+    let value_sum = x.op_add(y);
+    processor.print(value_read);
+    processor.print(value_sum);
 
     let output = processor.emit().expect("emit succeeds");
 
     assert_eq!(
         output,
-        "set x 1\nop add __mlcg_0 x y\nop not __mlcg_1 __mlcg_0 0\nop add __mlcg_1 __mlcg_0 2\nprint message\nread __mlcg_2 cell1 0\nread x cell1 1\nprint __mlcg_2"
+        "set x 1\nop add __mlcg_0 x y\nop not __mlcg_1 __mlcg_0 0\nop add __mlcg_1 __mlcg_0 2\nprint message\nread __mlcg_2 cell1 0\nread x cell1 1\nprint __mlcg_2\nread __mlcg_3 cell 2\nop add __mlcg_4 x y\nprint __mlcg_3\nprint __mlcg_4"
     );
 }
