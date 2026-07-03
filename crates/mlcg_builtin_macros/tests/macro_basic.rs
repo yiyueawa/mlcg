@@ -97,7 +97,23 @@ outputs = []
     fs::write(&trybuild_collision_manifest_path, collision_manifest)
         .expect("write trybuild collision manifest");
 
+    let invalid_manifest = r#"
+version = "fixture"
+
+[[instructions]]
+family = "broken"
+"#;
+    let invalid_manifest_path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/invalid_manifest.toml");
+    fs::write(&invalid_manifest_path, invalid_manifest).expect("write invalid manifest");
+    let trybuild_invalid_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../target/tests/trybuild/mlcg_builtin_macros/tests/invalid_manifest.toml");
+    fs::write(&trybuild_invalid_manifest_path, invalid_manifest)
+        .expect("write trybuild invalid manifest");
+
     let t = trybuild::TestCases::new();
     t.pass("tests/ui/pass_macro_basic.rs");
     t.compile_fail("tests/ui/fail_method_collision.rs");
+    t.compile_fail("tests/ui/fail_missing_manifest.rs");
+    t.compile_fail("tests/ui/fail_invalid_manifest.rs");
 }
