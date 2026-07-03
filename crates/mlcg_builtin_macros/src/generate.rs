@@ -99,6 +99,22 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
             fn from(value: &::mlcg_core::Value<P, T>) -> Self { Self(value.erase_type()) }
         }
 
+        impl<P> ::std::convert::From<i8> for Arg<P> {
+            fn from(value: i8) -> Self { Self::Raw(value.to_string()) }
+        }
+
+        impl<P> ::std::convert::From<&i8> for Arg<P> {
+            fn from(value: &i8) -> Self { Self::Raw(value.to_string()) }
+        }
+
+        impl<P> ::std::convert::From<i16> for Arg<P> {
+            fn from(value: i16) -> Self { Self::Raw(value.to_string()) }
+        }
+
+        impl<P> ::std::convert::From<&i16> for Arg<P> {
+            fn from(value: &i16) -> Self { Self::Raw(value.to_string()) }
+        }
+
         impl<P> ::std::convert::From<i32> for Arg<P> {
             fn from(value: i32) -> Self { Self::Raw(value.to_string()) }
         }
@@ -121,6 +137,22 @@ pub(crate) fn generate(manifest: &Manifest) -> TokenStream {
 
         impl<P> ::std::convert::From<&isize> for Arg<P> {
             fn from(value: &isize) -> Self { Self::Raw(value.to_string()) }
+        }
+
+        impl<P> ::std::convert::From<u8> for Arg<P> {
+            fn from(value: u8) -> Self { Self::Raw(value.to_string()) }
+        }
+
+        impl<P> ::std::convert::From<&u8> for Arg<P> {
+            fn from(value: &u8) -> Self { Self::Raw(value.to_string()) }
+        }
+
+        impl<P> ::std::convert::From<u16> for Arg<P> {
+            fn from(value: u16) -> Self { Self::Raw(value.to_string()) }
+        }
+
+        impl<P> ::std::convert::From<&u16> for Arg<P> {
+            fn from(value: &u16) -> Self { Self::Raw(value.to_string()) }
         }
 
         impl<P> ::std::convert::From<u32> for Arg<P> {
