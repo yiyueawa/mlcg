@@ -493,8 +493,8 @@ emit = [
     "$output",
     "$address",
 ]
-receiver = "address"
-inputs = []
+receiver = ""
+inputs = ["address"]
 outputs = ["output"]
 
 [[instructions]]
@@ -3093,8 +3093,8 @@ emit = [
     "$result",
     "$id",
 ]
-receiver = "id"
-inputs = []
+receiver = ""
+inputs = ["id"]
 outputs = ["result"]
 
 [[instructions]]
@@ -3107,8 +3107,8 @@ emit = [
     "$result",
     "$id",
 ]
-receiver = "id"
-inputs = []
+receiver = ""
+inputs = ["id"]
 outputs = ["result"]
 
 [[instructions]]
@@ -3121,8 +3121,8 @@ emit = [
     "$result",
     "$id",
 ]
-receiver = "id"
-inputs = []
+receiver = ""
+inputs = ["id"]
 outputs = ["result"]
 
 [[instructions]]
@@ -3135,8 +3135,8 @@ emit = [
     "$result",
     "$id",
 ]
-receiver = "id"
-inputs = []
+receiver = ""
+inputs = ["id"]
 outputs = ["result"]
 
 [[instructions]]
@@ -3149,8 +3149,8 @@ emit = [
     "$result",
     "$id",
 ]
-receiver = "id"
-inputs = []
+receiver = ""
+inputs = ["id"]
 outputs = ["result"]
 
 [[instructions]]
@@ -3163,8 +3163,8 @@ emit = [
     "$result",
     "$id",
 ]
-receiver = "id"
-inputs = []
+receiver = ""
+inputs = ["id"]
 outputs = ["result"]
 
 [[instructions]]
@@ -3177,8 +3177,8 @@ emit = [
     "$result",
     "$id",
 ]
-receiver = "id"
-inputs = []
+receiver = ""
+inputs = ["id"]
 outputs = ["result"]
 
 [[instructions]]
@@ -3191,8 +3191,8 @@ emit = [
     "$result",
     "$id",
 ]
-receiver = "id"
-inputs = []
+receiver = ""
+inputs = ["id"]
 outputs = ["result"]
 
 [[instructions]]
@@ -3205,8 +3205,8 @@ emit = [
     "$result",
     "$id",
 ]
-receiver = "id"
-inputs = []
+receiver = ""
+inputs = ["id"]
 outputs = ["result"]
 
 [[instructions]]
@@ -3219,8 +3219,8 @@ emit = [
     "$result",
     "$id",
 ]
-receiver = "id"
-inputs = []
+receiver = ""
+inputs = ["id"]
 outputs = ["result"]
 
 [[instructions]]
@@ -3233,8 +3233,8 @@ emit = [
     "$result",
     "$id",
 ]
-receiver = "id"
-inputs = []
+receiver = ""
+inputs = ["id"]
 outputs = ["result"]
 
 [[instructions]]
@@ -3247,8 +3247,8 @@ emit = [
     "$result",
     "$id",
 ]
-receiver = "id"
-inputs = []
+receiver = ""
+inputs = ["id"]
 outputs = ["result"]
 
 [[instructions]]
@@ -3261,8 +3261,8 @@ emit = [
     "$result",
     "$id",
 ]
-receiver = "id"
-inputs = []
+receiver = ""
+inputs = ["id"]
 outputs = ["result"]
 
 [[instructions]]
@@ -3275,8 +3275,8 @@ emit = [
     "$result",
     "$id",
 ]
-receiver = "id"
-inputs = []
+receiver = ""
+inputs = ["id"]
 outputs = ["result"]
 
 [[instructions]]
@@ -3289,8 +3289,8 @@ emit = [
     "$result",
     "$id",
 ]
-receiver = "id"
-inputs = []
+receiver = ""
+inputs = ["id"]
 outputs = ["result"]
 
 [[instructions]]
@@ -3303,8 +3303,8 @@ emit = [
     "$result",
     "$id",
 ]
-receiver = "id"
-inputs = []
+receiver = ""
+inputs = ["id"]
 outputs = ["result"]
 
 [[instructions]]
@@ -3317,8 +3317,8 @@ emit = [
     "$result",
     "$id",
 ]
-receiver = "id"
-inputs = []
+receiver = ""
+inputs = ["id"]
 outputs = ["result"]
 
 [[instructions]]
@@ -3331,8 +3331,8 @@ emit = [
     "$result",
     "$id",
 ]
-receiver = "id"
-inputs = []
+receiver = ""
+inputs = ["id"]
 outputs = ["result"]
 
 [[instructions]]
@@ -3347,8 +3347,9 @@ emit = [
     "$b",
     "$a",
 ]
-receiver = "r"
+receiver = ""
 inputs = [
+    "r",
     "g",
     "b",
     "a",
@@ -4272,8 +4273,11 @@ emit = [
     "$x",
     "$y",
 ]
-receiver = "x"
-inputs = ["y"]
+receiver = ""
+inputs = [
+    "x",
+    "y",
+]
 outputs = ["result"]
 
 [[instructions]]
@@ -4287,8 +4291,11 @@ emit = [
     "$x",
     "$y",
 ]
-receiver = "x"
-inputs = ["y"]
+receiver = ""
+inputs = [
+    "x",
+    "y",
+]
 outputs = ["result"]
 
 [[instructions]]
@@ -4302,8 +4309,11 @@ emit = [
     "$x",
     "$y",
 ]
-receiver = "x"
-inputs = ["y"]
+receiver = ""
+inputs = [
+    "x",
+    "y",
+]
 outputs = ["result"]
 
 [[instructions]]
@@ -4317,8 +4327,11 @@ emit = [
     "$x",
     "$y",
 ]
-receiver = "x"
-inputs = ["y"]
+receiver = ""
+inputs = [
+    "x",
+    "y",
+]
 outputs = ["result"]
 
 [[instructions]]
@@ -4422,8 +4435,9 @@ emit = [
     "$team",
     "$result",
 ]
-receiver = "type"
+receiver = ""
 inputs = [
+    "type",
     "x",
     "y",
     "rotation",
@@ -5177,8 +5191,8 @@ emit = [
     "$duration",
     "$outSuccess",
 ]
-receiver = "duration"
-inputs = []
+receiver = ""
+inputs = ["duration"]
 outputs = ["outSuccess"]
 
 [[instructions]]
@@ -5191,8 +5205,8 @@ emit = [
     "$duration",
     "$outSuccess",
 ]
-receiver = "duration"
-inputs = []
+receiver = ""
+inputs = ["duration"]
 outputs = ["outSuccess"]
 
 [[instructions]]
@@ -5205,8 +5219,8 @@ emit = [
     "$duration",
     "$outSuccess",
 ]
-receiver = "duration"
-inputs = []
+receiver = ""
+inputs = ["duration"]
 outputs = ["outSuccess"]
 
 [[instructions]]
@@ -5219,8 +5233,8 @@ emit = [
     "$duration",
     "$outSuccess",
 ]
-receiver = "duration"
-inputs = []
+receiver = ""
+inputs = ["duration"]
 outputs = ["outSuccess"]
 
 [[instructions]]
@@ -5359,8 +5373,9 @@ emit = [
     "$index",
     "$extra",
 ]
-receiver = "team"
+receiver = ""
 inputs = [
+    "team",
     "index",
     "extra",
 ]
@@ -5378,8 +5393,9 @@ emit = [
     "$index",
     "$extra",
 ]
-receiver = "team"
+receiver = ""
 inputs = [
+    "team",
     "index",
     "extra",
 ]
@@ -5397,8 +5413,9 @@ emit = [
     "$index",
     "$extra",
 ]
-receiver = "team"
+receiver = ""
 inputs = [
+    "team",
     "index",
     "extra",
 ]
@@ -5416,8 +5433,9 @@ emit = [
     "$index",
     "$extra",
 ]
-receiver = "team"
+receiver = ""
 inputs = [
+    "team",
     "index",
     "extra",
 ]
@@ -5435,8 +5453,9 @@ emit = [
     "$index",
     "$extra",
 ]
-receiver = "team"
+receiver = ""
 inputs = [
+    "team",
     "index",
     "extra",
 ]
@@ -5454,8 +5473,9 @@ emit = [
     "$index",
     "$extra",
 ]
-receiver = "team"
+receiver = ""
 inputs = [
+    "team",
     "index",
     "extra",
 ]
@@ -5473,8 +5493,9 @@ emit = [
     "$index",
     "$extra",
 ]
-receiver = "team"
+receiver = ""
 inputs = [
+    "team",
     "index",
     "extra",
 ]
@@ -5492,8 +5513,9 @@ emit = [
     "$index",
     "$extra",
 ]
-receiver = "team"
+receiver = ""
 inputs = [
+    "team",
     "index",
     "extra",
 ]
@@ -5537,8 +5559,8 @@ emit = [
     "$result",
     "$flag",
 ]
-receiver = "flag"
-inputs = []
+receiver = ""
+inputs = ["flag"]
 outputs = ["result"]
 
 [[instructions]]

@@ -9,6 +9,7 @@ struct EnumSelection {
     field: String,
     variant: String,
     arity: Option<usize>,
+    has_arity_model: bool,
 }
 
 pub fn derive_semantic_manifest(raw: &RawStatementManifest) -> Manifest {
@@ -89,6 +90,7 @@ fn expand_enum_selections(
             field: field.name.clone(),
             variant: variant.clone(),
             arity: raw_enum.arities.get(variant).copied(),
+            has_arity_model: !raw_enum.arities.is_empty(),
         });
         expand_enum_selections(statement, enum_fields, index + 1, selections, out);
         selections.pop();
@@ -201,7 +203,10 @@ fn receiver_field(
     if preferred.is_none() && ignored_preferred {
         return None;
     }
-    if preferred.is_some() || outputs.len() <= 1 {
+    if preferred.is_some()
+        || outputs.is_empty()
+        || (outputs.len() == 1 && has_operand_arity_model(enum_selections))
+    {
         preferred.or_else(|| operands.into_iter().next())
     } else {
         None
@@ -281,6 +286,12 @@ fn default_emit_token(field: &RawField) -> String {
 
 fn operand_arity(enum_selections: &[EnumSelection]) -> Option<usize> {
     enum_selections.iter().find_map(|selection| selection.arity)
+}
+
+fn has_operand_arity_model(enum_selections: &[EnumSelection]) -> bool {
+    enum_selections
+        .iter()
+        .any(|selection| selection.has_arity_model)
 }
 
 fn is_label_field(name: &str) -> bool {

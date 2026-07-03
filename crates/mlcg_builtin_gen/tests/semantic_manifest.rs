@@ -208,6 +208,49 @@ fn derives_receiver_and_output_roles_from_field_names() {
 }
 
 #[test]
+fn avoids_fallback_receiver_for_plain_output_queries_without_preferred_subject() {
+    let source = r#"
+        @RegisterStatement("link_like")
+        public static class LinkLikeStatement extends LStatement{
+            public String output = "result", address = "0";
+            @Override public LInstruction build(LAssembler builder){ return new LinkLikeI(builder.var(output), builder.var(address)); }
+        }
+
+        @RegisterStatement("color_like")
+        public static class ColorLikeStatement extends LStatement{
+            public String result = "result", r = "1", g = "1", b = "1", a = "1";
+            @Override public LInstruction build(LAssembler builder){ return new ColorLikeI(builder.var(result), builder.var(r), builder.var(g), builder.var(b), builder.var(a)); }
+        }
+    "#;
+
+    let raw = scan_raw_statements("fixture", source).expect("scan succeeds");
+    let manifest = derive_semantic_manifest(&raw);
+
+    let link_like = manifest
+        .instructions
+        .iter()
+        .find(|instruction| instruction.rust_name == "link_like")
+        .expect("link_like exists");
+    assert_eq!(link_like.emit, ["link_like", "$output", "$address"]);
+    assert!(link_like.receiver.is_empty());
+    assert_eq!(link_like.inputs, ["address"]);
+    assert_eq!(link_like.outputs, ["output"]);
+
+    let color_like = manifest
+        .instructions
+        .iter()
+        .find(|instruction| instruction.rust_name == "color_like")
+        .expect("color_like exists");
+    assert_eq!(
+        color_like.emit,
+        ["color_like", "$result", "$r", "$g", "$b", "$a"]
+    );
+    assert!(color_like.receiver.is_empty());
+    assert_eq!(color_like.inputs, ["r", "g", "b", "a"]);
+    assert_eq!(color_like.outputs, ["result"]);
+}
+
+#[test]
 fn keeps_multiple_outputs_and_avoids_fallback_receiver_for_multi_output_queries() {
     let source = r#"
         @RegisterStatement("locate_like")
