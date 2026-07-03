@@ -45,3 +45,12 @@ emit = ["recv_out", "$out", "$target", "$input"]
 receiver = "target"
 inputs = ["input"]
 outputs = ["out"]
+
+[[instructions]]
+family = "keywords"
+variant = "keywords"
+rust_name = "keywords"
+emit = ["keywords", "$loop", "$async", "$type", "$out"]
+receiver = ""
+inputs = ["loop", "async", "type"]
+outputs = ["out"]

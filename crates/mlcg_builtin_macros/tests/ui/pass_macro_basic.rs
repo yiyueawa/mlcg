@@ -5,7 +5,7 @@ mod generated {
 }
 
 use generated::prelude::{
-    Arg, MultiOutput, MultiRecvOutput, ProcessorMultiExt, ProcessorMultiRecvExt,
+    Arg, MultiOutput, MultiRecvOutput, ProcessorKeywordsExt, ProcessorMultiExt, ProcessorMultiRecvExt,
     ProcessorOpAddExt, ProcessorRecvOutExt, ProcessorSetExt, ValueMultiRecvExt, ValueRecvOutExt,
     ValueSetExt,
 };
@@ -19,7 +19,8 @@ where
         + ProcessorOpAddExt<P>
         + ProcessorMultiExt<P>
         + ProcessorMultiRecvExt<P>
-        + ProcessorRecvOutExt<P>,
+        + ProcessorRecvOutExt<P>
+        + ProcessorKeywordsExt<P>,
     Value<P>: ValueSetExt<P> + ValueMultiRecvExt<P> + ValueRecvOutExt<P>,
 {
 }
@@ -41,6 +42,7 @@ fn main() {
     x.multi_recv_into(multi_recv.outA.clone(), multi_recv.outB.clone(), 3isize);
     let recv_out = x.recv_out(y.clone());
     x.recv_out_into(recv_out.clone(), 1.5f32);
+    let keyword_out = processor.keywords(4, 5, 6);
 
     let text = processor.emit().unwrap();
     assert!(text.contains("set x 1"));
@@ -52,4 +54,6 @@ fn main() {
     assert!(text.contains("multi_recv __mlcg_3 __mlcg_4 x 3"));
     assert!(text.contains("recv_out __mlcg_5 x y"));
     assert!(text.contains("recv_out __mlcg_5 x 1.5"));
+    assert!(text.contains("keywords 4 5 6 __mlcg_6"));
+    let _ = keyword_out;
 }

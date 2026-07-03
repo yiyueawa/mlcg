@@ -708,10 +708,67 @@ fn to_pascal_string(name: &str) -> String {
 }
 
 fn safe_ident(name: &str) -> Ident {
-    match name {
-        "type" | "match" | "ref" | "self" | "crate" | "super" | "in" | "where" => {
-            format_ident!("arg_{}", name)
-        }
-        _ => format_ident!("{}", name),
+    if is_rust_keyword(name) {
+        format_ident!("arg_{}", name)
+    } else {
+        format_ident!("{}", name)
     }
+}
+
+fn is_rust_keyword(name: &str) -> bool {
+    matches!(
+        name,
+        "Self"
+            | "as"
+            | "async"
+            | "await"
+            | "break"
+            | "const"
+            | "continue"
+            | "crate"
+            | "dyn"
+            | "else"
+            | "enum"
+            | "extern"
+            | "false"
+            | "fn"
+            | "for"
+            | "if"
+            | "impl"
+            | "in"
+            | "let"
+            | "loop"
+            | "match"
+            | "mod"
+            | "move"
+            | "mut"
+            | "pub"
+            | "ref"
+            | "return"
+            | "self"
+            | "static"
+            | "struct"
+            | "super"
+            | "trait"
+            | "true"
+            | "type"
+            | "unsafe"
+            | "use"
+            | "where"
+            | "while"
+            | "abstract"
+            | "become"
+            | "box"
+            | "do"
+            | "final"
+            | "macro"
+            | "override"
+            | "priv"
+            | "try"
+            | "typeof"
+            | "unsized"
+            | "virtual"
+            | "yield"
+            | "union"
+    )
 }

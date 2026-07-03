@@ -50,6 +50,15 @@ emit = ["recv_out", "$out", "$target", "$input"]
 receiver = "target"
 inputs = ["input"]
 outputs = ["out"]
+
+[[instructions]]
+family = "keywords"
+variant = "keywords"
+rust_name = "keywords"
+emit = ["keywords", "$loop", "$async", "$type", "$out"]
+receiver = ""
+inputs = ["loop", "async", "type"]
+outputs = ["out"]
 "#;
     fs::write(&manifest_path, manifest).expect("write manifest");
     let trybuild_manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
