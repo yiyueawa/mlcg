@@ -47,14 +47,21 @@ fn scan_manifest_enums(
     let mut enums = Vec::new();
 
     for enum_name in enum_names {
+        let mut found = false;
         for java_file in &java_files {
             let source = std::fs::read_to_string(java_file).context(ReadSourceSnafu {
                 path: java_file.clone(),
             })?;
             if source.contains(&format!("enum {enum_name}")) {
                 enums.push(scan_raw_enum_variants(enum_name, &source)?);
+                found = true;
                 break;
             }
+        }
+        if !found {
+            return Err(GenerateError::RequiredSourceItemMissing {
+                item: format!("enum {enum_name}"),
+            });
         }
     }
 

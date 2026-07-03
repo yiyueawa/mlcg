@@ -1,6 +1,6 @@
 use std::{fs, path::Path};
 
-use mlcg_builtin_gen::source_parser::parse_cached_mindustry;
+use mlcg_builtin_gen::source_parser::{parse_cached_mindustry, scan_cached_mindustry_raw};
 
 #[test]
 fn cached_mindustry_parser_derives_full_semantic_manifest() {
@@ -69,6 +69,35 @@ fn cached_mindustry_parser_derives_full_semantic_manifest() {
         ["select", "$result", "always", "0", "0", "$a", "$b"]
     );
     assert_eq!(select_always.inputs, ["a", "b"]);
+}
+
+#[test]
+fn cached_mindustry_parser_reports_missing_enum_sources() {
+    let cache = tempfile::tempdir().expect("tempdir");
+    let logic_dir = cache.path().join("core/src/mindustry/logic");
+    fs::create_dir_all(&logic_dir).expect("create logic dir");
+
+    write(
+        &logic_dir.join("LStatements.java"),
+        r#"
+            public class LStatements{
+                @RegisterStatement("calc")
+                public static class CalcStatement extends LStatement{
+                    public MissingOp op = MissingOp.add;
+                    public String dest = "result", a = "a", b = "b";
+                    @Override public LInstruction build(LAssembler builder){ return new CalcI(op, builder.var(a), builder.var(b), builder.var(dest)); }
+                }
+            }
+        "#,
+    );
+
+    let error = scan_cached_mindustry_raw("fixture", cache.path())
+        .expect_err("missing enum source should fail");
+
+    assert_eq!(
+        error.to_string(),
+        "required source item not found: enum MissingOp"
+    );
 }
 
 fn write(path: &Path, content: &str) {
