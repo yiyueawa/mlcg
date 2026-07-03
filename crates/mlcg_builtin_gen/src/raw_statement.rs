@@ -41,6 +41,7 @@ pub fn scan_raw_statements(
     version: &str,
     source: &str,
 ) -> Result<RawStatementManifest, GenerateError> {
+    let classes = parse_classes(source)?;
     let mut statements = Vec::new();
     let mut offset = 0;
     let marker = "@RegisterStatement(\"";
@@ -90,7 +91,7 @@ pub fn scan_raw_statements(
             class: class.to_string(),
             instruction: parse_instruction(body),
             category: parse_category(body),
-            fields: parse_fields(body),
+            fields: parse_fields_with_direct_superclass(&classes, class, body),
         });
 
         offset = brace_end + 1;
@@ -101,6 +102,51 @@ pub fn scan_raw_statements(
         statements,
         enums: Vec::new(),
     })
+}
+
+#[derive(Debug)]
+struct ClassInfo {
+    superclass: Option<String>,
+    body: String,
+}
+
+fn parse_classes(source: &str) -> Result<BTreeMap<String, ClassInfo>, GenerateError> {
+    let mut classes = BTreeMap::new();
+    let mut offset = 0;
+    let marker = "public static class ";
+
+    while let Some(relative) = source[offset..].find(marker) {
+        let class_start = offset + relative + marker.len();
+        let class_end = source[class_start..]
+            .find(|c: char| c.is_whitespace() || c == '{')
+            .map(|index| class_start + index)
+            .context(RequiredItemMissingSnafu { item: "class name" })?;
+        let class = source[class_start..class_end].trim().to_string();
+        let brace_start = source[class_end..]
+            .find('{')
+            .map(|index| class_end + index)
+            .context(RequiredItemMissingSnafu { item: "class body" })?;
+        let superclass = parse_extends(&source[class_end..brace_start]);
+        let brace_end = matching_brace(source, brace_start).context(RequiredItemMissingSnafu {
+            item: "class closing brace",
+        })?;
+        let body = source[brace_start + 1..brace_end].to_string();
+
+        classes.insert(class, ClassInfo { superclass, body });
+        offset = brace_end + 1;
+    }
+
+    Ok(classes)
+}
+
+fn parse_extends(header: &str) -> Option<String> {
+    let marker = "extends ";
+    let start = header.find(marker)? + marker.len();
+    let rest = header[start..].trim_start();
+    let end = rest
+        .find(|c: char| !(c.is_ascii_alphanumeric() || c == '_'))
+        .unwrap_or(rest.len());
+    (!rest[..end].is_empty()).then(|| rest[..end].to_string())
 }
 
 impl RawStatementManifest {
@@ -184,6 +230,22 @@ fn parse_fields(body: &str) -> Vec<RawField> {
                 fields.push(field);
             }
         }
+    }
+    fields
+}
+
+fn parse_fields_with_direct_superclass(
+    classes: &BTreeMap<String, ClassInfo>,
+    class: &str,
+    body: &str,
+) -> Vec<RawField> {
+    let mut fields = parse_fields(body);
+    if let Some(superclass) = classes
+        .get(class)
+        .and_then(|class_info| class_info.superclass.as_deref())
+        .and_then(|superclass| classes.get(superclass))
+    {
+        fields.extend(parse_fields(&superclass.body));
     }
     fields
 }

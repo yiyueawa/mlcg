@@ -3960,10 +3960,25 @@ outputs = []
 family = "uradar"
 variant = "uradar"
 rust_name = "uradar"
-emit = ["uradar"]
-receiver = ""
-inputs = []
-outputs = []
+emit = [
+    "uradar",
+    "$target1",
+    "$target2",
+    "$target3",
+    "$sort",
+    "$radar",
+    "$sortOrder",
+    "$output",
+]
+receiver = "radar"
+inputs = [
+    "target1",
+    "target2",
+    "target3",
+    "sort",
+    "sortOrder",
+]
+outputs = ["output"]
 
 [[instructions]]
 family = "ulocate"

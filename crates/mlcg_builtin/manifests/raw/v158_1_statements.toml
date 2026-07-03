@@ -521,7 +521,41 @@ name = "uradar"
 class = "UnitRadarStatement"
 instruction = "RadarI"
 category = "unit"
-fields = []
+
+[[statements.fields]]
+ty = "RadarTarget"
+name = "target1"
+default = "RadarTarget.enemy"
+
+[[statements.fields]]
+ty = "RadarTarget"
+name = "target2"
+default = "RadarTarget.any"
+
+[[statements.fields]]
+ty = "RadarTarget"
+name = "target3"
+default = "RadarTarget.any"
+
+[[statements.fields]]
+ty = "RadarSort"
+name = "sort"
+default = "RadarSort.distance"
+
+[[statements.fields]]
+ty = "String"
+name = "radar"
+default = "turret1"
+
+[[statements.fields]]
+ty = "String"
+name = "sortOrder"
+default = "1"
+
+[[statements.fields]]
+ty = "String"
+name = "output"
+default = "result"
 
 [[statements]]
 name = "ulocate"

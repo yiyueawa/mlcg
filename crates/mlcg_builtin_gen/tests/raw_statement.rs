@@ -121,3 +121,41 @@ fn scans_enum_variants_from_source() {
     assert_eq!(variants.name, "LogicOp");
     assert_eq!(variants.variants, ["add", "sub", "not"]);
 }
+
+#[test]
+fn scans_direct_superclass_fields_for_registered_statements() {
+    let source = r#"
+        @RegisterStatement("radar")
+        public static class RadarStatement extends LStatement{
+            public RadarTarget target1 = RadarTarget.enemy, target2 = RadarTarget.any;
+            public String radar = "turret1", output = "result";
+            public static String ignoredStatic = "x";
+            public transient String ignoredTransient = "y";
+            @Override public LInstruction build(LAssembler builder){
+                return new RadarI(target1, target2, builder.var(radar), builder.var(output));
+            }
+        }
+
+        @RegisterStatement("uradar")
+        public static class UnitRadarStatement extends RadarStatement{
+            public String local = "own";
+            @Override public LInstruction build(LAssembler builder){
+                return new RadarI(target1, target2, builder.var("@unit"), builder.var(output));
+            }
+        }
+    "#;
+
+    let manifest = scan_raw_statements("158.1", source).expect("scan succeeds");
+    let uradar = manifest
+        .statements
+        .iter()
+        .find(|statement| statement.name == "uradar")
+        .expect("uradar exists");
+    let fields: Vec<_> = uradar
+        .fields
+        .iter()
+        .map(|field| field.name.as_str())
+        .collect();
+
+    assert_eq!(fields, ["local", "target1", "target2", "radar", "output"]);
+}
