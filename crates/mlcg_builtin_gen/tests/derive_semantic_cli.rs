@@ -116,3 +116,66 @@ fields = []
         "invalid semantic manifest should not be written"
     );
 }
+
+#[test]
+fn derive_semantic_cli_rejects_selector_field_without_enum_definition() {
+    let temp = tempfile::tempdir().expect("temp dir");
+    let raw_path = temp.path().join("raw.toml");
+    let semantic_path = temp.path().join("semantic.toml");
+    fs::write(
+        &raw_path,
+        r#"
+version = "fixture"
+
+[[statements]]
+name = "calc"
+class = "CalcStatement"
+instruction = "CalcI"
+
+[[statements.fields]]
+ty = "MissingOp"
+name = "op"
+default = "MissingOp.add"
+
+[[statements.fields]]
+ty = "String"
+name = "dest"
+default = "result"
+
+[[statements.fields]]
+ty = "String"
+name = "a"
+default = "a"
+
+[[statements.fields]]
+ty = "String"
+name = "b"
+default = "b"
+"#,
+    )
+    .expect("write raw manifest");
+
+    let output = Command::new(env!("CARGO_BIN_EXE_mlcg_builtin_gen"))
+        .arg("derive-semantic")
+        .arg(&raw_path)
+        .arg(&semantic_path)
+        .output()
+        .expect("run derive-semantic");
+
+    assert!(
+        !output.status.success(),
+        "derive-semantic unexpectedly succeeded\nstdout:\n{}\nstderr:\n{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(
+        String::from_utf8_lossy(&output.stderr)
+            .contains("required source item not found: enum MissingOp"),
+        "stderr did not explain missing selector enum:\n{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(
+        !semantic_path.exists(),
+        "invalid semantic manifest should not be written"
+    );
+}

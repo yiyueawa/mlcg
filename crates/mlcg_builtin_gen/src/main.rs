@@ -6,7 +6,7 @@ use mlcg_builtin_gen::{
     generated_api::validate_generated_rust_api_symbols,
     manifest::Manifest,
     raw_statement::RawStatementManifest,
-    semantic_manifest::derive_semantic_manifest,
+    semantic_manifest::try_derive_semantic_manifest,
     source_parser::{parse_cached_mindustry, scan_cached_mindustry_raw},
 };
 
@@ -54,7 +54,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             )?;
             let raw_toml = fs::read_to_string(&input)?;
             let raw_manifest: RawStatementManifest = toml::from_str(&raw_toml)?;
-            let manifest = derive_semantic_manifest(&raw_manifest);
+            let manifest = try_derive_semantic_manifest(&raw_manifest)?;
             write_semantic_manifest(output, &manifest)?;
         }
         Some("fixture") => {

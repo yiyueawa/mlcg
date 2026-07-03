@@ -9,12 +9,12 @@ use crate::{
     error::{GenerateError, ReadSourceSnafu},
     manifest::Manifest,
     raw_statement::{scan_raw_enum_variants, scan_raw_statements, RawEnum, RawStatementManifest},
-    semantic_manifest::derive_semantic_manifest,
+    semantic_manifest::try_derive_semantic_manifest,
 };
 
 pub fn parse_cached_mindustry(version: &str, cache_path: &Path) -> Result<Manifest, GenerateError> {
     let raw_manifest = scan_cached_mindustry_raw(version, cache_path)?;
-    Ok(derive_semantic_manifest(&raw_manifest))
+    try_derive_semantic_manifest(&raw_manifest)
 }
 
 pub fn scan_cached_mindustry_raw(

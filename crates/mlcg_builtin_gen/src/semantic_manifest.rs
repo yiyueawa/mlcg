@@ -1,4 +1,5 @@
 use crate::{
+    error::GenerateError,
     manifest::{Instruction, Manifest},
     raw_statement::{RawEnum, RawField, RawStatement, RawStatementManifest},
 };
@@ -11,14 +12,44 @@ struct EnumSelection {
 }
 
 pub fn derive_semantic_manifest(raw: &RawStatementManifest) -> Manifest {
-    Manifest {
+    try_derive_semantic_manifest(raw).expect("raw manifest selector enums are defined")
+}
+
+pub fn try_derive_semantic_manifest(raw: &RawStatementManifest) -> Result<Manifest, GenerateError> {
+    validate_selector_enums(raw)?;
+
+    Ok(Manifest {
         version: raw.version.clone(),
         instructions: raw
             .statements
             .iter()
             .flat_map(|statement| derive_statement_instructions(statement, &raw.enums))
             .collect(),
+    })
+}
+
+fn validate_selector_enums(raw: &RawStatementManifest) -> Result<(), GenerateError> {
+    for statement in &raw.statements {
+        for field in &statement.fields {
+            if is_ignored_field(statement, &field.name) || !is_selector_field(&field.name) {
+                continue;
+            }
+            if is_basic_field_type(&field.ty) {
+                continue;
+            }
+            if enum_variants(&raw.enums, &field.ty).is_none() {
+                return Err(GenerateError::RequiredSourceItemMissing {
+                    item: format!("enum {}", field.ty),
+                });
+            }
+        }
     }
+
+    Ok(())
+}
+
+fn is_basic_field_type(ty: &str) -> bool {
+    matches!(ty, "String" | "int" | "boolean" | "float" | "double")
 }
 
 fn derive_statement_instructions(statement: &RawStatement, enums: &[RawEnum]) -> Vec<Instruction> {
